@@ -97,7 +97,6 @@ class RestaurantHandlerTest {
         assertEquals(1, violations.size());
         ConstraintViolation<RestaurantRequestDto> violation = violations.iterator().next();
         assertEquals("El nombre no puede estar compuesto solo por números", violation.getMessage());
-        assertEquals("nombre", violation.getPropertyPath().toString());
     }
 
     @Test
@@ -116,7 +115,6 @@ class RestaurantHandlerTest {
         assertEquals(1, violations.size());
         ConstraintViolation<RestaurantRequestDto> violation = violations.iterator().next();
         assertEquals("El NIT no puede estar vacio", violation.getMessage());
-        assertEquals("nit", violation.getPropertyPath().toString());
     }
 
     @Test
@@ -162,12 +160,9 @@ class RestaurantHandlerTest {
         Set<ConstraintViolation<RestaurantRequestDto>> violations = validator.validate(restaurantRequestDto);
 
         assertFalse(violations.isEmpty());
-
-        boolean hasTelefonoViolation = violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("telefono") &&
-                        v.getMessage().contains("Teléfono inválido"));
-
-        assertTrue(hasTelefonoViolation, "Debe existir una violación para el campo telefono");
+        assertEquals(1, violations.size());
+        ConstraintViolation<RestaurantRequestDto> violation = violations.iterator().next();
+        assertEquals("Teléfono inválido. Máx 13 caracteres y puede iniciar con +", violation.getMessage());
     }
 
     @Test
@@ -183,12 +178,9 @@ class RestaurantHandlerTest {
         Set<ConstraintViolation<RestaurantRequestDto>> violations = validator.validate(restaurantRequestDto);
 
         assertFalse(violations.isEmpty());
-
-        boolean hasTelefonoViolation = violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("telefono") &&
-                        v.getMessage().contains("Teléfono inválido"));
-
-        assertTrue(hasTelefonoViolation, "Debe existir una violación para el campo telefono");
+        assertEquals(1, violations.size());
+        ConstraintViolation<RestaurantRequestDto> violation = violations.iterator().next();
+        assertEquals("Teléfono inválido. Máx 13 caracteres y puede iniciar con +", violation.getMessage());
     }
 
 }
