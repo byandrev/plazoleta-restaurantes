@@ -1,4 +1,4 @@
-package com.pragma.powerup.domain.api;
+package com.pragma.powerup.domain.spi;
 
 import com.pragma.powerup.domain.model.UserModel;
 

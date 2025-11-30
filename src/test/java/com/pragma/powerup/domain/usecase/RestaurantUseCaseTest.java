@@ -1,6 +1,6 @@
 package com.pragma.powerup.domain.usecase;
 
-import com.pragma.powerup.domain.api.IUserExternalServicePort;
+import com.pragma.powerup.domain.spi.IUserExternalServicePort;
 import com.pragma.powerup.domain.model.RestaurantModel;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
 import org.junit.jupiter.api.Test;

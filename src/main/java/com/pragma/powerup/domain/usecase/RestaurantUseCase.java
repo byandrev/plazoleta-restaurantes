@@ -1,7 +1,7 @@
 package com.pragma.powerup.domain.usecase;
 
 import com.pragma.powerup.domain.api.IRestaurantServicePort;
-import com.pragma.powerup.domain.api.IUserExternalServicePort;
+import com.pragma.powerup.domain.spi.IUserExternalServicePort;
 import com.pragma.powerup.domain.exception.UnauthorizedUserException;
 import com.pragma.powerup.domain.model.RestaurantModel;
 import com.pragma.powerup.domain.model.RolType;
