@@ -29,7 +29,9 @@ To get a local copy up and running follow these steps.
    ```sh
    cd plazoleta-restaurantes
    ```
-3. Run docker compose
+3. Run docker compose `docker compose up -d`
+4. Run Spring Boot app
+
 <!-- USAGE -->
 ## Usage
 
