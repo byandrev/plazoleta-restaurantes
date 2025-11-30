@@ -1,6 +1,7 @@
 package com.pragma.powerup.application.handler.impl;
 
 import com.pragma.powerup.application.dto.request.PlatoRequestDto;
+import com.pragma.powerup.application.dto.request.PlatoUpdateDto;
 import com.pragma.powerup.application.dto.response.PlatoResponseDto;
 import com.pragma.powerup.application.mapper.IPlatoRequestMapper;
 import com.pragma.powerup.application.mapper.IPlatoResponseMapper;
@@ -165,5 +166,33 @@ class PlatoHandlerTest {
         assertEquals(1, violations.size());
         ConstraintViolation<PlatoRequestDto> violation = violations.iterator().next();
         assertEquals("La categoria no puede estar vacia", violation.getMessage());
+    }
+
+    @Test
+    void updatePlatoBlankDescripcionFailsValidation() {
+        PlatoUpdateDto platoUpdateDto = new PlatoUpdateDto();
+        platoUpdateDto.setDescripcion("");
+        platoUpdateDto.setPrecio(1000);
+
+        Set<ConstraintViolation<PlatoUpdateDto>> violations = validator.validate(platoUpdateDto);
+
+        assertFalse(violations.isEmpty());
+        assertEquals(1, violations.size());
+        ConstraintViolation<PlatoUpdateDto> violation = violations.iterator().next();
+        assertEquals("La descripcion no puede estar vacia", violation.getMessage());
+    }
+
+    @Test
+    void updatePlatoNegativePriceFailsValidation() {
+        PlatoUpdateDto platoUpdateDto = new PlatoUpdateDto();
+        platoUpdateDto.setDescripcion("Test");
+        platoUpdateDto.setPrecio(-1000);
+
+        Set<ConstraintViolation<PlatoUpdateDto>> violations = validator.validate(platoUpdateDto);
+
+        assertFalse(violations.isEmpty());
+        assertEquals(1, violations.size());
+        ConstraintViolation<PlatoUpdateDto> violation = violations.iterator().next();
+        assertEquals("El precio no puede ser menor a 1", violation.getMessage());
     }
 }
