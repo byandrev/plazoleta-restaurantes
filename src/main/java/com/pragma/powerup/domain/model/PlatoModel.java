@@ -10,7 +10,7 @@ public class PlatoModel {
 
     private String descripcion;
 
-    private Double precio;
+    private Integer precio;
 
     private Long idRestaurante;
 
