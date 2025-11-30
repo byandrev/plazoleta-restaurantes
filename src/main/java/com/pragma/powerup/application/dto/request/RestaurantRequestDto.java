@@ -22,8 +22,8 @@ public class RestaurantRequestDto {
 
     @NotBlank(message = "El telefono no puede estar vacio")
     @Pattern(
-        regexp = "^\\+?\\d{1,13}$",
-        message = "Teléfono inválido. Máx 13 dígitos y puede iniciar con +"
+        regexp = "^(\\+\\d{1,12}|\\d{1,13})$",
+        message = "Teléfono inválido. Máx 13 caracteres y puede iniciar con +"
     )
     private String telefono;
 

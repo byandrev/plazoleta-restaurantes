@@ -23,6 +23,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -116,6 +117,78 @@ class RestaurantHandlerTest {
         ConstraintViolation<RestaurantRequestDto> violation = violations.iterator().next();
         assertEquals("El NIT no puede estar vacio", violation.getMessage());
         assertEquals("nit", violation.getPropertyPath().toString());
+    }
+
+    @Test
+    void saveRestaurantWithValidPhoneWithPlusSymbolPassesValidation() {
+        RestaurantRequestDto restaurantRequestDto = new RestaurantRequestDto();
+        restaurantRequestDto.setNombre("Comercial");
+        restaurantRequestDto.setDireccion("Av 123");
+        restaurantRequestDto.setTelefono("+573005698325");
+        restaurantRequestDto.setUrlLogo("http://logo.com/logo.png");
+        restaurantRequestDto.setNit("123456789");
+        restaurantRequestDto.setIdPropietario(1L);
+
+        Set<ConstraintViolation<RestaurantRequestDto>> violations = validator.validate(restaurantRequestDto);
+
+        assertTrue(violations.isEmpty());
+    }
+
+    @Test
+    void saveRestaurantWithValidPhoneWithoutPlusSymbolPassesValidation() {
+        RestaurantRequestDto restaurantRequestDto = new RestaurantRequestDto();
+        restaurantRequestDto.setNombre("Comercial");
+        restaurantRequestDto.setDireccion("Av 123");
+        restaurantRequestDto.setTelefono("5730056983250");
+        restaurantRequestDto.setUrlLogo("http://logo.com/logo.png");
+        restaurantRequestDto.setNit("123456789");
+        restaurantRequestDto.setIdPropietario(1L);
+
+        Set<ConstraintViolation<RestaurantRequestDto>> violations = validator.validate(restaurantRequestDto);
+
+        assertTrue(violations.isEmpty());
+    }
+
+    @Test
+    void saveRestaurantWithPhoneExceedingMaxLengthFailsValidation() {
+        RestaurantRequestDto restaurantRequestDto = new RestaurantRequestDto();
+        restaurantRequestDto.setNombre("Comercial");
+        restaurantRequestDto.setDireccion("Av 123");
+        restaurantRequestDto.setTelefono("+5730056983250");
+        restaurantRequestDto.setUrlLogo("http://logo.com/logo.png");
+        restaurantRequestDto.setNit("123456789");
+        restaurantRequestDto.setIdPropietario(1L);
+
+        Set<ConstraintViolation<RestaurantRequestDto>> violations = validator.validate(restaurantRequestDto);
+
+        assertFalse(violations.isEmpty());
+
+        boolean hasTelefonoViolation = violations.stream()
+                .anyMatch(v -> v.getPropertyPath().toString().equals("telefono") &&
+                        v.getMessage().contains("Teléfono inválido"));
+
+        assertTrue(hasTelefonoViolation, "Debe existir una violación para el campo telefono");
+    }
+
+    @Test
+    void saveRestaurantWithPhoneMoreThan13DigitsFailsValidation() {
+        RestaurantRequestDto restaurantRequestDto = new RestaurantRequestDto();
+        restaurantRequestDto.setNombre("Comercial");
+        restaurantRequestDto.setDireccion("Av 123");
+        restaurantRequestDto.setTelefono("57300569832501");
+        restaurantRequestDto.setUrlLogo("http://logo.com/logo.png");
+        restaurantRequestDto.setNit("123456789");
+        restaurantRequestDto.setIdPropietario(1L);
+
+        Set<ConstraintViolation<RestaurantRequestDto>> violations = validator.validate(restaurantRequestDto);
+
+        assertFalse(violations.isEmpty());
+
+        boolean hasTelefonoViolation = violations.stream()
+                .anyMatch(v -> v.getPropertyPath().toString().equals("telefono") &&
+                        v.getMessage().contains("Teléfono inválido"));
+
+        assertTrue(hasTelefonoViolation, "Debe existir una violación para el campo telefono");
     }
 
 }
