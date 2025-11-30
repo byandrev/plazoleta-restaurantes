@@ -23,6 +23,12 @@ public class ControllerAdvisor {
                 .body(Collections.singletonMap(MESSAGE, ExceptionResponse.NO_DATA_FOUND.getMessage()));
     }
 
+    @ExceptionHandler(FeignException.NotFound.class)
+    public ResponseEntity<Map<String, String>> handleFeignException(FeignException.NotFound ignoredFeignException) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.NO_DATA_FOUND.getMessage()));
+    }
+
     @ExceptionHandler(FeignException.class)
     public ResponseEntity<Map<String, String>> handleFeignException(FeignException ignoredFeignException) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
