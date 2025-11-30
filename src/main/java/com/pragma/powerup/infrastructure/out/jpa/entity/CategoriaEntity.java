@@ -22,7 +22,6 @@ public class CategoriaEntity {
     @Column(nullable = false, unique = true)
     private String nombre;
 
-    @Column(nullable = false)
     private String descripcion;
 
 }
