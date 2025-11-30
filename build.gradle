@@ -24,7 +24,7 @@ ext {
 	mapstructVersion = "1.5.2.Final"
 	lombokVersion = "1.18.24"
 	lombokMapstructBindingVersion = "0.2.0"
-	mySqlConnectorVersion = "8.0.32"
+    postgresSqlVersion = "42.7.8"
 	openApiVersion = "1.6.11"
 }
 
@@ -35,7 +35,7 @@ dependencies {
 	developmentOnly "org.springframework.boot:spring-boot-devtools:${springBootVersion}"
 	testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
 
-	runtimeOnly "mysql:mysql-connector-java:${mySqlConnectorVersion}"
+    runtimeOnly "org.postgresql:postgresql:${postgresSqlVersion}"
 
 	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 	compileOnly "org.projectlombok:lombok:${lombokVersion}"
