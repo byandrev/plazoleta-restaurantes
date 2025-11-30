@@ -32,4 +32,20 @@ public class PlatoJpaAdapter implements IPlatoPersistencePort {
 
         return platoEntityMapper.toModel(platoEntity.get());
     }
+
+    @Override
+    public PlatoModel update(Long id, PlatoModel platoModel) {
+        Optional<PlatoEntity> platoEntity = platoRepository.findById(id);
+
+        if (platoEntity.isEmpty()) {
+            throw new NoDataFoundException("El plato no existe");
+        }
+
+        PlatoEntity platoUpdated = platoEntity.get();
+
+        platoUpdated.setPrecio(platoModel.getPrecio());
+        platoUpdated.setDescripcion(platoModel.getDescripcion());
+
+        return platoEntityMapper.toModel(platoRepository.save(platoUpdated));
+    }
 }
