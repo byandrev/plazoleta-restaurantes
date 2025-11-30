@@ -3,10 +3,9 @@ package com.pragma.powerup.infrastructure.input.rest;
 import com.pragma.powerup.application.dto.request.PlatoRequestDto;
 import com.pragma.powerup.application.dto.response.PlatoResponseDto;
 import com.pragma.powerup.application.handler.IPlatoHandler;
+import com.pragma.powerup.infrastructure.input.rest.response.CustomResponse;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
@@ -36,14 +35,20 @@ public class PlatoRestController {
 
     @Operation(summary = "Get plato by id")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Plato returned",
-                    content = @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = PlatoResponseDto.class)))),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Plato returned"
+            ),
             @ApiResponse(responseCode = "404", description = "No data found", content = @Content)
     })
     @GetMapping("/{id}")
-    public ResponseEntity<PlatoResponseDto> getPlatoById(@PathVariable Long id) {
-        return ResponseEntity.ok(platoHandler.getById(id));
+    public ResponseEntity<CustomResponse<PlatoResponseDto>> getPlatoById(@PathVariable Long id) {
+        CustomResponse<PlatoResponseDto> response = CustomResponse.<PlatoResponseDto>builder()
+                .status(HttpStatus.OK.value())
+                .data(platoHandler.getById(id))
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
 }

@@ -13,13 +13,13 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CustomResponse {
+public class CustomResponse<T> {
 
     private int status;
 
     private String error;
 
-    private Object data;
+    private T data;
 
     private String message;
 
