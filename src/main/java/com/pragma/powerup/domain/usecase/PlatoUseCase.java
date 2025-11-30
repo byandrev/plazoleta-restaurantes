@@ -18,7 +18,7 @@ public class PlatoUseCase implements IPlatoServicePort {
     private final ICategoriaPersistencePort categoriaPersistencePort;
 
     @Override
-    public void save(PlatoModel plato) {
+    public PlatoModel save(PlatoModel plato) {
         RestaurantModel restaurantModel = restaurantPersistencePort.getById(plato.getIdRestaurante());
 
         try {
@@ -31,7 +31,7 @@ public class PlatoUseCase implements IPlatoServicePort {
 
         plato.setActivo(true);
 
-        platoPersistencePort.save(plato);
+        return platoPersistencePort.save(plato);
     }
 
     @Override
