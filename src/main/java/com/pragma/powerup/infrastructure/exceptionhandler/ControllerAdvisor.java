@@ -25,12 +25,12 @@ public class ControllerAdvisor {
 
     @ExceptionHandler(FeignException.class)
     public ResponseEntity<Map<String, String>> handleFeignException(FeignException ignoredFeignException) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Collections.singletonMap(MESSAGE, ignoredFeignException.getMessage()));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.SERVER_ERROR.getMessage()));
     }
 
     @ExceptionHandler(UnauthorizedUserException.class)
-    public ResponseEntity<Map<String, String>> handleUnauthorizedUserExceptiojn(UnauthorizedUserException unauthorizedUserException) {
+    public ResponseEntity<Map<String, String>> handleUnauthorizedUserException(UnauthorizedUserException unauthorizedUserException) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(Collections.singletonMap(MESSAGE, unauthorizedUserException.getMessage()));
     }
