@@ -17,13 +17,11 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 public class ControllerAdvisor {
 
-    private static final String MESSAGE = "message";
-
     @ExceptionHandler(NoDataFoundException.class)
-    public ResponseEntity<CustomResponse> handleNoDataFoundException(NoDataFoundException ignoredNoDataFoundException) {
-        CustomResponse response = CustomResponse.builder()
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error("Bad Request")
+    public ResponseEntity<CustomResponse<Void>> handleNoDataFoundException(NoDataFoundException ignoredNoDataFoundException) {
+        CustomResponse<Void> response = CustomResponse.<Void>builder()
+                .status(HttpStatus.NOT_FOUND.value())
+                .error("Not Found")
                 .message(ignoredNoDataFoundException.getMessage())
                 .build();
 
@@ -31,8 +29,7 @@ public class ControllerAdvisor {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<CustomResponse> handleValidationException(MethodArgumentNotValidException ex) {
-
+    public ResponseEntity<CustomResponse<Void>> handleValidationException(MethodArgumentNotValidException ex) {
         List<ValidationError> errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -43,7 +40,7 @@ public class ControllerAdvisor {
                 ))
                 .collect(Collectors.toList());
 
-        CustomResponse response = CustomResponse.builder()
+        CustomResponse<Void> response = CustomResponse.<Void>builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("Bad Request")
                 .message("Error de validación")
@@ -54,8 +51,8 @@ public class ControllerAdvisor {
     }
 
     @ExceptionHandler(FeignException.NotFound.class)
-    public ResponseEntity<CustomResponse> handleFeignException(FeignException.NotFound ignoredFeignException) {
-        CustomResponse response = CustomResponse.builder()
+    public ResponseEntity<CustomResponse<Void>> handleFeignException(FeignException.NotFound ignoredFeignException) {
+        CustomResponse<Void> response = CustomResponse.<Void>builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("Bad Request")
                 .message(ExceptionResponse.NO_DATA_FOUND.getMessage())
@@ -65,8 +62,8 @@ public class ControllerAdvisor {
     }
 
     @ExceptionHandler(FeignException.class)
-    public ResponseEntity<CustomResponse> handleFeignException(FeignException ignoredFeignException) {
-        CustomResponse response = CustomResponse.builder()
+    public ResponseEntity<CustomResponse<Void>> handleFeignException(FeignException ignoredFeignException) {
+        CustomResponse<Void> response = CustomResponse.<Void>builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("Bad Request")
                 .message(ExceptionResponse.SERVER_ERROR.getMessage())
@@ -76,8 +73,8 @@ public class ControllerAdvisor {
     }
 
     @ExceptionHandler(UnauthorizedUserException.class)
-    public ResponseEntity<CustomResponse> handleUnauthorizedUserException(UnauthorizedUserException unauthorizedUserException) {
-        CustomResponse response = CustomResponse.builder()
+    public ResponseEntity<CustomResponse<Void>> handleUnauthorizedUserException(UnauthorizedUserException unauthorizedUserException) {
+        CustomResponse<Void> response = CustomResponse.<Void>builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("Unauthorized")
                 .message(unauthorizedUserException.getMessage())

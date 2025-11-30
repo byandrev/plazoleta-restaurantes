@@ -39,4 +39,9 @@ public class PlatoUseCase implements IPlatoServicePort {
         return platoPersistencePort.getById(id);
     }
 
+    @Override
+    public PlatoModel update(Long id, PlatoModel plato) {
+        return platoPersistencePort.update(id, plato);
+    }
+
 }

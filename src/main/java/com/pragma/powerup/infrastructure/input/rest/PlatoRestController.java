@@ -1,6 +1,7 @@
 package com.pragma.powerup.infrastructure.input.rest;
 
 import com.pragma.powerup.application.dto.request.PlatoRequestDto;
+import com.pragma.powerup.application.dto.request.PlatoUpdateDto;
 import com.pragma.powerup.application.dto.response.PlatoResponseDto;
 import com.pragma.powerup.application.handler.IPlatoHandler;
 import com.pragma.powerup.infrastructure.input.rest.response.CustomResponse;
@@ -48,6 +49,26 @@ public class PlatoRestController {
                 .data(platoHandler.getById(id))
                 .build();
 
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Update plato")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Plato updated"),
+            @ApiResponse(responseCode = "404", description = "Plato not found", content = @Content)
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<CustomResponse<PlatoResponseDto>> updatePlato(
+            @Valid @PathVariable Long id,
+            @Valid @RequestBody PlatoUpdateDto platoUpdateDto
+    ) {
+        CustomResponse<PlatoResponseDto> response = CustomResponse.<PlatoResponseDto>builder()
+                .status(HttpStatus.OK.value())
+                .data(platoHandler.update(id, platoUpdateDto))
+                .build();
+
+        //        platoHandler.update(platoRequestDto);
+        //        return new ResponseEntity<>(HttpStatus.CREATED);
         return ResponseEntity.ok(response);
     }
 

@@ -8,4 +8,6 @@ public interface IPlatoServicePort {
 
     PlatoModel getById(Long id);
 
+    PlatoModel update(Long id, PlatoModel plato);
+
 }
