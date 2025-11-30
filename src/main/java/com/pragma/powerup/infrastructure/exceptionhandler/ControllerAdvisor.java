@@ -1,6 +1,5 @@
 package com.pragma.powerup.infrastructure.exceptionhandler;
 
-import com.pragma.powerup.domain.exception.NotFoundException;
 import com.pragma.powerup.domain.exception.UnauthorizedUserException;
 import com.pragma.powerup.infrastructure.exception.NoDataFoundException;
 import feign.FeignException;
@@ -16,13 +15,6 @@ import java.util.Map;
 public class ControllerAdvisor {
 
     private static final String MESSAGE = "message";
-
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleNotFoundException(
-            NotFoundException notFoundException) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Collections.singletonMap(MESSAGE, notFoundException.getMessage()));
-    }
 
     @ExceptionHandler(NoDataFoundException.class)
     public ResponseEntity<Map<String, String>> handleNoDataFoundException(

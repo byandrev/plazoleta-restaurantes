@@ -28,7 +28,7 @@ public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
         Optional<RestaurantEntity> restaurantEntity = restaurantRepository.findById(id);
 
         if  (restaurantEntity.isEmpty()) {
-            throw new NoDataFoundException();
+            throw new NoDataFoundException("El restaurante no existe");
         }
 
         return restaurantEntityMapper.toModel(restaurantEntity.get());

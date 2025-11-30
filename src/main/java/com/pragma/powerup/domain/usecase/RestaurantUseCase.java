@@ -23,7 +23,7 @@ public class RestaurantUseCase implements IRestaurantServicePort {
         UserModel user = userExternalServicePort.getUserById(restaurantModel.getIdPropietario());
 
         if (user == null) {
-            throw new NoDataFoundException();
+            throw new NoDataFoundException("El usuario no existe");
         }
 
         if (!user.getRol().getNombre().equals(RolType.PROPIETARIO)) {

@@ -1,7 +1,6 @@
 package com.pragma.powerup.domain.usecase;
 
 import com.pragma.powerup.domain.api.IPlatoServicePort;
-import com.pragma.powerup.domain.exception.NotFoundException;
 import com.pragma.powerup.domain.model.CategoriaModel;
 import com.pragma.powerup.domain.model.PlatoModel;
 import com.pragma.powerup.domain.model.RestaurantModel;
@@ -21,10 +20,6 @@ public class PlatoUseCase implements IPlatoServicePort {
     @Override
     public void save(PlatoModel plato) {
         RestaurantModel restaurantModel = restaurantPersistencePort.getById(plato.getIdRestaurante());
-
-        if (restaurantModel == null) {
-            throw new NotFoundException("El restaurante no existe");
-        }
 
         try {
             CategoriaModel categoria = categoriaPersistencePort.getByNombre(plato.getCategoria().getNombre());
