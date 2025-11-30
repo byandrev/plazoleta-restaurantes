@@ -27,7 +27,7 @@ public class PlatoJpaAdapter implements IPlatoPersistencePort {
         Optional<PlatoEntity> platoEntity = platoRepository.findById(id);
 
         if (platoEntity.isEmpty()) {
-            throw new NoDataFoundException();
+            throw new NoDataFoundException("El plato no existe");
         }
 
         return platoEntityMapper.toModel(platoEntity.get());

@@ -1,12 +1,17 @@
 package com.pragma.powerup.domain.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class PlatoModel {
 
     private Long id;
 
     private String nombre;
 
-    private Long idCategoria;
+    private CategoriaModel categoria;
 
     private String descripcion;
 

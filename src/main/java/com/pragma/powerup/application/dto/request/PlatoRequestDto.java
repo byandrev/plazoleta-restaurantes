@@ -24,8 +24,8 @@ public class PlatoRequestDto {
     @NotBlank(message = "La url_imagen no puede estar vacia")
     private String urlImagen;
 
-    @NotNull(message = "La id_categoria no puede estar vacio")
-    private Long idCategoria;
+    @NotBlank(message = "La categoria no puede estar vacia")
+    private String categoria;
 
     @NotNull(message = "El id_restaurante no puede estar vacio")
     private Long idRestaurante;

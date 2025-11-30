@@ -1,5 +1,6 @@
 package com.pragma.powerup.application.dto.response;
 
+import com.pragma.powerup.domain.model.CategoriaModel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,7 +18,7 @@ public class PlatoResponseDto {
 
     private String urlImagen;
 
-    private Long idCategoria;
+    private CategoriaModel categoria;
 
     private Long idRestaurante;
 

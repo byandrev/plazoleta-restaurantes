@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
 
@@ -32,8 +31,8 @@ public class PlatoEntity {
     @Column(nullable = false)
     private String urlImagen;
 
-    @ColumnDefault("true")
-    private boolean activo;
+    @Column(name = "activo")
+    private Boolean activo = true;
 
     @Column(nullable = false)
     private Long idRestaurante;
