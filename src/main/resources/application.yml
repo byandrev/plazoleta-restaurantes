@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/plazoleta-restaurantes
+    url: jdbc:postgresql://localhost:5433/plazoleta-restaurantes
     username: root
     password: 123456
 

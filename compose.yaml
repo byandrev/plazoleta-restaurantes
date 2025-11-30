@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: 'postgres:latest'
+    restart: unless-stopped
+    environment:
+      - 'POSTGRES_DB=plazoleta-restaurantes'
+      - 'POSTGRES_PASSWORD=123456'
+      - 'POSTGRES_USER=root'
+    ports:
+      - '5433:5432'
+    volumes:
+      - pgdata:/data/postgres
+
+volumes:
+  pgdata:

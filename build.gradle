@@ -24,8 +24,10 @@ ext {
 	mapstructVersion = "1.5.2.Final"
 	lombokVersion = "1.18.24"
 	lombokMapstructBindingVersion = "0.2.0"
-	mySqlConnectorVersion = "8.0.32"
+    postgresSqlVersion = "42.7.8"
 	openApiVersion = "1.6.11"
+    openFeignVersion = "5.0.0"
+    springCloudVersion = "2021.0.8"
 }
 
 dependencies {
@@ -35,9 +37,11 @@ dependencies {
 	developmentOnly "org.springframework.boot:spring-boot-devtools:${springBootVersion}"
 	testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
 
-	runtimeOnly "mysql:mysql-connector-java:${mySqlConnectorVersion}"
+    runtimeOnly "org.postgresql:postgresql:${postgresSqlVersion}"
 
-	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 	compileOnly "org.projectlombok:lombok:${lombokVersion}"
 	annotationProcessor "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
 	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
@@ -45,6 +49,12 @@ dependencies {
 
 	implementation "org.springdoc:springdoc-openapi-ui:${openApiVersion}"
 	implementation "org.springdoc:springdoc-openapi-webflux-ui:${openApiVersion}"
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
 }
 
 tasks.named('test') {
