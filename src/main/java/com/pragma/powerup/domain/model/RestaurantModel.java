@@ -23,4 +23,6 @@ public class RestaurantModel {
 
     private String nit;
 
+    private Long idPropietario;
+
 }
