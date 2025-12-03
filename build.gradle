@@ -28,6 +28,7 @@ ext {
 	openApiVersion = "1.6.11"
     openFeignVersion = "5.0.0"
     springCloudVersion = "2021.0.8"
+    jwtVersion = "4.5.0"
 }
 
 dependencies {
@@ -40,6 +41,8 @@ dependencies {
     runtimeOnly "org.postgresql:postgresql:${postgresSqlVersion}"
 
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation "org.springframework.boot:spring-boot-starter-security"
+    implementation "com.auth0:java-jwt:${jwtVersion}"
 
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 	compileOnly "org.projectlombok:lombok:${lombokVersion}"
