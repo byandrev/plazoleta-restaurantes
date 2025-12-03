@@ -15,7 +15,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+//@Transactional
 public class RestaurantHandler implements IRestaurantHandler {
 
     private final IRestaurantServicePort restaurantService;

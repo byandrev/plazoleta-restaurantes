@@ -7,9 +7,11 @@ import com.pragma.powerup.infrastructure.out.jpa.entity.PlatoEntity;
 import com.pragma.powerup.infrastructure.out.jpa.mapper.IPlatoEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.repository.IPlatoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+@Repository
 @RequiredArgsConstructor
 public class PlatoJpaAdapter implements IPlatoPersistencePort {
 
