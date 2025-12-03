@@ -19,6 +19,7 @@ jwt:
 security:
   role:
     propietario: PROPIETARIO
+    admin: ADMINISTRADOR
 
 appDescription: "Plazoleta Restaurantes"
 appVersion: "1.0.0"

@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -28,6 +29,7 @@ public class PlatoRestController {
             @ApiResponse(responseCode = "201", description = "Plato created", content = @Content),
             @ApiResponse(responseCode = "409", description = "Plato already exists", content = @Content)
     })
+    @PreAuthorize("hasRole('${security.role.propietario}')")
     @PostMapping("/")
     public ResponseEntity<Void> savePlato(@Valid @RequestBody PlatoRequestDto platoRequestDto) {
         platoHandler.save(platoRequestDto);
@@ -57,6 +59,7 @@ public class PlatoRestController {
             @ApiResponse(responseCode = "200", description = "Plato updated"),
             @ApiResponse(responseCode = "404", description = "Plato not found", content = @Content)
     })
+    @PreAuthorize("hasRole('${security.role.propietario}')")
     @PutMapping("/{id}")
     public ResponseEntity<CustomResponse<PlatoResponseDto>> updatePlato(
             @Valid @PathVariable Long id,

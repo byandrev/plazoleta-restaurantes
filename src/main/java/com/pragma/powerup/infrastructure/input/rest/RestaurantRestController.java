@@ -30,7 +30,7 @@ public class RestaurantRestController {
             @ApiResponse(responseCode = "200", description = "All restaurants returned"),
             @ApiResponse(responseCode = "404", description = "No data found", content = @Content)
     })
-    @PreAuthorize("hasRole('${security.role.propietario}')")
+    @PreAuthorize("hasRole('${security.role.admin}')")
     @GetMapping("/")
     public ResponseEntity<CustomResponse<List<RestaurantResponseDto>>> getRestaurants() {
         CustomResponse<List<RestaurantResponseDto>> response = CustomResponse.<List<RestaurantResponseDto>>builder()
@@ -46,7 +46,7 @@ public class RestaurantRestController {
             @ApiResponse(responseCode = "201", description = "Restaurant created", content = @Content),
             @ApiResponse(responseCode = "409", description = "Restaurant already exists", content = @Content)
     })
-    @PreAuthorize("hasRole('${security.role.propietario}')")
+    @PreAuthorize("hasRole('${security.role.admin}')")
     @PostMapping("/")
     public ResponseEntity<Void> saveRestaurant(@Valid @RequestBody RestaurantRequestDto restaurantRequestDto) {
         restaurantHandler.save(restaurantRequestDto);
