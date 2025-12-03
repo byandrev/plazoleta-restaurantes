@@ -67,8 +67,6 @@ public class PlatoRestController {
                 .data(platoHandler.update(id, platoUpdateDto))
                 .build();
 
-        //        platoHandler.update(platoRequestDto);
-        //        return new ResponseEntity<>(HttpStatus.CREATED);
         return ResponseEntity.ok(response);
     }
 
