@@ -9,9 +9,11 @@ import com.pragma.powerup.domain.model.UserModel;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.infrastructure.exception.NoDataFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 @RequiredArgsConstructor
 public class RestaurantUseCase implements IRestaurantServicePort {
 

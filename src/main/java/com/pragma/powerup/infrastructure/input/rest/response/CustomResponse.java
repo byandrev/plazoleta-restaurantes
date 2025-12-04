@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.mapping.Any;
 
 import java.util.List;
 
@@ -22,8 +21,6 @@ public class CustomResponse<T> {
     private T data;
 
     private String message;
-
-    private String path;
 
     private List<ValidationError> errors;
 

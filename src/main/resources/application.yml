@@ -12,5 +12,9 @@ spring:
       ddl-auto: update
     show-sql: true
 
+jwt:
+  secret: 123456
+  expiration: 1
+
 appDescription: "Plazoleta Restaurantes"
 appVersion: "1.0.0"
