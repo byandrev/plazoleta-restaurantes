@@ -23,8 +23,8 @@ public class PlatoHandler implements IPlatoHandler {
     private final IPlatoResponseMapper platoResponseMapper;
 
     @Override
-    public void save(PlatoRequestDto platoRequestDto) {
-        platoService.save(platoRequestMapper.toModel(platoRequestDto));
+    public void save(Long userId, PlatoRequestDto platoRequestDto) {
+        platoService.save(userId, platoRequestMapper.toModel(platoRequestDto));
     }
 
     @Override

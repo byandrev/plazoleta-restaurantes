@@ -1,6 +1,7 @@
 package com.pragma.powerup.domain.usecase;
 
 import com.pragma.powerup.domain.api.IPlatoServicePort;
+import com.pragma.powerup.domain.exception.UnauthorizedUserException;
 import com.pragma.powerup.domain.model.CategoriaModel;
 import com.pragma.powerup.domain.model.PlatoModel;
 import com.pragma.powerup.domain.model.RestaurantModel;
@@ -11,6 +12,8 @@ import com.pragma.powerup.infrastructure.exception.NoDataFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 public class PlatoUseCase implements IPlatoServicePort {
@@ -20,8 +23,12 @@ public class PlatoUseCase implements IPlatoServicePort {
     private final ICategoriaPersistencePort categoriaPersistencePort;
 
     @Override
-    public PlatoModel save(PlatoModel plato) {
+    public PlatoModel save(Long userId, PlatoModel plato) {
         RestaurantModel restaurantModel = restaurantPersistencePort.getById(plato.getIdRestaurante());
+
+        if (!Objects.equals(restaurantModel.getIdPropietario(), userId)) {
+            throw new UnauthorizedUserException("No eres propietario del restaurante");
+        }
 
         try {
             CategoriaModel categoria = categoriaPersistencePort.getByNombre(plato.getCategoria().getNombre());

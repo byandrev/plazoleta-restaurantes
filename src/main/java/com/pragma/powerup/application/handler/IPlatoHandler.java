@@ -6,7 +6,7 @@ import com.pragma.powerup.application.dto.response.PlatoResponseDto;
 
 public interface IPlatoHandler {
 
-    void save(PlatoRequestDto platoRequestDto);
+    void save(Long userId, PlatoRequestDto platoRequestDto);
 
     PlatoResponseDto getById(Long id);
 

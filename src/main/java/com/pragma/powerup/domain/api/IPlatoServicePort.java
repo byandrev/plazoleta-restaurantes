@@ -4,7 +4,7 @@ import com.pragma.powerup.domain.model.PlatoModel;
 
 public interface IPlatoServicePort {
 
-    PlatoModel save(PlatoModel plato);
+    PlatoModel save(Long userId, PlatoModel plato);
 
     PlatoModel getById(Long id);
 
