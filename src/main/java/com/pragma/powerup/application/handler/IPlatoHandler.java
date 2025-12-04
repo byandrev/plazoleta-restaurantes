@@ -10,6 +10,6 @@ public interface IPlatoHandler {
 
     PlatoResponseDto getById(Long id);
 
-    PlatoResponseDto update(Long id, PlatoUpdateDto platoUpdateDto);
+    PlatoResponseDto update(Long userId, Long id, PlatoUpdateDto platoUpdateDto);
 
 }

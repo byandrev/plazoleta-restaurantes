@@ -49,7 +49,14 @@ public class PlatoUseCase implements IPlatoServicePort {
     }
 
     @Override
-    public PlatoModel update(Long id, PlatoModel plato) {
+    public PlatoModel update(Long userId, Long id, PlatoModel plato) {
+        PlatoModel updatedPlato = platoPersistencePort.getById(id);
+        RestaurantModel restaurantModel = restaurantPersistencePort.getById(updatedPlato.getIdRestaurante());
+
+        if (!Objects.equals(restaurantModel.getIdPropietario(), userId)) {
+            throw new UnauthorizedUserException("No eres propietario del restaurante");
+        }
+
         return platoPersistencePort.update(id, plato);
     }
 

@@ -33,9 +33,9 @@ public class PlatoHandler implements IPlatoHandler {
     }
 
     @Override
-    public PlatoResponseDto update(Long id, PlatoUpdateDto platoUpdateDto) {
+    public PlatoResponseDto update(Long userId, Long id, PlatoUpdateDto platoUpdateDto) {
         PlatoModel platoModel = platoRequestMapper.toModel(platoUpdateDto);
-        return platoResponseMapper.toResponse(platoService.update(id, platoModel));
+        return platoResponseMapper.toResponse(platoService.update(userId, id, platoModel));
     }
 
 }

@@ -69,11 +69,12 @@ public class PlatoRestController {
     @PutMapping("/{id}")
     public ResponseEntity<CustomResponse<PlatoResponseDto>> updatePlato(
             @Valid @PathVariable Long id,
-            @Valid @RequestBody PlatoUpdateDto platoUpdateDto
+            @RequestBody PlatoUpdateDto platoUpdateDto,
+            @AuthenticationPrincipal CustomUserDetail userDetails
     ) {
         CustomResponse<PlatoResponseDto> response = CustomResponse.<PlatoResponseDto>builder()
                 .status(HttpStatus.OK.value())
-                .data(platoHandler.update(id, platoUpdateDto))
+                .data(platoHandler.update(userDetails.getId(), id, platoUpdateDto))
                 .build();
 
         return ResponseEntity.ok(response);
