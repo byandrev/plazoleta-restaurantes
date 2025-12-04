@@ -1,5 +1,6 @@
 package com.pragma.powerup.infrastructure.out.security.adapter;
 
+import com.pragma.powerup.infrastructure.out.security.models.CustomUserDetail;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -33,8 +34,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String username = jwtTokenValidator.getUsername(token);
         String rol = jwtTokenValidator.getClaim(token, "rol");
+        String userId = jwtTokenValidator.getClaim(token, "id");
 
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username, null, getAuthorities(rol));
+        if (userId == null || rol == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        CustomUserDetail userDetails = new CustomUserDetail(
+                Long.parseLong(userId),
+                username,
+                null,
+                getAuthorities(rol)
+        );
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, getAuthorities(rol));
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         filterChain.doFilter(request, response);
