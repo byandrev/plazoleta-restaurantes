@@ -5,6 +5,7 @@ import com.pragma.powerup.infrastructure.exception.NoDataFoundException;
 import com.pragma.powerup.infrastructure.exception.ValidationError;
 import com.pragma.powerup.infrastructure.input.rest.response.CustomResponse;
 import feign.FeignException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -23,7 +24,7 @@ public class ControllerAdvisor {
     public ResponseEntity<CustomResponse<Void>> handleNoDataFoundException(NoDataFoundException ignoredNoDataFoundException) {
         CustomResponse<Void> response = CustomResponse.<Void>builder()
                 .status(HttpStatus.NOT_FOUND.value())
-                .error("Not Found")
+                .error(ExceptionResponse.NO_DATA_FOUND.getMessage())
                 .message(ignoredNoDataFoundException.getMessage())
                 .build();
 
@@ -44,7 +45,7 @@ public class ControllerAdvisor {
 
         CustomResponse<Void> response = CustomResponse.<Void>builder()
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error("Bad Request")
+                .error(ExceptionResponse.BAD_REQUEST.getMessage())
                 .message("Error de validación")
                 .errors(errors)
                 .build();
@@ -56,7 +57,7 @@ public class ControllerAdvisor {
     public ResponseEntity<CustomResponse<Void>> handleFeignException(FeignException.NotFound ignoredFeignException) {
         CustomResponse<Void> response = CustomResponse.<Void>builder()
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error("Bad Request")
+                .error(ExceptionResponse.BAD_REQUEST.getMessage())
                 .message(ExceptionResponse.NO_DATA_FOUND.getMessage())
                 .build();
 
@@ -67,7 +68,7 @@ public class ControllerAdvisor {
     public ResponseEntity<CustomResponse<Void>> handleFeignException(FeignException ignoredFeignException) {
         CustomResponse<Void> response = CustomResponse.<Void>builder()
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error("Bad Request")
+                .error(ExceptionResponse.BAD_REQUEST.getMessage())
                 .message(ExceptionResponse.SERVER_ERROR.getMessage())
                 .build();
 
@@ -77,8 +78,8 @@ public class ControllerAdvisor {
     @ExceptionHandler(UnauthorizedUserException.class)
     public ResponseEntity<CustomResponse<Void>> handleUnauthorizedUserException(UnauthorizedUserException unauthorizedUserException) {
         CustomResponse<Void> response = CustomResponse.<Void>builder()
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error("Unauthorized")
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .error(ExceptionResponse.UNAUTHORIZED.getMessage())
                 .message(unauthorizedUserException.getMessage())
                 .build();
 
@@ -89,7 +90,7 @@ public class ControllerAdvisor {
     public ResponseEntity<CustomResponse<Void>> handleHttpMessageNotReadableException() {
         CustomResponse<Void> response = CustomResponse.<Void>builder()
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error("Bad Request")
+                .error(ExceptionResponse.BAD_REQUEST.getMessage())
                 .message("Es necesario el body")
                 .build();
 
@@ -100,10 +101,21 @@ public class ControllerAdvisor {
     public ResponseEntity<CustomResponse<Void>> handleHttpMediaTypeNotSupportedException() {
         CustomResponse<Void> response = CustomResponse.<Void>builder()
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error("Bad Request")
+                .error(ExceptionResponse.BAD_REQUEST.getMessage())
                 .message("MediaType no soportado")
                 .build();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<CustomResponse<Void>> handleDataIntegrityViolationException() {
+        CustomResponse<Void> response = CustomResponse.<Void>builder()
+                .status(HttpStatus.CONFLICT.value())
+                .error(ExceptionResponse.CONFLICT.getMessage())
+                .message(ExceptionResponse.DUPLICATE_DATA.getMessage())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 }
