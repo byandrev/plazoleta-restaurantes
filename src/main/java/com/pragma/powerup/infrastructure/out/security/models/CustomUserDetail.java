@@ -15,13 +15,13 @@ public class CustomUserDetail implements UserDetails {
 
     private final Long id;
 
-    private final String username;
+    private final String email;
     private final String password;
     private final Collection<? extends GrantedAuthority> authorities;
 
     @Override
     public String getUsername() {
-        return username;
+        return email;
     }
 
     @Override
