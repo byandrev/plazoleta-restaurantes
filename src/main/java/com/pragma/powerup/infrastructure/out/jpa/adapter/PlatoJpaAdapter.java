@@ -1,15 +1,13 @@
 package com.pragma.powerup.infrastructure.out.jpa.adapter;
 
+import com.pragma.powerup.domain.exception.PlatoNotFound;
 import com.pragma.powerup.domain.model.PlatoModel;
 import com.pragma.powerup.domain.spi.IPlatoPersistencePort;
-import com.pragma.powerup.infrastructure.exception.NoDataFoundException;
 import com.pragma.powerup.infrastructure.out.jpa.entity.PlatoEntity;
 import com.pragma.powerup.infrastructure.out.jpa.mapper.IPlatoEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.repository.IPlatoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -26,13 +24,8 @@ public class PlatoJpaAdapter implements IPlatoPersistencePort {
 
     @Override
     public PlatoModel getById(Long id) {
-        Optional<PlatoEntity> platoEntity = platoRepository.findById(id);
-
-        if (platoEntity.isEmpty()) {
-            throw new NoDataFoundException("El plato no existe");
-        }
-
-        return platoEntityMapper.toModel(platoEntity.get());
+        PlatoEntity platoEntity = platoRepository.findById(id).orElseThrow(PlatoNotFound::new);
+        return platoEntityMapper.toModel(platoEntity);
     }
 
 }
