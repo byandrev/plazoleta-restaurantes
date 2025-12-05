@@ -26,9 +26,7 @@ public interface IPlatoRequestMapper {
             return null;
         }
 
-        CategoriaModel categoriaModel = new CategoriaModel();
-        categoriaModel.setNombre(categoria.toUpperCase());
-        return categoriaModel;
+        return CategoriaModel.builder().nombre(categoria.toUpperCase()).build();
     }
 
 }
