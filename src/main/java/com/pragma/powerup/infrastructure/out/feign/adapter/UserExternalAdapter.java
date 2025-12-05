@@ -1,11 +1,13 @@
 package com.pragma.powerup.infrastructure.out.feign.adapter;
 
 import com.pragma.powerup.application.dto.response.UserResponseDto;
+import com.pragma.powerup.domain.exception.UserNotFound;
 import com.pragma.powerup.domain.spi.IUserExternalServicePort;
 import com.pragma.powerup.domain.model.UserModel;
 import com.pragma.powerup.infrastructure.input.rest.response.CustomResponse;
 import com.pragma.powerup.infrastructure.out.feign.IUserFeignClient;
 import com.pragma.powerup.infrastructure.out.feign.mapper.IUserFeignMapper;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -18,9 +20,14 @@ public class UserExternalAdapter implements IUserExternalServicePort {
 
     @Override
     public UserModel getUserById(Long id) {
-        CustomResponse<UserResponseDto> response = userFeignClient.getUser(id);
-        UserResponseDto userDto = response.getData();
-        return userFeignMapper.toModel(userDto);
+       try {
+           CustomResponse<UserResponseDto> response = userFeignClient.getUser(id);
+           UserResponseDto userDto = response.getData();
+
+           return userFeignMapper.toModel(userDto);
+       } catch (FeignException e) {
+            throw new UserNotFound();
+       }
     }
 
 }
