@@ -30,12 +30,26 @@ public class RestaurantRestController {
             @ApiResponse(responseCode = "200", description = "All restaurants returned"),
             @ApiResponse(responseCode = "404", description = "No data found", content = @Content)
     })
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @GetMapping("/")
     public ResponseEntity<CustomResponse<List<RestaurantResponseDto>>> getRestaurants() {
         CustomResponse<List<RestaurantResponseDto>> response = CustomResponse.<List<RestaurantResponseDto>>builder()
                 .status(HttpStatus.OK.value())
                 .data(restaurantHandler.getAll())
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Get by ID restaurant")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Restaurants returned"),
+            @ApiResponse(responseCode = "404", description = "No data found", content = @Content)
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<CustomResponse<RestaurantResponseDto>> getRestaurant(@PathVariable Long id) {
+        CustomResponse<RestaurantResponseDto> response = CustomResponse.<RestaurantResponseDto>builder()
+                .status(HttpStatus.OK.value())
+                .data(restaurantHandler.getById(id))
                 .build();
 
         return ResponseEntity.ok(response);
