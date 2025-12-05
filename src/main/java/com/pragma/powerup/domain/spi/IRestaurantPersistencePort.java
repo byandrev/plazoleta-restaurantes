@@ -1,8 +1,8 @@
 package com.pragma.powerup.domain.spi;
 
 import com.pragma.powerup.domain.model.RestaurantModel;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 public interface IRestaurantPersistencePort {
 
@@ -10,6 +10,6 @@ public interface IRestaurantPersistencePort {
 
     RestaurantModel getById(Long id);
 
-    List<RestaurantModel> getAll();
+    Page<RestaurantModel> getAll(PageRequest pageRequest);
 
 }

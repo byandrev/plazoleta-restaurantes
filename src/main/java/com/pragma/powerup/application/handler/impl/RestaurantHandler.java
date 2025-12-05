@@ -8,14 +8,11 @@ import com.pragma.powerup.application.mapper.IRestaurantResponseMapper;
 import com.pragma.powerup.domain.api.IRestaurantServicePort;
 import com.pragma.powerup.domain.model.RestaurantModel;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-//@Transactional
 public class RestaurantHandler implements IRestaurantHandler {
 
     private final IRestaurantServicePort restaurantService;
@@ -35,9 +32,9 @@ public class RestaurantHandler implements IRestaurantHandler {
     }
 
     @Override
-    public List<RestaurantResponseDto> getAll() {
-        List<RestaurantModel> restaurantList = restaurantService.getAll();
-        return restaurantResponseMapper.toResponseList(restaurantList);
+    public Page<RestaurantResponseDto> getAll(int page, int size) {
+        Page<RestaurantModel> restaurantList = restaurantService.getAll(page, size);
+        return restaurantList.map(restaurantResponseMapper::toResponse);
     }
 
 }

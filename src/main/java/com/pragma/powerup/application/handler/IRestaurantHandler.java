@@ -2,8 +2,7 @@ package com.pragma.powerup.application.handler;
 
 import com.pragma.powerup.application.dto.request.RestaurantRequestDto;
 import com.pragma.powerup.application.dto.response.RestaurantResponseDto;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 public interface IRestaurantHandler {
 
@@ -11,6 +10,6 @@ public interface IRestaurantHandler {
 
     RestaurantResponseDto getById(Long id);
 
-    List<RestaurantResponseDto> getAll();
+    Page<RestaurantResponseDto> getAll(int page, int size);
 
 }
