@@ -60,6 +60,7 @@ public class PlatoUseCase implements IPlatoServicePort {
 
         Optional.ofNullable(plato.getPrecio()).ifPresent(updatedPlato::setPrecio);
         Optional.ofNullable(plato.getDescripcion()).ifPresent(updatedPlato::setDescripcion);
+        Optional.ofNullable(plato.getActivo()).ifPresent(updatedPlato::setActivo);
 
         return platoPersistencePort.save(updatedPlato);
     }

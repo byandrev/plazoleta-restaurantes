@@ -21,6 +21,6 @@ public class PlatoModel {
 
     private String urlImagen;
 
-    private boolean activo;
+    private Boolean activo;
 
 }
