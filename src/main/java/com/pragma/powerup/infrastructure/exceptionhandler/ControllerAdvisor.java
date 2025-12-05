@@ -27,7 +27,7 @@ public class ControllerAdvisor {
                 .message(ex.getMessage())
                 .build();
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        return ResponseEntity.status(ex.getCode()).body(response);
     }
 
     @ExceptionHandler(NoDataFoundException.class)
