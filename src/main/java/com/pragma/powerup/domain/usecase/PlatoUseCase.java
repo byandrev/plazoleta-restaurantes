@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +58,11 @@ public class PlatoUseCase implements IPlatoServicePort {
             throw new UnauthorizedUserException("No eres propietario del restaurante");
         }
 
-        return platoPersistencePort.update(id, plato);
+        Optional.ofNullable(plato.getPrecio()).ifPresent(updatedPlato::setPrecio);
+        Optional.ofNullable(plato.getDescripcion()).ifPresent(updatedPlato::setDescripcion);
+        Optional.ofNullable(plato.getActivo()).ifPresent(updatedPlato::setActivo);
+
+        return platoPersistencePort.save(updatedPlato);
     }
 
 }

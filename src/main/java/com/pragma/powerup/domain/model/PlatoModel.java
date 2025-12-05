@@ -1,10 +1,12 @@
 package com.pragma.powerup.domain.model;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
 public class PlatoModel {
 
     private Long id;
@@ -19,8 +21,10 @@ public class PlatoModel {
 
     private Long idRestaurante;
 
+    private RestaurantModel restaurant;
+
     private String urlImagen;
 
-    private boolean activo;
+    private Boolean activo;
 
 }

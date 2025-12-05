@@ -1,7 +1,9 @@
 package com.pragma.powerup.domain.exception;
 
-public class UnauthorizedUserException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class UnauthorizedUserException extends DomainException {
     public UnauthorizedUserException(String message) {
-        super(message);
+        super("No estas autorizado para esta tarea", HttpStatus.FORBIDDEN.value());
     }
 }

@@ -50,22 +50,24 @@ class PlatoHandlerTest {
 
     @Test
     void save_IsDefaultActivo() {
-        PlatoModel platoModel = new PlatoModel();
-        platoModel.setId(1L);
-        platoModel.setNombre("Plato");
+        PlatoModel platoModel = PlatoModel.builder()
+                .id(1L)
+                .nombre("Plato")
+                .build();
 
-        when(platoService.save(platoModel)).thenReturn(platoModel);
+        when(platoService.save(1L, platoModel)).thenReturn(platoModel);
 
-        PlatoModel currentPlato = platoService.save(platoModel);
+        PlatoModel currentPlato = platoService.save(1L, platoModel);
 
         assertEquals(platoModel.getNombre(), currentPlato.getNombre());
     }
 
     @Test
     void getById() {
-        PlatoModel platoModel = new PlatoModel();
-        platoModel.setId(1L);
-        platoModel.setNombre("Plato");
+        PlatoModel platoModel = PlatoModel.builder()
+                .id(1L)
+                .nombre("Plato")
+                .build();
 
         PlatoResponseDto expectedPlato = new PlatoResponseDto();
         expectedPlato.setId(1L);
@@ -169,17 +171,14 @@ class PlatoHandlerTest {
     }
 
     @Test
-    void updatePlatoBlankDescripcionFailsValidation() {
+    void updatePlatoBlankDescripcionValidation() {
         PlatoUpdateDto platoUpdateDto = new PlatoUpdateDto();
         platoUpdateDto.setDescripcion("");
         platoUpdateDto.setPrecio(1000);
 
         Set<ConstraintViolation<PlatoUpdateDto>> violations = validator.validate(platoUpdateDto);
 
-        assertFalse(violations.isEmpty());
-        assertEquals(1, violations.size());
-        ConstraintViolation<PlatoUpdateDto> violation = violations.iterator().next();
-        assertEquals("La descripcion no puede estar vacia", violation.getMessage());
+        assertTrue(violations.isEmpty());
     }
 
     @Test

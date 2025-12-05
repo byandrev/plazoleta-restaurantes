@@ -8,6 +8,4 @@ public interface IPlatoPersistencePort {
 
     PlatoModel getById(Long id);
 
-    PlatoModel update(Long id, PlatoModel platoModel);
-
 }
