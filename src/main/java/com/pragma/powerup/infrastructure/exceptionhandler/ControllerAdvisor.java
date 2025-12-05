@@ -1,10 +1,9 @@
 package com.pragma.powerup.infrastructure.exceptionhandler;
 
-import com.pragma.powerup.domain.exception.UnauthorizedUserException;
+import com.pragma.powerup.domain.exception.DomainException;
 import com.pragma.powerup.infrastructure.exception.NoDataFoundException;
 import com.pragma.powerup.infrastructure.exception.ValidationError;
 import com.pragma.powerup.infrastructure.input.rest.response.CustomResponse;
-import feign.FeignException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +18,17 @@ import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class ControllerAdvisor {
+
+    @ExceptionHandler(DomainException.class)
+    public ResponseEntity<CustomResponse<Void>> handleDomainException(DomainException ex) {
+        CustomResponse<Void> response = CustomResponse.<Void>builder()
+                .status(ex.getCode())
+                .error(ex.getMessage())
+                .message(ex.getMessage())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
 
     @ExceptionHandler(NoDataFoundException.class)
     public ResponseEntity<CustomResponse<Void>> handleNoDataFoundException(NoDataFoundException ignoredNoDataFoundException) {
@@ -53,39 +63,6 @@ public class ControllerAdvisor {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    @ExceptionHandler(FeignException.NotFound.class)
-    public ResponseEntity<CustomResponse<Void>> handleFeignException(FeignException.NotFound ignoredFeignException) {
-        CustomResponse<Void> response = CustomResponse.<Void>builder()
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error(ExceptionResponse.BAD_REQUEST.getMessage())
-                .message(ExceptionResponse.NO_DATA_FOUND.getMessage())
-                .build();
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-    }
-
-    @ExceptionHandler(FeignException.class)
-    public ResponseEntity<CustomResponse<Void>> handleFeignException(FeignException ignoredFeignException) {
-        CustomResponse<Void> response = CustomResponse.<Void>builder()
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error(ExceptionResponse.BAD_REQUEST.getMessage())
-                .message(ExceptionResponse.SERVER_ERROR.getMessage())
-                .build();
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-    }
-
-    @ExceptionHandler(UnauthorizedUserException.class)
-    public ResponseEntity<CustomResponse<Void>> handleUnauthorizedUserException(UnauthorizedUserException unauthorizedUserException) {
-        CustomResponse<Void> response = CustomResponse.<Void>builder()
-                .status(HttpStatus.UNAUTHORIZED.value())
-                .error(ExceptionResponse.UNAUTHORIZED.getMessage())
-                .message(unauthorizedUserException.getMessage())
-                .build();
-
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-    }
-
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<CustomResponse<Void>> handleHttpMessageNotReadableException() {
         CustomResponse<Void> response = CustomResponse.<Void>builder()
@@ -118,4 +95,5 @@ public class ControllerAdvisor {
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
+
 }
