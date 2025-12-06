@@ -39,11 +39,12 @@ public class PlatoRestController {
     public ResponseEntity<CustomResponse<Page<PlatoResponseDto>>> getRestaurants(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam @Min(value = 0) int restaurantId
+            @RequestParam @Min(value = 0) long restaurantId,
+            @RequestParam(required = false) String categoria
     ) {
         CustomResponse<Page<PlatoResponseDto>> response = CustomResponse.<Page<PlatoResponseDto>>builder()
                 .status(HttpStatus.OK.value())
-                .data(platoHandler.getAll(Long.parseLong(String.valueOf(restaurantId)), page, size))
+                .data(platoHandler.getAll(categoria, restaurantId, page, size))
                 .build();
 
         return ResponseEntity.ok(response);
