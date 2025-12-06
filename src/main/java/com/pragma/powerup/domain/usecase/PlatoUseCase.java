@@ -10,6 +10,9 @@ import com.pragma.powerup.domain.spi.ICategoriaPersistencePort;
 import com.pragma.powerup.domain.spi.IPlatoPersistencePort;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -42,6 +45,17 @@ public class PlatoUseCase implements IPlatoServicePort {
         plato.setActivo(true);
 
         return platoPersistencePort.save(plato);
+    }
+
+    @Override
+    public Page<PlatoModel> getAll(String categoria, Long restauranteId, int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("nombre").ascending());
+
+        if (categoria != null && !categoria.trim().isEmpty()) {
+            return platoPersistencePort.getAllByCategoria(categoria.toUpperCase(), restauranteId, pageRequest);
+        }
+
+        return  platoPersistencePort.getAll(restauranteId, pageRequest);
     }
 
     @Override

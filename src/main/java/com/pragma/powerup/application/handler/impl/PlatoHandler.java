@@ -9,6 +9,7 @@ import com.pragma.powerup.application.mapper.IPlatoResponseMapper;
 import com.pragma.powerup.domain.api.IPlatoServicePort;
 import com.pragma.powerup.domain.model.PlatoModel;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -25,6 +26,12 @@ public class PlatoHandler implements IPlatoHandler {
     @Override
     public void save(Long userId, PlatoRequestDto platoRequestDto) {
         platoService.save(userId, platoRequestMapper.toModel(platoRequestDto));
+    }
+
+    @Override
+    public Page<PlatoResponseDto> getAll(String categoria, Long restauranteId, int page, int size) {
+        Page<PlatoModel> platosList = platoService.getAll(categoria, restauranteId, page, size);
+        return platosList.map(platoResponseMapper::toResponse);
     }
 
     @Override
