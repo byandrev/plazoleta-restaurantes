@@ -29,8 +29,8 @@ public class PlatoHandler implements IPlatoHandler {
     }
 
     @Override
-    public Page<PlatoResponseDto> getAll(Long restauranteId, int page, int size) {
-        Page<PlatoModel> platosList = platoService.getAll(restauranteId, page, size);
+    public Page<PlatoResponseDto> getAll(String categoria, Long restauranteId, int page, int size) {
+        Page<PlatoModel> platosList = platoService.getAll(categoria, restauranteId, page, size);
         return platosList.map(platoResponseMapper::toResponse);
     }
 

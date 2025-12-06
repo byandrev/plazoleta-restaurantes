@@ -9,7 +9,7 @@ public interface IPlatoHandler {
 
     void save(Long userId, PlatoRequestDto platoRequestDto);
 
-    Page<PlatoResponseDto> getAll(Long restauranteId, int page, int size);
+    Page<PlatoResponseDto> getAll(String categoria, Long restauranteId, int page, int size);
 
     PlatoResponseDto getById(Long id);
 
