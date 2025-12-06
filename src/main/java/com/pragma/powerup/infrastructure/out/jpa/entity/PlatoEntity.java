@@ -34,12 +34,12 @@ public class PlatoEntity {
     @Column(name = "activo")
     private Boolean activo = true;
 
-    @Column(nullable = false)
-    private Long idRestaurante;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_restaurante", nullable = false)
+    private RestaurantEntity restaurante;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_categoria", nullable = false)
     private CategoriaEntity categoria;
-
-
+    
 }
