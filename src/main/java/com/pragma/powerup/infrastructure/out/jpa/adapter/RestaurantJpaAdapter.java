@@ -1,6 +1,6 @@
 package com.pragma.powerup.infrastructure.out.jpa.adapter;
 
-import com.pragma.powerup.domain.exception.RestaurantNotFoundException;
+import com.pragma.powerup.domain.exception.ResourceNotFound;
 import com.pragma.powerup.domain.model.RestaurantModel;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.infrastructure.out.jpa.entity.RestaurantEntity;
@@ -26,7 +26,8 @@ public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
 
     @Override
     public RestaurantModel getById(Long id) {
-        RestaurantEntity restaurantEntity = restaurantRepository.findById(id).orElseThrow(RestaurantNotFoundException::new);
+        RestaurantEntity restaurantEntity = restaurantRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFound("El restaurante no existe"));
         return restaurantEntityMapper.toModel(restaurantEntity);
     }
 

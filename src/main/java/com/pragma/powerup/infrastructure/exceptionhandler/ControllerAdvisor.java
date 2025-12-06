@@ -1,7 +1,6 @@
 package com.pragma.powerup.infrastructure.exceptionhandler;
 
 import com.pragma.powerup.domain.exception.DomainException;
-import com.pragma.powerup.infrastructure.exception.NoDataFoundException;
 import com.pragma.powerup.infrastructure.exception.ValidationError;
 import com.pragma.powerup.infrastructure.input.rest.response.CustomResponse;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -30,17 +29,6 @@ public class ControllerAdvisor {
         return ResponseEntity.status(ex.getCode()).body(response);
     }
 
-    @ExceptionHandler(NoDataFoundException.class)
-    public ResponseEntity<CustomResponse<Void>> handleNoDataFoundException(NoDataFoundException ignoredNoDataFoundException) {
-        CustomResponse<Void> response = CustomResponse.<Void>builder()
-                .status(HttpStatus.NOT_FOUND.value())
-                .error(ExceptionResponse.NO_DATA_FOUND.getMessage())
-                .message(ignoredNoDataFoundException.getMessage())
-                .build();
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-    }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<CustomResponse<Void>> handleValidationException(MethodArgumentNotValidException ex) {
         List<ValidationError> errors = ex.getBindingResult()
@@ -56,7 +44,7 @@ public class ControllerAdvisor {
         CustomResponse<Void> response = CustomResponse.<Void>builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(ExceptionResponse.BAD_REQUEST.getMessage())
-                .message("Error de validación")
+                .message(ExceptionResponse.VALIDATION_ERROR.getMessage())
                 .errors(errors)
                 .build();
 
@@ -68,7 +56,7 @@ public class ControllerAdvisor {
         CustomResponse<Void> response = CustomResponse.<Void>builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(ExceptionResponse.BAD_REQUEST.getMessage())
-                .message("Es necesario el body")
+                .message(ExceptionResponse.BODY_NECESSARY.getMessage())
                 .build();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
@@ -79,7 +67,7 @@ public class ControllerAdvisor {
         CustomResponse<Void> response = CustomResponse.<Void>builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(ExceptionResponse.BAD_REQUEST.getMessage())
-                .message("MediaType no soportado")
+                .message(ExceptionResponse.MEDIA_TYPE_IS_NOT_SUPPORTED.getMessage())
                 .build();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);

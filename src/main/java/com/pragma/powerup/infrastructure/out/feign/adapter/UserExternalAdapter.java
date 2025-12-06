@@ -1,9 +1,9 @@
 package com.pragma.powerup.infrastructure.out.feign.adapter;
 
 import com.pragma.powerup.application.dto.response.UserResponseDto;
-import com.pragma.powerup.domain.exception.UserNotFound;
-import com.pragma.powerup.domain.spi.IUserExternalServicePort;
+import com.pragma.powerup.domain.exception.ResourceNotFound;
 import com.pragma.powerup.domain.model.UserModel;
+import com.pragma.powerup.domain.spi.IUserExternalServicePort;
 import com.pragma.powerup.infrastructure.input.rest.response.CustomResponse;
 import com.pragma.powerup.infrastructure.out.feign.IUserFeignClient;
 import com.pragma.powerup.infrastructure.out.feign.mapper.IUserFeignMapper;
@@ -26,7 +26,7 @@ public class UserExternalAdapter implements IUserExternalServicePort {
 
            return userFeignMapper.toModel(userDto);
        } catch (FeignException e) {
-            throw new UserNotFound();
+            throw new ResourceNotFound("El usuario no existe");
        }
     }
 
