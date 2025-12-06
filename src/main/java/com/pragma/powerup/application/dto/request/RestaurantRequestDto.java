@@ -29,6 +29,7 @@ public class RestaurantRequestDto {
     )
     private String telefono;
 
+    @NotBlank(message = "El urlLogo no puede estar vacio")
     private String urlLogo;
 
     @NotBlank(message = "El NIT no puede estar vacio")
