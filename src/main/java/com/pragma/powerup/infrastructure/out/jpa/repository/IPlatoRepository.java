@@ -9,4 +9,5 @@ public interface IPlatoRepository extends JpaRepository<PlatoEntity, Long> {
 
     Page<PlatoEntity> findAllByIdRestaurante(Long restauranteId, PageRequest pageRequest);
 
+    Page<PlatoEntity> findAllByIdRestauranteAndCategoria_Nombre(Long idRestaurante, String categoriaNombre, PageRequest pageRequest);
 }

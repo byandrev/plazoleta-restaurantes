@@ -31,6 +31,12 @@ public class PlatoJpaAdapter implements IPlatoPersistencePort {
     }
 
     @Override
+    public Page<PlatoModel> getAllByCategoria(String categoria, Long restauranteId, PageRequest pageRequest) {
+        Page<PlatoEntity> page = platoRepository.findAllByIdRestauranteAndCategoria_Nombre(restauranteId, categoria, pageRequest);
+        return page.map(platoEntityMapper::toModel);
+    }
+
+    @Override
     public PlatoModel getById(Long id) {
         PlatoEntity platoEntity = platoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFound("El plato no existe"));
