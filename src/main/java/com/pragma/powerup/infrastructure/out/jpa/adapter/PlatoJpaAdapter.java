@@ -7,6 +7,8 @@ import com.pragma.powerup.infrastructure.out.jpa.entity.PlatoEntity;
 import com.pragma.powerup.infrastructure.out.jpa.mapper.IPlatoEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.repository.IPlatoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -20,6 +22,12 @@ public class PlatoJpaAdapter implements IPlatoPersistencePort {
     public PlatoModel save(PlatoModel platoModel) {
         PlatoEntity platoEntity = platoEntityMapper.toEntity(platoModel);
         return platoEntityMapper.toModel(platoRepository.save(platoEntity));
+    }
+
+    @Override
+    public Page<PlatoModel> getAll(Long restauranteId, PageRequest pageRequest) {
+        Page<PlatoEntity> page = platoRepository.findAllByIdRestaurante(restauranteId, pageRequest);
+        return page.map(platoEntityMapper::toModel);
     }
 
     @Override
