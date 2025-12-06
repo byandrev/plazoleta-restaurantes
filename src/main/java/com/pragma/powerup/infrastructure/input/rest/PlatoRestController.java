@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,6 +26,25 @@ import javax.validation.Valid;
 public class PlatoRestController {
 
     private final IPlatoHandler platoHandler;
+
+    @Operation(summary = "Get platos")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Platos returned"),
+            @ApiResponse(responseCode = "404", description = "No data found", content = @Content)
+    })
+    @GetMapping("/")
+    public ResponseEntity<CustomResponse<Page<PlatoResponseDto>>> getRestaurants(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam Long restaurantId
+    ) {
+        CustomResponse<Page<PlatoResponseDto>> response = CustomResponse.<Page<PlatoResponseDto>>builder()
+                .status(HttpStatus.OK.value())
+                .data(platoHandler.getAll(restaurantId, page, size))
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
 
     @Operation(summary = "Add new plato")
     @ApiResponses(value = {
