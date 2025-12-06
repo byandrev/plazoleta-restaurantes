@@ -1,15 +1,13 @@
 package com.pragma.powerup.infrastructure.out.jpa.adapter;
 
+import com.pragma.powerup.domain.exception.ResourceNotFound;
 import com.pragma.powerup.domain.model.CategoriaModel;
 import com.pragma.powerup.domain.spi.ICategoriaPersistencePort;
-import com.pragma.powerup.infrastructure.exception.NoDataFoundException;
 import com.pragma.powerup.infrastructure.out.jpa.entity.CategoriaEntity;
 import com.pragma.powerup.infrastructure.out.jpa.mapper.ICategoriaEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.repository.ICategoriaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -26,13 +24,9 @@ public class CategoriaJpaAdapter implements ICategoriaPersistencePort {
 
     @Override
     public CategoriaModel getByNombre(String nombre) {
-        Optional<CategoriaEntity> categoriaEntity = categoriaRepository.findByNombre(nombre);
-
-        if (categoriaEntity.isEmpty()) {
-            throw new NoDataFoundException("La categoria no existe");
-        }
-
-        return categoriaEntityMapper.toModel(categoriaEntity.get());
+        CategoriaEntity categoriaEntity = categoriaRepository.findByNombre(nombre)
+                .orElseThrow(() -> new ResourceNotFound("La categoria no existe"));
+        return categoriaEntityMapper.toModel(categoriaEntity);
     }
 
 }

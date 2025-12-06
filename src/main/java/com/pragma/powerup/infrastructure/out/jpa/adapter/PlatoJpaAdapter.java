@@ -1,6 +1,6 @@
 package com.pragma.powerup.infrastructure.out.jpa.adapter;
 
-import com.pragma.powerup.domain.exception.PlatoNotFound;
+import com.pragma.powerup.domain.exception.ResourceNotFound;
 import com.pragma.powerup.domain.model.PlatoModel;
 import com.pragma.powerup.domain.spi.IPlatoPersistencePort;
 import com.pragma.powerup.infrastructure.out.jpa.entity.PlatoEntity;
@@ -24,7 +24,8 @@ public class PlatoJpaAdapter implements IPlatoPersistencePort {
 
     @Override
     public PlatoModel getById(Long id) {
-        PlatoEntity platoEntity = platoRepository.findById(id).orElseThrow(PlatoNotFound::new);
+        PlatoEntity platoEntity = platoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFound("El plato no existe"));
         return platoEntityMapper.toModel(platoEntity);
     }
 
