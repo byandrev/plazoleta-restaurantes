@@ -16,11 +16,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 
 @RestController
+@Validated
 @RequestMapping("/api/v1/platos")
 @RequiredArgsConstructor
 public class PlatoRestController {
@@ -36,11 +39,11 @@ public class PlatoRestController {
     public ResponseEntity<CustomResponse<Page<PlatoResponseDto>>> getRestaurants(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam Long restaurantId
+            @RequestParam @Min(value = 0) int restaurantId
     ) {
         CustomResponse<Page<PlatoResponseDto>> response = CustomResponse.<Page<PlatoResponseDto>>builder()
                 .status(HttpStatus.OK.value())
-                .data(platoHandler.getAll(restaurantId, page, size))
+                .data(platoHandler.getAll(Long.parseLong(String.valueOf(restaurantId)), page, size))
                 .build();
 
         return ResponseEntity.ok(response);
