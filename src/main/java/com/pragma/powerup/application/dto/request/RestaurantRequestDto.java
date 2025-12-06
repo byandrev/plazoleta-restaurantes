@@ -1,5 +1,6 @@
 package com.pragma.powerup.application.dto.request;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,6 +9,7 @@ import javax.validation.constraints.Pattern;
 
 @Getter
 @Setter
+@Builder
 public class RestaurantRequestDto {
 
     @NotBlank(message = "El nombre del restaurante es obligatorio")
@@ -27,6 +29,7 @@ public class RestaurantRequestDto {
     )
     private String telefono;
 
+    @NotBlank(message = "El urlLogo no puede estar vacio")
     private String urlLogo;
 
     @NotBlank(message = "El NIT no puede estar vacio")

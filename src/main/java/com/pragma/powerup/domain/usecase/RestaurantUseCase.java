@@ -1,17 +1,18 @@
 package com.pragma.powerup.domain.usecase;
 
 import com.pragma.powerup.domain.api.IRestaurantServicePort;
-import com.pragma.powerup.domain.spi.IUserExternalServicePort;
 import com.pragma.powerup.domain.exception.UnauthorizedUserException;
 import com.pragma.powerup.domain.model.RestaurantModel;
 import com.pragma.powerup.domain.model.RolType;
 import com.pragma.powerup.domain.model.UserModel;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
+import com.pragma.powerup.domain.spi.IUserExternalServicePort;
 import com.pragma.powerup.infrastructure.exception.NoDataFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -41,8 +42,9 @@ public class RestaurantUseCase implements IRestaurantServicePort {
     }
 
     @Override
-    public List<RestaurantModel> getAll() {
-        return restaurantPersistencePort.getAll();
+    public Page<RestaurantModel> getAll(int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("nombre").ascending());
+        return  restaurantPersistencePort.getAll(pageRequest);
     }
 
 }

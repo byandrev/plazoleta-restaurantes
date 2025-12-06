@@ -9,13 +9,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 
 
 @RestController
@@ -25,16 +25,19 @@ public class RestaurantRestController {
 
     private final IRestaurantHandler  restaurantHandler;
 
-    @Operation(summary = "Get all restaurants")
+    @Operation(summary = "Get restaurants")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "All restaurants returned"),
+            @ApiResponse(responseCode = "200", description = "Restaurants returned"),
             @ApiResponse(responseCode = "404", description = "No data found", content = @Content)
     })
     @GetMapping("/")
-    public ResponseEntity<CustomResponse<List<RestaurantResponseDto>>> getRestaurants() {
-        CustomResponse<List<RestaurantResponseDto>> response = CustomResponse.<List<RestaurantResponseDto>>builder()
+    public ResponseEntity<CustomResponse<Page<RestaurantResponseDto>>> getRestaurants(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        CustomResponse<Page<RestaurantResponseDto>> response = CustomResponse.<Page<RestaurantResponseDto>>builder()
                 .status(HttpStatus.OK.value())
-                .data(restaurantHandler.getAll())
+                .data(restaurantHandler.getAll(page, size))
                 .build();
 
         return ResponseEntity.ok(response);

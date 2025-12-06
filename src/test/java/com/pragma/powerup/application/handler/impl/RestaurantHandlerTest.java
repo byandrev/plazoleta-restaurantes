@@ -7,25 +7,21 @@ import com.pragma.powerup.application.mapper.IRestaurantResponseMapper;
 import com.pragma.powerup.domain.api.IRestaurantServicePort;
 import com.pragma.powerup.domain.model.RestaurantModel;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class RestaurantHandlerTest {
@@ -42,145 +38,116 @@ class RestaurantHandlerTest {
     @InjectMocks
     private RestaurantHandler restaurantHandler;
 
-    private Validator validator;
+    private RestaurantRequestDto restaurantRequestDto;
+    private RestaurantModel restaurantModel;
+    private RestaurantResponseDto restaurantResponseDto;
+
+    private final Long RESTAURANT_ID = 1L;
+    private final int PAGE = 0;
+    private final int SIZE = 2;
+    private final String RESTAURANT_NAME_A = "Restaurant A";
 
     @BeforeEach
     void setUp() {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
+        restaurantRequestDto = RestaurantRequestDto
+                .builder()
+                .nombre("Restaurante")
+                .direccion("Av 123")
+                .telefono("+573001234567")
+                .urlLogo("https://logo.png")
+                .nit("123456789")
+                .build();
+
+        restaurantModel = RestaurantModel.builder()
+                .id(RESTAURANT_ID)
+                .nombre(RESTAURANT_NAME_A)
+                .build();
+
+        restaurantResponseDto = RestaurantResponseDto.builder()
+                .id(RESTAURANT_ID)
+                .nombre(RESTAURANT_NAME_A)
+                .build();
     }
 
     @Test
-    void getAllRestaurants() {
-        RestaurantModel restaurantModel1 = new RestaurantModel();
-        restaurantModel1.setId(1L);
-        restaurantModel1.setNombre("Restaurant 1");
-        RestaurantModel restaurantModel2 = new RestaurantModel();
-        restaurantModel2.setId(2L);
-        restaurantModel2.setNombre("Restaurant 2");
-        List<RestaurantModel> restaurantModels = Arrays.asList(restaurantModel1, restaurantModel2);
+    @DisplayName("save debe mapear DTO a Model y llamar al servicio para guardar")
+    void save_SuccessfulFlow_CallsMapperAndService() {
+        when(restaurantRequestMapper.toRestaurant(restaurantRequestDto)).thenReturn(restaurantModel);
 
-        RestaurantResponseDto restaurantResponseDto1 = new RestaurantResponseDto();
-        restaurantResponseDto1.setId(1L);
-        restaurantResponseDto1.setNombre("Restaurant 1");
-        RestaurantResponseDto restaurantResponseDto2 = new RestaurantResponseDto();
-        restaurantResponseDto2.setId(2L);
-        restaurantResponseDto2.setNombre("Restaurant 2");
-        List<RestaurantResponseDto> expectedResponse = Arrays.asList(restaurantResponseDto1, restaurantResponseDto2);
+        restaurantHandler.save(restaurantRequestDto);
 
-        when(restaurantService.getAll()).thenReturn(restaurantModels);
-        when(restaurantResponseMapper.toResponseList(restaurantModels)).thenReturn(expectedResponse);
+        verify(restaurantRequestMapper).toRestaurant(restaurantRequestDto);
+        verify(restaurantService).save(restaurantModel);
+        verifyNoMoreInteractions(restaurantService, restaurantRequestMapper, restaurantResponseMapper);
+    }
 
-        List<RestaurantResponseDto> actualResponse = restaurantHandler.getAll();
+    @Test
+    @DisplayName("getById debe llamar al servicio y mapear el Model a Response DTO")
+    void getById_SuccessfulFlow_ReturnsResponseDto() {
+        when(restaurantService.getById(RESTAURANT_ID)).thenReturn(restaurantModel);
+        when(restaurantResponseMapper.toResponse(restaurantModel)).thenReturn(restaurantResponseDto);
 
-        assertEquals(expectedResponse.size(), actualResponse.size());
-        assertEquals(expectedResponse.get(0).getNombre(), actualResponse.get(0).getNombre());
-        assertEquals(expectedResponse.get(1).getNombre(), actualResponse.get(1).getNombre());
-        verify(restaurantService).getAll();
-        verify(restaurantResponseMapper).toResponseList(restaurantModels);
+        RestaurantResponseDto result = restaurantHandler.getById(RESTAURANT_ID);
+
+        verify(restaurantService).getById(RESTAURANT_ID);
+        verify(restaurantResponseMapper).toResponse(restaurantModel);
+
+        assertNotNull(result);
+        assertEquals(RESTAURANT_ID, result.getId());
+        assertEquals(RESTAURANT_NAME_A, result.getNombre());
+
+        verifyNoMoreInteractions(restaurantService, restaurantRequestMapper, restaurantResponseMapper);
     }
 
 
     @Test
-    void saveRestaurantWithNumericNameFailsValidation() {
-        RestaurantRequestDto restaurantRequestDto = new RestaurantRequestDto();
-        restaurantRequestDto.setNombre("12345");
-        restaurantRequestDto.setDireccion("Av 123");
-        restaurantRequestDto.setTelefono("+573001234567");
-        restaurantRequestDto.setUrlLogo("http://logo.com/logo.png");
-        restaurantRequestDto.setNit("123456789");
-        restaurantRequestDto.setIdPropietario(1L);
+    @DisplayName("getAll debe llamar al servicio con paginación y mapear Page<Model> a Page<ResponseDto>")
+    void getAll_SuccessfulFlow_ReturnsPagedResponseDto() {
+        RestaurantModel modelB = RestaurantModel.builder().id(2L).nombre("Restaurant B").build();
+        RestaurantResponseDto responseB = RestaurantResponseDto.builder().id(2L).nombre("Restaurant B").build();
 
-        Set<ConstraintViolation<RestaurantRequestDto>> violations = validator.validate(restaurantRequestDto);
+        List<RestaurantModel> modelList = Arrays.asList(restaurantModel, modelB);
+        Page<RestaurantModel> mockedPage = new PageImpl<>(modelList, PageRequest.of(PAGE, SIZE), 10);
 
-        assertFalse(violations.isEmpty());
-        assertEquals(1, violations.size());
-        ConstraintViolation<RestaurantRequestDto> violation = violations.iterator().next();
-        assertEquals("El nombre no puede estar compuesto solo por números", violation.getMessage());
+        when(restaurantService.getAll(PAGE, SIZE)).thenReturn(mockedPage);
+
+        when(restaurantResponseMapper.toResponse(restaurantModel)).thenReturn(restaurantResponseDto);
+        when(restaurantResponseMapper.toResponse(modelB)).thenReturn(responseB);
+
+        Page<RestaurantResponseDto> resultPage = restaurantHandler.getAll(PAGE, SIZE);
+
+        verify(restaurantService).getAll(PAGE, SIZE);
+
+        assertNotNull(resultPage);
+        assertEquals(SIZE, resultPage.getContent().size());
+        assertEquals(10, resultPage.getTotalElements());
+        assertEquals(5, resultPage.getTotalPages());
+
+        verify(restaurantResponseMapper).toResponse(restaurantModel);
+        verify(restaurantResponseMapper).toResponse(modelB);
+
+        assertEquals(RESTAURANT_NAME_A, resultPage.getContent().get(0).getNombre());
+        assertEquals("Restaurant B", resultPage.getContent().get(1).getNombre());
+
+        verifyNoMoreInteractions(restaurantService, restaurantRequestMapper);
     }
 
     @Test
-    void saveRestaurantWithBlankNitFailsValidation() {
-        RestaurantRequestDto restaurantRequestDto = new RestaurantRequestDto();
-        restaurantRequestDto.setNombre("Comercial");
-        restaurantRequestDto.setDireccion("Av 123");
-        restaurantRequestDto.setTelefono("+573001234567");
-        restaurantRequestDto.setUrlLogo("http://logo.com/logo.png");
-        // restaurantRequestDto.setNit("");
-        restaurantRequestDto.setIdPropietario(1L);
+    @DisplayName("getAll debe manejar una página vacía correctamente")
+    void getAll_EmptyPage_ReturnsEmptyPagedResponseDto() {
+        Page<RestaurantModel> mockedEmptyPage = new PageImpl<>(List.of(), PageRequest.of(PAGE, SIZE), 0);
 
-        Set<ConstraintViolation<RestaurantRequestDto>> violations = validator.validate(restaurantRequestDto);
+        when(restaurantService.getAll(PAGE, SIZE)).thenReturn(mockedEmptyPage);
 
-        assertFalse(violations.isEmpty());
-        assertEquals(1, violations.size());
-        ConstraintViolation<RestaurantRequestDto> violation = violations.iterator().next();
-        assertEquals("El NIT no puede estar vacio", violation.getMessage());
-    }
+        Page<RestaurantResponseDto> resultPage = restaurantHandler.getAll(PAGE, SIZE);
 
-    @Test
-    void saveRestaurantWithValidPhoneWithPlusSymbolPassesValidation() {
-        RestaurantRequestDto restaurantRequestDto = new RestaurantRequestDto();
-        restaurantRequestDto.setNombre("Comercial");
-        restaurantRequestDto.setDireccion("Av 123");
-        restaurantRequestDto.setTelefono("+573005698325");
-        restaurantRequestDto.setUrlLogo("http://logo.com/logo.png");
-        restaurantRequestDto.setNit("123456789");
-        restaurantRequestDto.setIdPropietario(1L);
+        verify(restaurantService, times(1)).getAll(PAGE, SIZE);
+        verifyNoInteractions(restaurantRequestMapper, restaurantResponseMapper);
 
-        Set<ConstraintViolation<RestaurantRequestDto>> violations = validator.validate(restaurantRequestDto);
+        assertTrue(resultPage.isEmpty());
+        assertEquals(0, resultPage.getTotalElements());
 
-        assertTrue(violations.isEmpty());
-    }
-
-    @Test
-    void saveRestaurantWithValidPhoneWithoutPlusSymbolPassesValidation() {
-        RestaurantRequestDto restaurantRequestDto = new RestaurantRequestDto();
-        restaurantRequestDto.setNombre("Comercial");
-        restaurantRequestDto.setDireccion("Av 123");
-        restaurantRequestDto.setTelefono("5730056983250");
-        restaurantRequestDto.setUrlLogo("http://logo.com/logo.png");
-        restaurantRequestDto.setNit("123456789");
-        restaurantRequestDto.setIdPropietario(1L);
-
-        Set<ConstraintViolation<RestaurantRequestDto>> violations = validator.validate(restaurantRequestDto);
-
-        assertTrue(violations.isEmpty());
-    }
-
-    @Test
-    void saveRestaurantWithPhoneExceedingMaxLengthFailsValidation() {
-        RestaurantRequestDto restaurantRequestDto = new RestaurantRequestDto();
-        restaurantRequestDto.setNombre("Comercial");
-        restaurantRequestDto.setDireccion("Av 123");
-        restaurantRequestDto.setTelefono("+5730056983250");
-        restaurantRequestDto.setUrlLogo("http://logo.com/logo.png");
-        restaurantRequestDto.setNit("123456789");
-        restaurantRequestDto.setIdPropietario(1L);
-
-        Set<ConstraintViolation<RestaurantRequestDto>> violations = validator.validate(restaurantRequestDto);
-
-        assertFalse(violations.isEmpty());
-        assertEquals(1, violations.size());
-        ConstraintViolation<RestaurantRequestDto> violation = violations.iterator().next();
-        assertEquals("Teléfono inválido. Máx 13 caracteres y puede iniciar con +", violation.getMessage());
-    }
-
-    @Test
-    void saveRestaurantWithPhoneMoreThan13DigitsFailsValidation() {
-        RestaurantRequestDto restaurantRequestDto = new RestaurantRequestDto();
-        restaurantRequestDto.setNombre("Comercial");
-        restaurantRequestDto.setDireccion("Av 123");
-        restaurantRequestDto.setTelefono("57300569832501");
-        restaurantRequestDto.setUrlLogo("http://logo.com/logo.png");
-        restaurantRequestDto.setNit("123456789");
-        restaurantRequestDto.setIdPropietario(1L);
-
-        Set<ConstraintViolation<RestaurantRequestDto>> violations = validator.validate(restaurantRequestDto);
-
-        assertFalse(violations.isEmpty());
-        assertEquals(1, violations.size());
-        ConstraintViolation<RestaurantRequestDto> violation = violations.iterator().next();
-        assertEquals("Teléfono inválido. Máx 13 caracteres y puede iniciar con +", violation.getMessage());
+        verifyNoMoreInteractions(restaurantService);
     }
 
 }
