@@ -1,5 +1,6 @@
 package com.pragma.powerup.application.dto.request;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,6 +8,7 @@ import javax.validation.constraints.Min;
 
 @Getter
 @Setter
+@Builder
 public class PlatoUpdateDto {
 
     private String descripcion;

@@ -1,5 +1,6 @@
 package com.pragma.powerup.application.dto.request;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,6 +10,7 @@ import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
+@Builder
 public class PlatoRequestDto {
 
     @NotBlank(message = "El nombre no puede estar vacio")
