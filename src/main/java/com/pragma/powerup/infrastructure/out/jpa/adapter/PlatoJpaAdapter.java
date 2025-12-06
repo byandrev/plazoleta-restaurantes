@@ -26,13 +26,13 @@ public class PlatoJpaAdapter implements IPlatoPersistencePort {
 
     @Override
     public Page<PlatoModel> getAll(Long restauranteId, PageRequest pageRequest) {
-        Page<PlatoEntity> page = platoRepository.findAllByIdRestaurante(restauranteId, pageRequest);
+        Page<PlatoEntity> page = platoRepository.findAllByRestaurante_Id(restauranteId, pageRequest);
         return page.map(platoEntityMapper::toModel);
     }
 
     @Override
     public Page<PlatoModel> getAllByCategoria(String categoria, Long restauranteId, PageRequest pageRequest) {
-        Page<PlatoEntity> page = platoRepository.findAllByIdRestauranteAndCategoria_Nombre(restauranteId, categoria, pageRequest);
+        Page<PlatoEntity> page = platoRepository.findByRestaurante_IdAndCategoria_Nombre(restauranteId, categoria, pageRequest);
         return page.map(platoEntityMapper::toModel);
     }
 
