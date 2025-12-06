@@ -1,7 +1,6 @@
 package com.pragma.powerup.domain.usecase;
 
-import com.pragma.powerup.domain.exception.PlatoNotFound;
-import com.pragma.powerup.domain.exception.RestaurantNotFoundException;
+import com.pragma.powerup.domain.exception.ResourceNotFound;
 import com.pragma.powerup.domain.exception.UnauthorizedUserException;
 import com.pragma.powerup.domain.model.CategoriaModel;
 import com.pragma.powerup.domain.model.PlatoModel;
@@ -67,9 +66,9 @@ class PlatoUseCaseTest {
         Long nonExistentRestaurantId = 99L;
         plato.setIdRestaurante(nonExistentRestaurantId);
 
-        doThrow(RestaurantNotFoundException.class).when(restaurantPersistencePort).getById(nonExistentRestaurantId);
+        doThrow(ResourceNotFound.class).when(restaurantPersistencePort).getById(nonExistentRestaurantId);
 
-        assertThrows(RestaurantNotFoundException.class, () -> platoUseCase.save(ownerId, plato));
+        assertThrows(ResourceNotFound.class, () -> platoUseCase.save(ownerId, plato));
         verify(platoPersistencePort, never()).save(any(PlatoModel.class));
     }
 
@@ -90,9 +89,9 @@ class PlatoUseCaseTest {
         PlatoModel platoToUpdate = buildValidPlato();
         Long nonExistentPlatoId = 99L;
 
-        doThrow(PlatoNotFound.class).when(platoPersistencePort).getById(nonExistentPlatoId);
+        doThrow(ResourceNotFound.class).when(platoPersistencePort).getById(nonExistentPlatoId);
 
-        assertThrows(PlatoNotFound.class, () -> platoUseCase.update(ownerId, nonExistentPlatoId, platoToUpdate));
+        assertThrows(ResourceNotFound.class, () -> platoUseCase.update(ownerId, nonExistentPlatoId, platoToUpdate));
 
         verify(platoPersistencePort, never()).save(any(PlatoModel.class));
     }
