@@ -13,14 +13,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 
 
 @RestController
 @RequestMapping("/api/v1/restaurants")
 @RequiredArgsConstructor
+@Validated
 public class RestaurantRestController {
 
     private final IRestaurantHandler  restaurantHandler;
@@ -32,8 +35,8 @@ public class RestaurantRestController {
     })
     @GetMapping("/")
     public ResponseEntity<CustomResponse<Page<RestaurantResponseDto>>> getRestaurants(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "0") @Min(value = 0) int page,
+            @RequestParam(defaultValue = "10") @Min(value = 1) int size
     ) {
         CustomResponse<Page<RestaurantResponseDto>> response = CustomResponse.<Page<RestaurantResponseDto>>builder()
                 .status(HttpStatus.OK.value())
