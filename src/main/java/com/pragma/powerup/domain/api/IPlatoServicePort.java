@@ -7,7 +7,7 @@ public interface IPlatoServicePort {
 
     PlatoModel save(Long userId, PlatoModel plato);
 
-    Page<PlatoModel> getAll(Long restauranteId, int page, int size);
+    Page<PlatoModel> getAll(String categoria, Long restauranteId, int page, int size);
 
     PlatoModel getById(Long id);
 

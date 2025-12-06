@@ -10,6 +10,8 @@ public interface IPlatoPersistencePort {
 
     Page<PlatoModel> getAll(Long restauranteId, PageRequest pageRequest);
 
+    Page<PlatoModel> getAllByCategoria(String categoria, Long restauranteId, PageRequest pageRequest);
+
     PlatoModel getById(Long id);
 
 }
