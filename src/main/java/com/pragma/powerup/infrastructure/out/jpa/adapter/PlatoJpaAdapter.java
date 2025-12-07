@@ -11,6 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
+import java.util.*;
+
 @Repository
 @RequiredArgsConstructor
 public class PlatoJpaAdapter implements IPlatoPersistencePort {
@@ -41,6 +43,17 @@ public class PlatoJpaAdapter implements IPlatoPersistencePort {
         PlatoEntity platoEntity = platoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFound("El plato no existe"));
         return platoEntityMapper.toModel(platoEntity);
+    }
+
+    @Override
+    public Set<Long> findNonExistentPlatoIds(Set<Long> ids) {
+        if (ids.isEmpty()) return Collections.emptySet();
+
+        List<Long> foundIds = platoRepository.findAllIdsByIds(ids);
+        Set<Long> missingIds = new HashSet<>(ids);
+        missingIds.removeAll(foundIds);
+
+        return missingIds;
     }
 
 }
