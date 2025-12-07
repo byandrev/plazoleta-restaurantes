@@ -43,6 +43,7 @@ public class PlatoUseCase implements IPlatoServicePort {
         }
 
         plato.setActivo(true);
+        plato.setRestaurante(restaurantModel);
 
         return platoPersistencePort.save(plato);
     }
