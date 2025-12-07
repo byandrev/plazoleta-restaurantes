@@ -1,14 +1,14 @@
 package com.pragma.powerup.domain.usecase;
 
 import com.pragma.powerup.domain.api.IPlatoServicePort;
-import com.pragma.powerup.domain.exception.ResourceNotFound;
-import com.pragma.powerup.domain.exception.UnauthorizedUserException;
+import com.pragma.powerup.domain.exception.DomainException;
 import com.pragma.powerup.domain.model.CategoriaModel;
 import com.pragma.powerup.domain.model.PlatoModel;
 import com.pragma.powerup.domain.model.RestaurantModel;
 import com.pragma.powerup.domain.spi.ICategoriaPersistencePort;
 import com.pragma.powerup.domain.spi.IPlatoPersistencePort;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
+import com.pragma.powerup.infrastructure.exception.ResourceNotFound;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,7 +31,7 @@ public class PlatoUseCase implements IPlatoServicePort {
         RestaurantModel restaurantModel = restaurantPersistencePort.getById(plato.getIdRestaurante());
 
         if (!Objects.equals(restaurantModel.getIdPropietario(), userId)) {
-            throw new UnauthorizedUserException("No eres propietario del restaurante");
+            throw new DomainException("No eres propietario del restaurante");
         }
 
         try {
@@ -43,6 +43,7 @@ public class PlatoUseCase implements IPlatoServicePort {
         }
 
         plato.setActivo(true);
+        plato.setRestaurante(restaurantModel);
 
         return platoPersistencePort.save(plato);
     }
@@ -69,7 +70,7 @@ public class PlatoUseCase implements IPlatoServicePort {
         RestaurantModel restaurantModel = restaurantPersistencePort.getById(updatedPlato.getIdRestaurante());
 
         if (!Objects.equals(restaurantModel.getIdPropietario(), userId)) {
-            throw new UnauthorizedUserException("No eres propietario del restaurante");
+            throw new DomainException("No eres propietario del restaurante");
         }
 
         Optional.ofNullable(plato.getPrecio()).ifPresent(updatedPlato::setPrecio);

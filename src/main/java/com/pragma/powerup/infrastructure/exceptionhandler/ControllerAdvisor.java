@@ -1,6 +1,8 @@
 package com.pragma.powerup.infrastructure.exceptionhandler;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.pragma.powerup.domain.exception.DomainException;
+import com.pragma.powerup.infrastructure.exception.InfraException;
 import com.pragma.powerup.infrastructure.exception.ValidationError;
 import com.pragma.powerup.infrastructure.input.rest.response.CustomResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +10,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -16,6 +20,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import javax.validation.ConstraintViolationException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,6 +30,17 @@ public class ControllerAdvisor {
 
     @ExceptionHandler(DomainException.class)
     public ResponseEntity<CustomResponse<Void>> handleDomainException(DomainException ex) {
+        CustomResponse<Void> response = CustomResponse.<Void>builder()
+                .status(HttpStatus.CONFLICT.value())
+                .error(ex.getMessage())
+                .message(ex.getMessage())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT.value()).body(response);
+    }
+
+    @ExceptionHandler(InfraException.class)
+    public ResponseEntity<CustomResponse<Void>> handleInfraException(InfraException ex) {
         CustomResponse<Void> response = CustomResponse.<Void>builder()
                 .status(ex.getCode())
                 .error(ex.getMessage())
@@ -91,11 +107,32 @@ public class ControllerAdvisor {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<CustomResponse<Void>> handleHttpMessageNotReadableException() {
+    public ResponseEntity<CustomResponse<Void>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        List<ValidationError> errors = new ArrayList<>();
+
+        if (ex.getCause() instanceof InvalidFormatException) {
+            InvalidFormatException ife = (InvalidFormatException) ex.getCause();
+
+            String field = ife.getPath().stream()
+                    .map(p -> p.getFieldName())
+                    .filter(s -> s != null)
+                    .reduce((a, b) -> a + "." + b)
+                    .orElse("Campo desconocido");
+
+            String errorDetail = String.format("El campo '%s' no es valido. Valor recibido: '%s'", field, ife.getValue());
+
+            errors.add(new ValidationError(
+                    field,
+                    errorDetail,
+                    ife.getValue()
+            ));
+        }
+
         CustomResponse<Void> response = CustomResponse.<Void>builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(ExceptionResponse.BAD_REQUEST.getMessage())
-                .message(ExceptionResponse.BODY_NECESSARY.getMessage())
+                .message(ExceptionResponse.JSON_ERROR.getMessage())
+                .errors(errors)
                 .build();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
@@ -136,8 +173,13 @@ public class ControllerAdvisor {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<CustomResponse<Void>> handleGlobalException(Exception ex) {
+    @ExceptionHandler({AccessDeniedException.class, AuthenticationException.class})
+    public void handleSecurityExceptions(RuntimeException ex) {
+        throw ex;
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<CustomResponse<Void>> handleGlobalException(RuntimeException ex) {
         CustomResponse<Void> response = CustomResponse.<Void>builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .error(ExceptionResponse.SERVER_ERROR.getMessage())

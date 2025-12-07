@@ -1,7 +1,7 @@
 package com.pragma.powerup.domain.usecase;
 
-import com.pragma.powerup.domain.exception.ResourceNotFound;
-import com.pragma.powerup.domain.exception.UnauthorizedUserException;
+import com.pragma.powerup.domain.exception.DomainException;
+import com.pragma.powerup.infrastructure.exception.ResourceNotFound;
 import com.pragma.powerup.domain.model.CategoriaModel;
 import com.pragma.powerup.domain.model.PlatoModel;
 import com.pragma.powerup.domain.model.RestaurantModel;
@@ -56,7 +56,7 @@ class PlatoUseCaseTest {
                 .urlImagen("http://img.com/hamb.jpg")
                 .activo(true)
                 .idRestaurante(restaurantId)
-                .restaurant(buildOwnerRestaurant())
+                .restaurante(buildOwnerRestaurant())
                 .categoria(CategoriaModel.builder().nombre(categoria).id(categoryId).build())
                 .build();
     }
@@ -94,9 +94,9 @@ class PlatoUseCaseTest {
         RestaurantModel nonOwnedRestaurant = buildOwnerRestaurant();
         nonOwnedRestaurant.setIdPropietario(notOwnerId);
 
-        doThrow(UnauthorizedUserException.class).when(restaurantPersistencePort).getById(plato.getIdRestaurante());
+        doThrow(DomainException.class).when(restaurantPersistencePort).getById(plato.getIdRestaurante());
 
-        assertThrows(UnauthorizedUserException.class, () -> platoUseCase.save(ownerId, plato));
+        assertThrows(DomainException.class, () -> platoUseCase.save(ownerId, plato));
         verify(platoPersistencePort, never()).save(any(PlatoModel.class));
     }
 
@@ -121,7 +121,7 @@ class PlatoUseCaseTest {
         when(platoPersistencePort.getById(platoId)).thenReturn(existingPlato);
         when(restaurantPersistencePort.getById(restaurant.getId())).thenReturn(restaurant);
 
-        assertThrows(UnauthorizedUserException.class, () -> platoUseCase.update(ownerId, platoId, existingPlato));
+        assertThrows(DomainException.class, () -> platoUseCase.update(ownerId, platoId, existingPlato));
         verify(platoPersistencePort, never()).save(any(PlatoModel.class));
     }
 

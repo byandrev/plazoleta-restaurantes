@@ -1,6 +1,6 @@
 package com.pragma.powerup.infrastructure.out.jpa.adapter;
 
-import com.pragma.powerup.domain.exception.ResourceNotFound;
+import com.pragma.powerup.infrastructure.exception.ResourceNotFound;
 import com.pragma.powerup.domain.model.PlatoModel;
 import com.pragma.powerup.domain.spi.IPlatoPersistencePort;
 import com.pragma.powerup.infrastructure.out.jpa.entity.PlatoEntity;
@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
+
+import java.util.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -26,13 +28,13 @@ public class PlatoJpaAdapter implements IPlatoPersistencePort {
 
     @Override
     public Page<PlatoModel> getAll(Long restauranteId, PageRequest pageRequest) {
-        Page<PlatoEntity> page = platoRepository.findAllByIdRestaurante(restauranteId, pageRequest);
+        Page<PlatoEntity> page = platoRepository.findAllByRestaurante_Id(restauranteId, pageRequest);
         return page.map(platoEntityMapper::toModel);
     }
 
     @Override
     public Page<PlatoModel> getAllByCategoria(String categoria, Long restauranteId, PageRequest pageRequest) {
-        Page<PlatoEntity> page = platoRepository.findAllByIdRestauranteAndCategoria_Nombre(restauranteId, categoria, pageRequest);
+        Page<PlatoEntity> page = platoRepository.findByRestaurante_IdAndCategoria_Nombre(restauranteId, categoria, pageRequest);
         return page.map(platoEntityMapper::toModel);
     }
 
@@ -41,6 +43,17 @@ public class PlatoJpaAdapter implements IPlatoPersistencePort {
         PlatoEntity platoEntity = platoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFound("El plato no existe"));
         return platoEntityMapper.toModel(platoEntity);
+    }
+
+    @Override
+    public Set<Long> findNonExistentPlatoIds(Set<Long> ids) {
+        if (ids.isEmpty()) return Collections.emptySet();
+
+        List<Long> foundIds = platoRepository.findAllIdsByIds(ids);
+        Set<Long> missingIds = new HashSet<>(ids);
+        missingIds.removeAll(foundIds);
+
+        return missingIds;
     }
 
 }

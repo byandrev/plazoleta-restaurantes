@@ -51,7 +51,7 @@ class RestaurantHandlerTest {
     void setUp() {
         restaurantRequestDto = RestaurantRequestDto
                 .builder()
-                .nombre("Restaurante")
+                .nombre(RESTAURANT_NAME_A)
                 .direccion("Av 123")
                 .telefono("+573001234567")
                 .urlLogo("https://logo.png")

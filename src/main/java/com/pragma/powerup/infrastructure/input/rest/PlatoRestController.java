@@ -7,6 +7,7 @@ import com.pragma.powerup.application.handler.IPlatoHandler;
 import com.pragma.powerup.infrastructure.input.rest.response.CustomResponse;
 import com.pragma.powerup.infrastructure.out.security.models.CustomUserDetail;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -58,9 +59,8 @@ public class PlatoRestController {
     @PreAuthorize("hasRole('PROPIETARIO')")
     @PostMapping("/")
     public ResponseEntity<Void> savePlato(
-            @Valid
-            @RequestBody PlatoRequestDto platoRequestDto,
-            @AuthenticationPrincipal CustomUserDetail userDetails
+            @Valid @RequestBody PlatoRequestDto platoRequestDto,
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetail userDetails
     ) {
         platoHandler.save(userDetails.getId(), platoRequestDto);
         return new ResponseEntity<>(HttpStatus.CREATED);
@@ -94,7 +94,7 @@ public class PlatoRestController {
     public ResponseEntity<CustomResponse<PlatoResponseDto>> updatePlato(
             @Valid @PathVariable Long id,
             @RequestBody PlatoUpdateDto platoUpdateDto,
-            @AuthenticationPrincipal CustomUserDetail userDetails
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetail userDetails
     ) {
         CustomResponse<PlatoResponseDto> response = CustomResponse.<PlatoResponseDto>builder()
                 .status(HttpStatus.OK.value())

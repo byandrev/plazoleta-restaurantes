@@ -8,7 +8,7 @@ public enum ExceptionResponse {
     UNAUTHORIZED("Unauthorized"),
     CONFLICT("Conflict"),
     VALIDATION_ERROR("Error en el formato de los datos"),
-    BODY_NECESSARY("Se necesita enviar un body"),
+    JSON_ERROR("Error de formato de JSON"),
     MEDIA_TYPE_IS_NOT_SUPPORTED("El MediaType no es soportado"),;
 
     private final String message;

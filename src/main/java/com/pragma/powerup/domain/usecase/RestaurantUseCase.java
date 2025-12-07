@@ -1,8 +1,7 @@
 package com.pragma.powerup.domain.usecase;
 
 import com.pragma.powerup.domain.api.IRestaurantServicePort;
-import com.pragma.powerup.domain.exception.ResourceNotFound;
-import com.pragma.powerup.domain.exception.UnauthorizedUserException;
+import com.pragma.powerup.domain.exception.DomainException;
 import com.pragma.powerup.domain.model.RestaurantModel;
 import com.pragma.powerup.domain.model.RolType;
 import com.pragma.powerup.domain.model.UserModel;
@@ -25,12 +24,8 @@ public class RestaurantUseCase implements IRestaurantServicePort {
     public void save(RestaurantModel restaurantModel) {
         UserModel user = userExternalServicePort.getUserById(restaurantModel.getIdPropietario());
 
-        if (user == null) {
-            throw new ResourceNotFound("El usuario no existe");
-        }
-
         if (!user.getRol().getNombre().equals(RolType.PROPIETARIO)) {
-            throw new UnauthorizedUserException("El usuario no tiene permisos para realizar esta acción.");
+            throw new DomainException("El usuario no tiene permisos para realizar esta acción.");
         }
 
         restaurantPersistencePort.save(restaurantModel);

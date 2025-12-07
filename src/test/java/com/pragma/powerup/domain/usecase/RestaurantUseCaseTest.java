@@ -1,6 +1,6 @@
 package com.pragma.powerup.domain.usecase;
 
-import com.pragma.powerup.domain.exception.UnauthorizedUserException;
+import com.pragma.powerup.domain.exception.DomainException;
 import com.pragma.powerup.domain.model.RestaurantModel;
 import com.pragma.powerup.domain.model.RolModel;
 import com.pragma.powerup.domain.model.RolType;
@@ -146,10 +146,10 @@ class RestaurantUseCaseTest {
         Long invalidOwnerId = 200L;
         RestaurantModel newRestaurant = buildRestaurantModel(null, "Forbidden restaurant", invalidOwnerId);
 
-        doThrow(UnauthorizedUserException.class).when(userExternalServicePort).getUserById(invalidOwnerId);
+        doThrow(DomainException.class).when(userExternalServicePort).getUserById(invalidOwnerId);
 
-        assertThrows(UnauthorizedUserException.class, () ->
-                restaurantUseCase.save(newRestaurant), "Debe lanzar UnauthorizedUserException.");
+        assertThrows(DomainException.class, () ->
+                restaurantUseCase.save(newRestaurant), "Debe lanzar DomainException.");
 
         verify(userExternalServicePort).getUserById(invalidOwnerId);
         verify(restaurantPersistencePort, never()).save(any(RestaurantModel.class));
