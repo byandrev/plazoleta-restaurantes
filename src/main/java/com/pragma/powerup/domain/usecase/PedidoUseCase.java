@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,25 +21,20 @@ public class PedidoUseCase implements IPedidoServicePort {
 
     private final IPlatoPersistencePort platoPersistencePort;
 
-    @Override
-    public PedidoModel save(PedidoModel pedido) {
-        if (pedidoPersistencePort.existsByClienteIdAndEstadoIn(pedido.getIdCliente())) {
-            throw new DomainException("No puedes crear un pedido porque tienes uno pendiente.");
+    private void checkPlatos(PedidoModel pedido) {
+        Set<Long> platosIds = pedido.getItems().stream().map(PedidoItemModel::getPlatoId).collect(Collectors.toSet());
+        Set<Long> platosNotFound = platoPersistencePort.findNonExistentPlatoIds(platosIds);
+
+        if (!platosNotFound.isEmpty()) {
+            String missingIds = platosNotFound.stream()
+                    .map(Object::toString)
+                    .collect(Collectors.joining(", "));
+
+            throw new DomainException("Los siguientes IDs de plato no fueron encontrados: " + missingIds);
         }
+    }
 
-        pedido.setEstado(PedidoEstado.PENDIENTE);
-        pedido.setFecha(LocalDate.now());
-
-        pedido.setRestaurante(RestaurantModel
-                .builder()
-                .id(pedido.getIdRestaurante())
-                .build()
-        );
-
-        Set<PedidoItemModel> items = pedido.getItems();
-
-        pedido.setItems(new HashSet<>());
-
+    private PedidoModel saveAllItems(PedidoModel pedido, Set<PedidoItemModel> items) {
         PedidoModel pedidoSaved = pedidoPersistencePort.save(pedido);
 
         for (PedidoItemModel item : items) {
@@ -52,6 +48,26 @@ public class PedidoUseCase implements IPedidoServicePort {
 
             pedidoSaved.addItem(newItem);
         }
+
+        return pedidoSaved;
+    }
+
+    @Override
+    public PedidoModel save(PedidoModel pedido) {
+        if (pedidoPersistencePort.existsByClienteIdAndEstadoIn(pedido.getIdCliente())) {
+            throw new DomainException("No puedes crear un pedido porque tienes uno pendiente.");
+        }
+
+        checkPlatos(pedido);
+
+        pedido.setEstado(PedidoEstado.PENDIENTE);
+        pedido.setFecha(LocalDate.now());
+        pedido.setRestaurante(RestaurantModel.builder().id(pedido.getIdRestaurante()).build());
+
+        Set<PedidoItemModel> items = pedido.getItems();
+        pedido.setItems(new HashSet<>());
+
+        PedidoModel pedidoSaved = saveAllItems(pedido, items);
 
         return pedidoPersistencePort.save(pedidoSaved);
     }
