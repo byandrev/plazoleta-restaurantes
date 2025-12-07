@@ -7,9 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Collection;
 
 public interface IPedidoRepository extends JpaRepository<PedidoEntity, Long> {
-    Boolean existsByEstado(PedidoEstado estado);
-
-    Boolean existsByEstadoContaining(PedidoEstado estado);
-
     Boolean existsByIdClienteAndEstadoIn(Long idCliente, Collection<PedidoEstado> estados);
 }
