@@ -1,6 +1,7 @@
 package com.pragma.powerup.infrastructure.out.jpa.adapter;
 
-import com.pragma.powerup.domain.exception.ResourceNotFound;
+import com.pragma.powerup.infrastructure.exception.ResourceNotFound;
+import com.pragma.powerup.domain.model.PedidoEstado;
 import com.pragma.powerup.domain.model.PedidoModel;
 import com.pragma.powerup.domain.spi.IPedidoPersistencePort;
 import com.pragma.powerup.infrastructure.out.jpa.entity.PedidoEntity;
@@ -8,6 +9,8 @@ import com.pragma.powerup.infrastructure.out.jpa.mapper.IPedidoEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.repository.IPedidoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
@@ -28,6 +31,17 @@ public class PedidoJpaAdapter implements IPedidoPersistencePort {
         PedidoEntity pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFound("El pedido no existe"));
         return pedidoEntityMapper.toModel(pedido);
+    }
+
+    @Override
+    public Boolean existsByClienteIdAndEstadoIn(Long clientId) {
+        List<PedidoEstado> estadosEnProceso = List.of(
+                PedidoEstado.PENDIENTE,
+                PedidoEstado.EN_PREPARACION,
+                PedidoEstado.LISTO
+        );
+
+        return pedidoRepository.existsByIdClienteAndEstadoIn(clientId, estadosEnProceso);
     }
 
 }

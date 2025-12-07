@@ -8,4 +8,6 @@ public interface IPedidoPersistencePort {
 
     PedidoModel getById(Long id);
 
+    Boolean existsByClienteIdAndEstadoIn(Long clienteId);
+
 }
