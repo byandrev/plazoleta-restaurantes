@@ -2,6 +2,7 @@ package com.pragma.powerup.infrastructure.exceptionhandler;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.pragma.powerup.domain.exception.DomainException;
+import com.pragma.powerup.infrastructure.exception.InfraException;
 import com.pragma.powerup.infrastructure.exception.ValidationError;
 import com.pragma.powerup.infrastructure.input.rest.response.CustomResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,17 @@ public class ControllerAdvisor {
 
     @ExceptionHandler(DomainException.class)
     public ResponseEntity<CustomResponse<Void>> handleDomainException(DomainException ex) {
+        CustomResponse<Void> response = CustomResponse.<Void>builder()
+                .status(HttpStatus.CONFLICT.value())
+                .error(ex.getMessage())
+                .message(ex.getMessage())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT.value()).body(response);
+    }
+
+    @ExceptionHandler(InfraException.class)
+    public ResponseEntity<CustomResponse<Void>> handleInfraException(InfraException ex) {
         CustomResponse<Void> response = CustomResponse.<Void>builder()
                 .status(ex.getCode())
                 .error(ex.getMessage())
