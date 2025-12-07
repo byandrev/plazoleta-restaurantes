@@ -21,7 +21,7 @@ public class PlatoModel {
 
     private Long idRestaurante;
 
-    private RestaurantModel restaurant;
+    private RestaurantModel restaurante;
 
     private String urlImagen;
 
