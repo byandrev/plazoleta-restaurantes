@@ -12,13 +12,13 @@ import java.util.Set;
 @Builder
 public class PedidoRequestDto {
 
-    @NotNull(message = "El id_cliente no puede estar vacio")
+    @NotNull(message = "El idCliente no puede estar vacio")
     private Long idCliente;
 
-    @NotNull(message = "El id_chef no puede estar vacio")
+    @NotNull(message = "El idChef no puede estar vacio")
     private Long idChef;
 
-    @NotNull(message = "El id_restaurante no puede estar vacio")
+    @NotNull(message = "El idRestaurante no puede estar vacio")
     private Long idRestaurante;
 
     @Valid
