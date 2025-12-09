@@ -5,6 +5,7 @@ import com.pragma.powerup.domain.exception.DomainException;
 import com.pragma.powerup.domain.model.*;
 import com.pragma.powerup.domain.spi.IPedidoPersistencePort;
 import com.pragma.powerup.domain.spi.IPlatoPersistencePort;
+import com.pragma.powerup.domain.spi.ITraceabilityExternalServicePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,8 @@ public class PedidoUseCase implements IPedidoServicePort {
     private final IPedidoPersistencePort pedidoPersistencePort;
 
     private final IPlatoPersistencePort platoPersistencePort;
+
+    private final ITraceabilityExternalServicePort traceabilityService;
 
     private void checkPlatos(PedidoModel pedido) {
         Set<Long> platosIds = pedido.getItems().stream().map(PedidoItemModel::getPlatoId).collect(Collectors.toSet());
@@ -68,6 +71,17 @@ public class PedidoUseCase implements IPedidoServicePort {
         pedido.setItems(new HashSet<>());
 
         PedidoModel pedidoSaved = saveAllItems(pedido, items);
+
+        traceabilityService.save(TraceabilityModel
+                .builder()
+                        .pedidoId(pedidoSaved.getId())
+                        .clienteId(pedido.getCliente().getId())
+                        .correoCliente(pedido.getCliente().getCorreo())
+                        .estadoNuevo(pedidoSaved.getEstado())
+                        .estadoAnterior(PedidoEstado.NINGUNO)
+                        .correoEmpleado(null)
+                        .empleadoId(0L)
+                .build());
 
         return pedidoPersistencePort.save(pedidoSaved);
     }

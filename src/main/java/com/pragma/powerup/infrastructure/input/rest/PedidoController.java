@@ -2,6 +2,7 @@ package com.pragma.powerup.infrastructure.input.rest;
 
 import com.pragma.powerup.application.dto.request.PedidoRequestDto;
 import com.pragma.powerup.application.handler.IPedidoHandler;
+import com.pragma.powerup.domain.model.UserModel;
 import com.pragma.powerup.infrastructure.out.security.models.CustomUserDetail;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -38,8 +39,14 @@ public class PedidoController {
             @Valid @RequestBody PedidoRequestDto pedidoRequestDto,
             @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetail userDetails
     ) {
-        pedidoRequestDto.setIdCliente(userDetails.getId());
+        pedidoRequestDto.setCliente(UserModel
+                .builder()
+                        .id(userDetails.getId())
+                        .correo(userDetails.getEmail())
+                .build());
+
         pedidoHandler.save(pedidoRequestDto);
+
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
