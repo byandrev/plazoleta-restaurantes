@@ -1,5 +1,6 @@
 package com.pragma.powerup.application.dto.request;
 
+import com.pragma.powerup.domain.model.UserModel;
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,6 +15,8 @@ public class PedidoRequestDto {
 
     @NotNull(message = "El idCliente no puede estar vacio")
     private Long idCliente;
+
+    private UserModel cliente;
 
     @NotNull(message = "El idChef no puede estar vacio")
     private Long idChef;
