@@ -47,14 +47,14 @@ public class PedidoJpaAdapter implements IPedidoPersistencePort {
     }
 
     @Override
-    public Page<PedidoModel> getAll(PageRequest pageRequest) {
-        Page<PedidoEntity> page = pedidoRepository.findAll(pageRequest);
+    public Page<PedidoModel> getAll(Long restaurantId, PageRequest pageRequest) {
+        Page<PedidoEntity> page = pedidoRepository.findAllByRestaurante_Id(restaurantId, pageRequest);
         return page.map(pedidoEntityMapper::toModel);
     }
 
     @Override
-    public Page<PedidoModel> getAllByEstado(PedidoEstado estado, PageRequest pageRequest) {
-        Page<PedidoEntity> page = pedidoRepository.findByEstado(estado, pageRequest);
+    public Page<PedidoModel> getAllByEstado(Long restaurantId, PedidoEstado estado, PageRequest pageRequest) {
+        Page<PedidoEntity> page = pedidoRepository.findByRestaurante_IdAndEstado(restaurantId, estado, pageRequest);
         return page.map(pedidoEntityMapper::toModel);
     }
 

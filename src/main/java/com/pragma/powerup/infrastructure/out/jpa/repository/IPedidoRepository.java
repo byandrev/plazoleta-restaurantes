@@ -11,5 +11,7 @@ import java.util.Collection;
 public interface IPedidoRepository extends JpaRepository<PedidoEntity, Long> {
     Boolean existsByIdClienteAndEstadoIn(Long idCliente, Collection<PedidoEstado> estados);
 
-    Page<PedidoEntity> findByEstado(PedidoEstado estado, Pageable pageable);
+    Page<PedidoEntity> findByRestaurante_IdAndEstado(Long restauranteId, PedidoEstado estado, Pageable pageable);
+
+    Page<PedidoEntity> findAllByRestaurante_Id(Long restauranteId, Pageable pageable);
 }

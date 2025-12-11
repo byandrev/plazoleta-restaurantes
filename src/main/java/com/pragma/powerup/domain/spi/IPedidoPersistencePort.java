@@ -13,8 +13,8 @@ public interface IPedidoPersistencePort {
 
     Boolean existsByClienteIdAndEstadoIn(Long clienteId);
 
-    Page<PedidoModel> getAll(PageRequest pageRequest);
+    Page<PedidoModel> getAll(Long restaurantId, PageRequest pageRequest);
 
-    Page<PedidoModel> getAllByEstado(PedidoEstado estado, PageRequest pageRequest);
+    Page<PedidoModel> getAllByEstado(Long restaurantId, PedidoEstado estado, PageRequest pageRequest);
 
 }
