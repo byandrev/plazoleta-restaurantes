@@ -7,6 +7,7 @@ import com.pragma.powerup.application.handler.IRestaurantHandler;
 import com.pragma.powerup.infrastructure.input.rest.response.CustomResponse;
 import com.pragma.powerup.infrastructure.out.security.models.CustomUserDetail;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -86,7 +87,7 @@ public class RestaurantRestController {
     public ResponseEntity<Void> assignEmployee(
             @PathVariable Long restaurantId,
             @Valid @RequestBody EmployeeRequestDto employeeRequest,
-            @AuthenticationPrincipal CustomUserDetail userDetail
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetail userDetail
     ) {
         employeeRequest.setRestaurantId(restaurantId);
         restaurantHandler.assignEmployee(userDetail.getId(), employeeRequest);
