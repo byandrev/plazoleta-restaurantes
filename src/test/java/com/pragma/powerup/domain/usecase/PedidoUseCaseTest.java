@@ -2,10 +2,7 @@ package com.pragma.powerup.domain.usecase;
 
 import com.pragma.powerup.domain.exception.DomainException;
 import com.pragma.powerup.domain.model.*;
-import com.pragma.powerup.domain.spi.IEmployeePersistencePort;
-import com.pragma.powerup.domain.spi.IPedidoPersistencePort;
-import com.pragma.powerup.domain.spi.IPlatoPersistencePort;
-import com.pragma.powerup.domain.spi.ITraceabilityExternalServicePort;
+import com.pragma.powerup.domain.spi.*;
 import com.pragma.powerup.domain.utils.ConvertDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -41,11 +38,16 @@ class PedidoUseCaseTest {
     @Mock
     private IEmployeePersistencePort  employeePersistence;
 
+    @Mock
+    private IUserExternalServicePort userExternalService;
+
     @InjectMocks
     private PedidoUseCase pedidoUseCase;
 
+    private static final Long PEDIDO_ID = 5L;
     private static final Long RESTAURANT_ID = 1L;
     private static final Long USER_ID = 1L;
+    private static final Long CHEF_ID = 2L;
     private static final PageRequest PAGE_REQUEST = PageRequest.of(0, 10);
     private PedidoEstado ESTADO = PedidoEstado.PENDIENTE;
     private Page<PedidoModel> mockPage;
@@ -54,9 +56,23 @@ class PedidoUseCaseTest {
     private PedidoModel pedidoSavedFirst;
     private Set<PedidoItemModel> itemsRequest;
     private PlatoModel platoModel;
+    private UserModel client;
+    private UserModel chefModel;
+    private PedidoModel existingPedido;
+    private PedidoModel pedidoUpdatedRequest;
+    private PedidoModel pedidoUpdatedSaved;
+    private RestaurantModel restaurantModel;
 
     @BeforeEach
     void setUp() {
+        client = UserModel
+                .builder()
+                .id(10L)
+                .correo("user@gmail.com")
+                .build();
+
+        restaurantModel = RestaurantModel.builder().id(RESTAURANT_ID).build();
+
         platoModel = PlatoModel.builder().id(1L).nombre("Pizza").precio(10).build();
 
         itemsRequest = new HashSet<>(List.of(
@@ -64,38 +80,67 @@ class PedidoUseCaseTest {
         ));
 
         pedidoRequest = PedidoModel.builder()
-                .cliente(UserModel.builder().id(10L).correo("cliente@gmail.com").build())
+                .cliente(client)
                 .idRestaurante(RESTAURANT_ID)
                 .items(itemsRequest)
                 .build();
 
         pedidoSavedFirst = PedidoModel.builder()
                 .id(5L)
-                .idCliente(10L)
+                .idCliente(client.getId())
                 .idRestaurante(RESTAURANT_ID)
                 .estado(PedidoEstado.PENDIENTE)
                 .fecha(ConvertDate.getCurrentDateTimeUTC())
                 .items(new HashSet<>())
                 .build();
 
+        existingPedido = PedidoModel.builder()
+                .id(PEDIDO_ID)
+                .idCliente(10L)
+                .idRestaurante(RESTAURANT_ID)
+                .restaurante(restaurantModel)
+                .estado(PedidoEstado.PENDIENTE)
+                .idChef(null)
+                .build();
+
+        pedidoUpdatedRequest = PedidoModel.builder()
+                .id(PEDIDO_ID)
+                .estado(PedidoEstado.EN_PREPARACION)
+                .idChef(CHEF_ID)
+                .build();
+
+        pedidoUpdatedSaved = PedidoModel.builder()
+                .id(PEDIDO_ID)
+                .idCliente(10L)
+                .idRestaurante(RESTAURANT_ID)
+                .restaurante(restaurantModel)
+                .estado(PedidoEstado.EN_PREPARACION)
+                .idChef(CHEF_ID)
+                .build();
+
         List<PedidoModel> pedidoList = Collections.singletonList(PedidoModel.builder().build());
         mockPage = new PageImpl<>(pedidoList, PAGE_REQUEST, 1);
+
+        chefModel = UserModel.builder()
+                .id(CHEF_ID)
+                .correo("chef@gmail.com")
+                .build();
     }
 
     @Test
     @DisplayName("Debe crear un pedido exitosamente si el cliente no tiene pedidos en proceso")
     void save_shouldCreatePedidoSuccessfully_whenClientHasNoPendingOrders() {
-        when(pedidoPersistence.existsByClienteIdAndEstadoIn(pedidoRequest.getIdCliente())).thenReturn(false);
+        when(pedidoPersistence.existsByClienteIdAndEstadoIn(pedidoRequest.getCliente().getId())).thenReturn(false);
         when(platoPersistence.findNonExistentPlatoIds(any(Long.class), any(Set.class))).thenReturn(new HashSet<>());
         when(pedidoPersistence.save(any(PedidoModel.class))).thenReturn(pedidoSavedFirst);
         when(platoPersistence.getById(pedidoRequest.getItems().stream().findFirst().get().getPlatoId())).thenReturn(platoModel);
 
-        PedidoModel result = pedidoUseCase.save(pedidoRequest);
+        PedidoModel result = pedidoUseCase.save(client, pedidoRequest);
 
-        verify(pedidoPersistence).existsByClienteIdAndEstadoIn(pedidoRequest.getIdCliente());
+        verify(pedidoPersistence).existsByClienteIdAndEstadoIn(pedidoRequest.getCliente().getId());
         verify(platoPersistence).findNonExistentPlatoIds(any(Long.class), any(Set.class));
         verify(platoPersistence).getById(1L);
-        verify(pedidoPersistence, times(2)).save(any(PedidoModel.class));
+        verify(pedidoPersistence).save(any(PedidoModel.class));
         verify(traceabilityService).save(any(TraceabilityModel.class));
 
         assertNotNull(result);
@@ -106,10 +151,10 @@ class PedidoUseCaseTest {
     @Test
     @DisplayName("Debe lanzar DomainException si el cliente ya tiene un pedido en proceso")
     void save_shouldThrowDomainException_whenClientHasPendingOrders() {
-        when(pedidoPersistence.existsByClienteIdAndEstadoIn(pedidoRequest.getIdCliente())).thenReturn(true);
+        when(pedidoPersistence.existsByClienteIdAndEstadoIn(pedidoRequest.getCliente().getId())).thenReturn(true);
 
         DomainException exception = assertThrows(DomainException.class, () ->
-                pedidoUseCase.save(pedidoRequest)
+                pedidoUseCase.save(client, pedidoRequest)
         );
 
         assertEquals("No puedes crear un pedido porque tienes uno pendiente.", exception.getMessage());
@@ -122,13 +167,13 @@ class PedidoUseCaseTest {
     @Test
     @DisplayName("Debe lanzar una excepción si el plato asociado a un ítem no existe")
     void save_shouldThrowException_whenPlatoDoesNotExist() {
-        when(pedidoPersistence.existsByClienteIdAndEstadoIn(pedidoRequest.getIdCliente())).thenReturn(false);
+        when(pedidoPersistence.existsByClienteIdAndEstadoIn(pedidoRequest.getCliente().getId())).thenReturn(false);
         when(platoPersistence.findNonExistentPlatoIds(any(Long.class), any(Set.class))).thenReturn(new HashSet<>());
         when(pedidoPersistence.save(any(PedidoModel.class))).thenReturn(pedidoSavedFirst);
         when(platoPersistence.getById(anyLong())).thenThrow(new RuntimeException("Plato not found"));
 
         assertThrows(RuntimeException.class, () ->
-                pedidoUseCase.save(pedidoRequest)
+                pedidoUseCase.save(client, pedidoRequest)
         );
 
         verify(pedidoPersistence).save(any(PedidoModel.class));
@@ -167,5 +212,87 @@ class PedidoUseCaseTest {
         verify(pedidoPersistence, times(0)).getAll(RESTAURANT_ID, PAGE_REQUEST);
     }
 
+    @Test
+    @DisplayName("Debe actualizar el pedido exitosamente")
+    void update_ShouldUpdatePedidoSuccessfully() {
+        when(pedidoPersistence.getById(PEDIDO_ID)).thenReturn(existingPedido);
+        when(employeePersistence.existsById(CHEF_ID, RESTAURANT_ID)).thenReturn(true);
+        when(pedidoPersistence.save(any(PedidoModel.class))).thenReturn(pedidoUpdatedSaved);
+        when(userExternalService.getUserById(existingPedido.getIdCliente())).thenReturn(client);
+        when(userExternalService.getUserById(CHEF_ID)).thenReturn(chefModel);
+
+        PedidoModel result = pedidoUseCase.update(chefModel, pedidoUpdatedRequest);
+
+        assertNotNull(result);
+        assertEquals(PedidoEstado.EN_PREPARACION, result.getEstado());
+        assertEquals(CHEF_ID, result.getIdChef());
+        assertNotNull(result.getCliente());
+        assertNotNull(result.getChef());
+
+        verify(pedidoPersistence).getById(PEDIDO_ID);
+        verify(employeePersistence).existsById(CHEF_ID, RESTAURANT_ID);
+        verify(userExternalService).getUserById(existingPedido.getIdCliente());
+        verify(userExternalService).getUserById(CHEF_ID);
+        verify(traceabilityService).save(any(TraceabilityModel.class));
+    }
+
+    @Test
+    @DisplayName("Debe lanzar DomainException si el empleado intenta asignar a otro chef")
+    void update_ShouldThrowDomainException_WhenEmployeeTriesToAssignOtherChef() {
+        UserModel empleadoDiferente = UserModel.builder().id(USER_ID).correo("diferente@gmail.com").build();
+
+        DomainException exception = assertThrows(DomainException.class, () ->
+                pedidoUseCase.update(empleadoDiferente, pedidoUpdatedRequest)
+        );
+
+        assertEquals("No puedes asignar a otro empleado a un pedido.", exception.getMessage());
+
+        verify(pedidoPersistence, never()).getById(anyLong());
+        verify(employeePersistence, never()).existsById(anyLong(), anyLong());
+        verify(pedidoPersistence, never()).save(any(PedidoModel.class));
+        verify(traceabilityService, never()).save(any(TraceabilityModel.class));
+    }
+
+    @Test
+    @DisplayName("Debe lanzar DomainException si el chef asignado no es empleado del restaurante")
+    void update_ShouldThrowDomainException_WhenChefIsNotRestaurantEmployee() {
+        when(pedidoPersistence.getById(PEDIDO_ID)).thenReturn(existingPedido);
+        when(employeePersistence.existsById(CHEF_ID, RESTAURANT_ID)).thenReturn(false);
+
+        DomainException exception = assertThrows(DomainException.class, () ->
+                pedidoUseCase.update(chefModel, pedidoUpdatedRequest)
+        );
+
+        assertEquals("No eres empleado del restaurante", exception.getMessage());
+
+        verify(pedidoPersistence).getById(PEDIDO_ID);
+        verify(employeePersistence).existsById(CHEF_ID, RESTAURANT_ID);
+        verify(pedidoPersistence, never()).save(any(PedidoModel.class));
+        verify(traceabilityService, never()).save(any(TraceabilityModel.class));
+    }
+
+    @Test
+    @DisplayName("Debe lanzar DomainException si el nuevo estado es igual al estado anterior")
+    void update_ShouldThrowDomainException_WhenNewStateIsSameAsOldState() {
+        when(pedidoPersistence.getById(PEDIDO_ID)).thenReturn(existingPedido);
+        PedidoModel requestSameState = PedidoModel.builder()
+                .id(PEDIDO_ID)
+                .estado(PedidoEstado.PENDIENTE)
+                .idChef(CHEF_ID)
+                .build();
+
+        when(employeePersistence.existsById(CHEF_ID, RESTAURANT_ID)).thenReturn(true);
+
+        DomainException exception = assertThrows(DomainException.class, () ->
+                pedidoUseCase.update(chefModel, requestSameState)
+        );
+
+        assertEquals("Estas enviando un estado nuevo el cual es el mismo al anterior", exception.getMessage());
+
+        verify(pedidoPersistence).getById(PEDIDO_ID);
+        verify(employeePersistence).existsById(CHEF_ID, RESTAURANT_ID);
+        verify(pedidoPersistence, never()).save(any(PedidoModel.class));
+        verify(traceabilityService, never()).save(any(TraceabilityModel.class));
+    }
 
 }

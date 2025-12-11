@@ -10,6 +10,8 @@ public interface IPedidoServicePort {
 
     PedidoModel save(UserModel client, PedidoModel pedido);
 
+    PedidoModel update(UserModel employee, PedidoModel pedido);
+
     PedidoModel getById(Long id);
 
     Page<PedidoModel> getAll(Long userId, Long restaurantId, PedidoEstado estado, PageRequest pageRequest);
