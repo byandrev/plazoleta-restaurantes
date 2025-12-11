@@ -7,12 +7,12 @@ import com.pragma.powerup.domain.spi.IEmployeePersistencePort;
 import com.pragma.powerup.domain.spi.IPedidoPersistencePort;
 import com.pragma.powerup.domain.spi.IPlatoPersistencePort;
 import com.pragma.powerup.domain.spi.ITraceabilityExternalServicePort;
+import com.pragma.powerup.domain.utils.ConvertDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,7 +31,7 @@ public class PedidoUseCase implements IPedidoServicePort {
 
     private void checkPlatos(PedidoModel pedido) {
         Set<Long> platosIds = pedido.getItems().stream().map(PedidoItemModel::getPlatoId).collect(Collectors.toSet());
-        Set<Long> platosNotFound = platoPersistencePort.findNonExistentPlatoIds(platosIds);
+        Set<Long> platosNotFound = platoPersistencePort.findNonExistentPlatoIds(pedido.getIdRestaurante(), platosIds);
 
         if (!platosNotFound.isEmpty()) {
             String missingIds = platosNotFound.stream()
@@ -69,7 +69,7 @@ public class PedidoUseCase implements IPedidoServicePort {
         checkPlatos(pedido);
 
         pedido.setEstado(PedidoEstado.PENDIENTE);
-        pedido.setFecha(LocalDate.now());
+        pedido.setFecha(ConvertDate.getCurrentDateTimeUTC());
         pedido.setRestaurante(RestaurantModel.builder().id(pedido.getIdRestaurante()).build());
 
         Set<PedidoItemModel> items = pedido.getItems();
@@ -103,10 +103,10 @@ public class PedidoUseCase implements IPedidoServicePort {
         }
 
         if (estado != null) {
-            return pedidoPersistencePort.getAllByEstado(estado, pageRequest);
+            return pedidoPersistencePort.getAllByEstado(restaurantId, estado, pageRequest);
         }
 
-        return pedidoPersistencePort.getAll(pageRequest);
+        return pedidoPersistencePort.getAll(restaurantId, pageRequest);
     }
 
 }
