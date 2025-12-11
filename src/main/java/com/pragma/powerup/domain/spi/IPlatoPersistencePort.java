@@ -16,6 +16,6 @@ public interface IPlatoPersistencePort {
 
     PlatoModel getById(Long id);
 
-    Set<Long> findNonExistentPlatoIds(Set<Long> ids);
+    Set<Long> findNonExistentPlatoIds(Long restaurantId, Set<Long> ids);
 
 }
