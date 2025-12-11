@@ -1,6 +1,7 @@
 package com.pragma.powerup.infrastructure.input.rest;
 
 import com.pragma.powerup.application.dto.request.PedidoRequestDto;
+import com.pragma.powerup.application.dto.request.PedidoUpdateDto;
 import com.pragma.powerup.application.dto.response.PedidoResponseDto;
 import com.pragma.powerup.application.handler.IPedidoHandler;
 import com.pragma.powerup.domain.model.PedidoEstado;
@@ -72,6 +73,31 @@ public class PedidoController {
                 .build();
 
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Update pedido")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Pedido updated", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Conflict to update pedido", content = @Content)
+    })
+    @PatchMapping("/{pedidoId}")
+    @PreAuthorize("hasRole('EMPLEADO')")
+    public ResponseEntity<Void> updatePedido(
+            @PathVariable Long pedidoId,
+            @Valid @RequestBody PedidoUpdateDto pedidoUpdateDto,
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetail userDetails
+    ) {
+        UserModel client = UserModel
+                .builder()
+                .id(userDetails.getId())
+                .correo(userDetails.getEmail())
+                .build();
+
+        pedidoUpdateDto.setId(pedidoId);
+
+        pedidoHandler.update(client, pedidoUpdateDto);
+
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
 }
