@@ -8,6 +8,7 @@ import com.pragma.powerup.application.mapper.IPedidoResponseMapper;
 import com.pragma.powerup.domain.api.IPedidoServicePort;
 import com.pragma.powerup.domain.model.PedidoEstado;
 import com.pragma.powerup.domain.model.PedidoModel;
+import com.pragma.powerup.domain.model.UserModel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,9 +26,9 @@ public class PedidoHandler implements IPedidoHandler {
     private final IPedidoResponseMapper pedidoResponseMapper;
 
     @Override
-    public PedidoResponseDto save(PedidoRequestDto pedidoDto) {
+    public PedidoResponseDto save(UserModel client, PedidoRequestDto pedidoDto) {
         PedidoModel pedidoModel = pedidoRequestMapper.toModel(pedidoDto);
-        return pedidoResponseMapper.toResponse(pedidoService.save(pedidoModel));
+        return pedidoResponseMapper.toResponse(pedidoService.save(client, pedidoModel));
     }
 
     @Override

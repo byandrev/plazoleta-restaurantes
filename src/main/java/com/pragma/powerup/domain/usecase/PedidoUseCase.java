@@ -61,8 +61,8 @@ public class PedidoUseCase implements IPedidoServicePort {
     }
 
     @Override
-    public PedidoModel save(PedidoModel pedido) {
-        if (pedidoPersistencePort.existsByClienteIdAndEstadoIn(pedido.getIdCliente())) {
+    public PedidoModel save(UserModel client, PedidoModel pedido) {
+        if (pedidoPersistencePort.existsByClienteIdAndEstadoIn(client.getId())) {
             throw new DomainException("No puedes crear un pedido porque tienes uno pendiente.");
         }
 
@@ -74,21 +74,22 @@ public class PedidoUseCase implements IPedidoServicePort {
 
         Set<PedidoItemModel> items = pedido.getItems();
         pedido.setItems(new HashSet<>());
+        pedido.setIdCliente(client.getId());
 
         PedidoModel pedidoSaved = saveAllItems(pedido, items);
 
         traceabilityService.save(TraceabilityModel
                 .builder()
                         .pedidoId(pedidoSaved.getId())
-                        .clienteId(pedido.getCliente().getId())
-                        .correoCliente(pedido.getCliente().getCorreo())
+                        .clienteId(client.getId())
+                        .correoCliente(client.getCorreo())
                         .estadoNuevo(pedidoSaved.getEstado())
                         .estadoAnterior(PedidoEstado.NINGUNO)
                         .correoEmpleado(null)
                         .empleadoId(0L)
                 .build());
 
-        return pedidoPersistencePort.save(pedidoSaved);
+        return pedidoSaved;
     }
 
     @Override

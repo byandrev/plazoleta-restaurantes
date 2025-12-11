@@ -40,13 +40,13 @@ public class PedidoController {
             @Valid @RequestBody PedidoRequestDto pedidoRequestDto,
             @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetail userDetails
     ) {
-        pedidoRequestDto.setCliente(UserModel
+        UserModel client = UserModel
                 .builder()
-                        .id(userDetails.getId())
-                        .correo(userDetails.getEmail())
-                .build());
+                .id(userDetails.getId())
+                .correo(userDetails.getEmail())
+                .build();
 
-        pedidoHandler.save(pedidoRequestDto);
+        pedidoHandler.save(client, pedidoRequestDto);
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
