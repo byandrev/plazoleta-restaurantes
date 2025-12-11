@@ -1,9 +1,11 @@
 package com.pragma.powerup.infrastructure.input.rest;
 
+import com.pragma.powerup.application.dto.request.EmployeeRequestDto;
 import com.pragma.powerup.application.dto.request.RestaurantRequestDto;
 import com.pragma.powerup.application.dto.response.RestaurantResponseDto;
 import com.pragma.powerup.application.handler.IRestaurantHandler;
 import com.pragma.powerup.infrastructure.input.rest.response.CustomResponse;
+import com.pragma.powerup.infrastructure.out.security.models.CustomUserDetail;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -13,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -70,6 +73,23 @@ public class RestaurantRestController {
     @PostMapping("/")
     public ResponseEntity<Void> saveRestaurant(@Valid @RequestBody RestaurantRequestDto restaurantRequestDto) {
         restaurantHandler.save(restaurantRequestDto);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "Assign employee to restaurant")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Employee assigned", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Restaurant not found", content = @Content)
+    })
+    @PreAuthorize("hasRole('PROPIETARIO')")
+    @PostMapping("/{restaurantId}/employees")
+    public ResponseEntity<Void> assignEmployee(
+            @PathVariable Long restaurantId,
+            @Valid @RequestBody EmployeeRequestDto employeeRequest,
+            @AuthenticationPrincipal CustomUserDetail userDetail
+    ) {
+        employeeRequest.setRestaurantId(restaurantId);
+        restaurantHandler.assignEmployee(userDetail.getId(), employeeRequest);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
