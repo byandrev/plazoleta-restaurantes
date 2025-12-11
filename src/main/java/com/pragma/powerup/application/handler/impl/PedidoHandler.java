@@ -1,10 +1,12 @@
 package com.pragma.powerup.application.handler.impl;
 
 import com.pragma.powerup.application.dto.request.PedidoRequestDto;
+import com.pragma.powerup.application.dto.request.PedidoUpdateDto;
 import com.pragma.powerup.application.dto.response.PedidoResponseDto;
 import com.pragma.powerup.application.handler.IPedidoHandler;
 import com.pragma.powerup.application.mapper.IPedidoRequestMapper;
 import com.pragma.powerup.application.mapper.IPedidoResponseMapper;
+import com.pragma.powerup.application.mapper.IPedidoUpdateMapper;
 import com.pragma.powerup.domain.api.IPedidoServicePort;
 import com.pragma.powerup.domain.model.PedidoEstado;
 import com.pragma.powerup.domain.model.PedidoModel;
@@ -23,12 +25,20 @@ public class PedidoHandler implements IPedidoHandler {
 
     private final IPedidoRequestMapper pedidoRequestMapper;
 
+    private final IPedidoUpdateMapper pedidoUpdateMapper;
+
     private final IPedidoResponseMapper pedidoResponseMapper;
 
     @Override
     public PedidoResponseDto save(UserModel client, PedidoRequestDto pedidoDto) {
         PedidoModel pedidoModel = pedidoRequestMapper.toModel(pedidoDto);
         return pedidoResponseMapper.toResponse(pedidoService.save(client, pedidoModel));
+    }
+
+    @Override
+    public PedidoResponseDto update(UserModel employee, PedidoUpdateDto pedidoDto) {
+        PedidoModel pedidoModel = pedidoUpdateMapper.toModel(pedidoDto);
+        return pedidoResponseMapper.toResponse(pedidoService.update(employee, pedidoModel));
     }
 
     @Override
