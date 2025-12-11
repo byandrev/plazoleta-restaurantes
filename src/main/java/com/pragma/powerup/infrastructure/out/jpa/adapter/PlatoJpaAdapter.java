@@ -46,10 +46,10 @@ public class PlatoJpaAdapter implements IPlatoPersistencePort {
     }
 
     @Override
-    public Set<Long> findNonExistentPlatoIds(Set<Long> ids) {
+    public Set<Long> findNonExistentPlatoIds(Long restaurantId, Set<Long> ids) {
         if (ids.isEmpty()) return Collections.emptySet();
 
-        List<Long> foundIds = platoRepository.findAllIdsByIds(ids);
+        List<Long> foundIds = platoRepository.findAllIdsByIds(restaurantId, ids);
         Set<Long> missingIds = new HashSet<>(ids);
         missingIds.removeAll(foundIds);
 

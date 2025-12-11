@@ -17,7 +17,7 @@ public interface IPlatoRepository extends JpaRepository<PlatoEntity, Long> {
 
     Page<PlatoEntity> findByRestaurante_IdAndCategoria_Nombre(Long restauranteId, String categoriaNombre, Pageable pageable);
 
-    @Query("SELECT p.id FROM PlatoEntity p WHERE p.id IN :ids")
-    List<Long> findAllIdsByIds(@Param("ids") Set<Long> ids);
+    @Query("SELECT p.id FROM PlatoEntity p WHERE p.restaurante.id = :restaurantId AND p.id IN :ids")
+    List<Long> findAllIdsByIds(@Param("restaurantId") Long restaurantId, @Param("ids") Set<Long> ids);
 
 }

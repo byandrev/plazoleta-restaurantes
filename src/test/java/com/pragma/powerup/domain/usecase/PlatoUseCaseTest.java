@@ -196,7 +196,7 @@ class PlatoUseCaseTest {
 
         when(platoPersistencePort.getAll(restaurantId, pageRequest)).thenReturn(mockedPage);
 
-        Page<PlatoModel> result = platoUseCase.getAll(null, restaurantId, pageRequest.getPageNumber(), pageRequest.getPageSize());
+        Page<PlatoModel> result = platoUseCase.getAll(null, restaurantId, pageRequest);
 
         assertNotNull(result, "La página no debe ser null.");
         assertEquals(2, result.getContent().size(), "Debe retornar el tamaño de la página (2).");
@@ -220,7 +220,7 @@ class PlatoUseCaseTest {
 
         when(platoPersistencePort.getAllByCategoria(categoria.toUpperCase(), restaurantId, pageRequest)).thenReturn(mockedPage);
 
-        Page<PlatoModel> result = platoUseCase.getAll(categoria, restaurantId, pageRequest.getPageNumber(), pageRequest.getPageSize());
+        Page<PlatoModel> result = platoUseCase.getAll(categoria, restaurantId, pageRequest);
 
         assertNotNull(result, "La página no debe ser null.");
         assertEquals(2, result.getContent().size(), "Debe retornar el tamaño de la página (2).");
@@ -240,7 +240,7 @@ class PlatoUseCaseTest {
 
         when(platoPersistencePort.getAllByCategoria(categoria.toUpperCase(), restaurantId, pageRequest)).thenReturn(mockedEmptyPage);
 
-        Page<PlatoModel> result = platoUseCase.getAll(categoria, restaurantId, pageRequest.getPageNumber(), pageRequest.getPageSize());
+        Page<PlatoModel> result = platoUseCase.getAll(categoria, restaurantId, pageRequest);
 
         assertNotNull(result, "La página no debe ser null.");
         assertTrue(result.isEmpty(), "La página debe estar vacía (isEmpty()).");
