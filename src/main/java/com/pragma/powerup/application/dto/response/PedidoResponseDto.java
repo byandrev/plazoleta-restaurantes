@@ -4,7 +4,7 @@ import com.pragma.powerup.domain.model.PedidoEstado;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -14,7 +14,7 @@ public class PedidoResponseDto {
 
     private PedidoEstado estado;
 
-    private LocalDate fecha;
+    private LocalDateTime fecha;
 
     private Long idCliente;
 
