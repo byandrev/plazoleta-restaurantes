@@ -54,9 +54,16 @@ class PedidoUseCaseTest {
     private PedidoModel pedidoSavedFirst;
     private Set<PedidoItemModel> itemsRequest;
     private PlatoModel platoModel;
+    private UserModel client;
 
     @BeforeEach
     void setUp() {
+        client = UserModel
+                .builder()
+                .id(10L)
+                .correo("user@gmail.com")
+                .build();
+
         platoModel = PlatoModel.builder().id(1L).nombre("Pizza").precio(10).build();
 
         itemsRequest = new HashSet<>(List.of(
@@ -64,14 +71,14 @@ class PedidoUseCaseTest {
         ));
 
         pedidoRequest = PedidoModel.builder()
-                .cliente(UserModel.builder().id(10L).correo("cliente@gmail.com").build())
+                .cliente(client)
                 .idRestaurante(RESTAURANT_ID)
                 .items(itemsRequest)
                 .build();
 
         pedidoSavedFirst = PedidoModel.builder()
                 .id(5L)
-                .idCliente(10L)
+                .idCliente(client.getId())
                 .idRestaurante(RESTAURANT_ID)
                 .estado(PedidoEstado.PENDIENTE)
                 .fecha(ConvertDate.getCurrentDateTimeUTC())
@@ -85,17 +92,17 @@ class PedidoUseCaseTest {
     @Test
     @DisplayName("Debe crear un pedido exitosamente si el cliente no tiene pedidos en proceso")
     void save_shouldCreatePedidoSuccessfully_whenClientHasNoPendingOrders() {
-        when(pedidoPersistence.existsByClienteIdAndEstadoIn(pedidoRequest.getIdCliente())).thenReturn(false);
+        when(pedidoPersistence.existsByClienteIdAndEstadoIn(pedidoRequest.getCliente().getId())).thenReturn(false);
         when(platoPersistence.findNonExistentPlatoIds(any(Long.class), any(Set.class))).thenReturn(new HashSet<>());
         when(pedidoPersistence.save(any(PedidoModel.class))).thenReturn(pedidoSavedFirst);
         when(platoPersistence.getById(pedidoRequest.getItems().stream().findFirst().get().getPlatoId())).thenReturn(platoModel);
 
-        PedidoModel result = pedidoUseCase.save(pedidoRequest);
+        PedidoModel result = pedidoUseCase.save(client, pedidoRequest);
 
-        verify(pedidoPersistence).existsByClienteIdAndEstadoIn(pedidoRequest.getIdCliente());
+        verify(pedidoPersistence).existsByClienteIdAndEstadoIn(pedidoRequest.getCliente().getId());
         verify(platoPersistence).findNonExistentPlatoIds(any(Long.class), any(Set.class));
         verify(platoPersistence).getById(1L);
-        verify(pedidoPersistence, times(2)).save(any(PedidoModel.class));
+        verify(pedidoPersistence).save(any(PedidoModel.class));
         verify(traceabilityService).save(any(TraceabilityModel.class));
 
         assertNotNull(result);
@@ -106,10 +113,10 @@ class PedidoUseCaseTest {
     @Test
     @DisplayName("Debe lanzar DomainException si el cliente ya tiene un pedido en proceso")
     void save_shouldThrowDomainException_whenClientHasPendingOrders() {
-        when(pedidoPersistence.existsByClienteIdAndEstadoIn(pedidoRequest.getIdCliente())).thenReturn(true);
+        when(pedidoPersistence.existsByClienteIdAndEstadoIn(pedidoRequest.getCliente().getId())).thenReturn(true);
 
         DomainException exception = assertThrows(DomainException.class, () ->
-                pedidoUseCase.save(pedidoRequest)
+                pedidoUseCase.save(client, pedidoRequest)
         );
 
         assertEquals("No puedes crear un pedido porque tienes uno pendiente.", exception.getMessage());
@@ -122,13 +129,13 @@ class PedidoUseCaseTest {
     @Test
     @DisplayName("Debe lanzar una excepción si el plato asociado a un ítem no existe")
     void save_shouldThrowException_whenPlatoDoesNotExist() {
-        when(pedidoPersistence.existsByClienteIdAndEstadoIn(pedidoRequest.getIdCliente())).thenReturn(false);
+        when(pedidoPersistence.existsByClienteIdAndEstadoIn(pedidoRequest.getCliente().getId())).thenReturn(false);
         when(platoPersistence.findNonExistentPlatoIds(any(Long.class), any(Set.class))).thenReturn(new HashSet<>());
         when(pedidoPersistence.save(any(PedidoModel.class))).thenReturn(pedidoSavedFirst);
         when(platoPersistence.getById(anyLong())).thenThrow(new RuntimeException("Plato not found"));
 
         assertThrows(RuntimeException.class, () ->
-                pedidoUseCase.save(pedidoRequest)
+                pedidoUseCase.save(client, pedidoRequest)
         );
 
         verify(pedidoPersistence).save(any(PedidoModel.class));

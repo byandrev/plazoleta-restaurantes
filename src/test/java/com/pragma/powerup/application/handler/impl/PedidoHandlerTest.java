@@ -6,6 +6,7 @@ import com.pragma.powerup.application.mapper.IPedidoRequestMapper;
 import com.pragma.powerup.application.mapper.IPedidoResponseMapper;
 import com.pragma.powerup.domain.api.IPedidoServicePort;
 import com.pragma.powerup.domain.model.PedidoModel;
+import com.pragma.powerup.domain.model.UserModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,7 @@ class PedidoHandlerTest {
 
     private PedidoRequestDto pedidoRequestDto;
     private PedidoModel pedidoModel;
+    private UserModel client;
 
     @BeforeEach
     void setUp() {
@@ -42,11 +44,16 @@ class PedidoHandlerTest {
                 .builder()
                 .idRestaurante(1L)
                 .idChef(2L)
-                .idCliente(3L)
                 .items(Set.of(PedidoItemRequestDto.builder().platoId(10L).cantidad(2).build()))
                 .build();
 
         pedidoModel = PedidoModel.builder().build();
+
+        client = UserModel
+                .builder()
+                .id(10L)
+                .correo("user@gmail.com")
+                .build();
     }
 
     @Test
@@ -54,10 +61,10 @@ class PedidoHandlerTest {
     void save_SuccessfulFlow_CallsMapperAndService() {
         when(pedidoRequestMapper.toModel(pedidoRequestDto)).thenReturn(pedidoModel);
 
-        pedidoHandler.save(pedidoRequestDto);
+        pedidoHandler.save(client, pedidoRequestDto);
 
         verify(pedidoRequestMapper).toModel(pedidoRequestDto);
-        verify(pedidoServicePort).save(pedidoModel);
+        verify(pedidoServicePort).save(client, pedidoModel);
 
         verifyNoMoreInteractions(pedidoServicePort, pedidoRequestMapper);
     }
