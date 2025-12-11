@@ -3,7 +3,7 @@ package com.pragma.powerup.domain.model;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Data
@@ -12,7 +12,7 @@ public class PedidoModel {
 
     private Long id;
 
-    private LocalDate fecha;
+    private LocalDateTime fecha;
 
     private PedidoEstado estado;
 
