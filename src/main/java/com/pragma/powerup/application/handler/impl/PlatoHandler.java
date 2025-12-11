@@ -10,6 +10,8 @@ import com.pragma.powerup.domain.api.IPlatoServicePort;
 import com.pragma.powerup.domain.model.PlatoModel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -30,7 +32,8 @@ public class PlatoHandler implements IPlatoHandler {
 
     @Override
     public Page<PlatoResponseDto> getAll(String categoria, Long restauranteId, int page, int size) {
-        Page<PlatoModel> platosList = platoService.getAll(categoria, restauranteId, page, size);
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("nombre").ascending());
+        Page<PlatoModel> platosList = platoService.getAll(categoria, restauranteId, pageRequest);
         return platosList.map(platoResponseMapper::toResponse);
     }
 

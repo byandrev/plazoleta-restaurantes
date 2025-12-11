@@ -49,9 +49,7 @@ public class PlatoUseCase implements IPlatoServicePort {
     }
 
     @Override
-    public Page<PlatoModel> getAll(String categoria, Long restauranteId, int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("nombre").ascending());
-
+    public Page<PlatoModel> getAll(String categoria, Long restauranteId, PageRequest pageRequest) {
         if (categoria != null && !categoria.trim().isEmpty()) {
             return platoPersistencePort.getAllByCategoria(categoria.toUpperCase(), restauranteId, pageRequest);
         }
