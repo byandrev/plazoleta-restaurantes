@@ -3,10 +3,13 @@ package com.pragma.powerup.domain.usecase;
 import com.pragma.powerup.domain.api.IPedidoServicePort;
 import com.pragma.powerup.domain.exception.DomainException;
 import com.pragma.powerup.domain.model.*;
+import com.pragma.powerup.domain.spi.IEmployeePersistencePort;
 import com.pragma.powerup.domain.spi.IPedidoPersistencePort;
 import com.pragma.powerup.domain.spi.IPlatoPersistencePort;
 import com.pragma.powerup.domain.spi.ITraceabilityExternalServicePort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -23,6 +26,8 @@ public class PedidoUseCase implements IPedidoServicePort {
     private final IPlatoPersistencePort platoPersistencePort;
 
     private final ITraceabilityExternalServicePort traceabilityService;
+
+    private final IEmployeePersistencePort employeePersistence;
 
     private void checkPlatos(PedidoModel pedido) {
         Set<Long> platosIds = pedido.getItems().stream().map(PedidoItemModel::getPlatoId).collect(Collectors.toSet());
@@ -89,6 +94,19 @@ public class PedidoUseCase implements IPedidoServicePort {
     @Override
     public PedidoModel getById(Long id) {
         return pedidoPersistencePort.getById(id);
+    }
+
+    @Override
+    public Page<PedidoModel> getAll(Long userId, Long restaurantId, PedidoEstado estado, PageRequest pageRequest) {
+        if (!employeePersistence.existsById(userId, restaurantId)) {
+            throw new DomainException("No eres empleado del restaurante");
+        }
+
+        if (estado != null) {
+            return pedidoPersistencePort.getAllByEstado(estado, pageRequest);
+        }
+
+        return pedidoPersistencePort.getAll(pageRequest);
     }
 
 }
