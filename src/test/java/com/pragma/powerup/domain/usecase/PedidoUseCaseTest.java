@@ -5,6 +5,7 @@ import com.pragma.powerup.domain.model.*;
 import com.pragma.powerup.domain.spi.IPedidoPersistencePort;
 import com.pragma.powerup.domain.spi.IPlatoPersistencePort;
 import com.pragma.powerup.domain.spi.ITraceabilityExternalServicePort;
+import com.pragma.powerup.domain.utils.ConvertDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,6 +36,8 @@ class PedidoUseCaseTest {
     @InjectMocks
     private PedidoUseCase pedidoUseCase;
 
+    private final Long RESTAURANT_ID = 1L;
+
     private PedidoModel pedidoRequest;
     private PedidoModel pedidoSavedFirst;
     private Set<PedidoItemModel> itemsRequest;
@@ -51,16 +53,16 @@ class PedidoUseCaseTest {
 
         pedidoRequest = PedidoModel.builder()
                 .cliente(UserModel.builder().id(10L).correo("cliente@gmail.com").build())
-                .idRestaurante(1L)
+                .idRestaurante(RESTAURANT_ID)
                 .items(itemsRequest)
                 .build();
 
         pedidoSavedFirst = PedidoModel.builder()
                 .id(5L)
                 .idCliente(10L)
-                .idRestaurante(1L)
+                .idRestaurante(RESTAURANT_ID)
                 .estado(PedidoEstado.PENDIENTE)
-                .fecha(LocalDate.now())
+                .fecha(ConvertDate.getCurrentDateTimeUTC())
                 .items(new HashSet<>())
                 .build();
     }
@@ -69,14 +71,14 @@ class PedidoUseCaseTest {
     @DisplayName("Debe crear un pedido exitosamente si el cliente no tiene pedidos en proceso")
     void save_shouldCreatePedidoSuccessfully_whenClientHasNoPendingOrders() {
         when(pedidoPersistencePort.existsByClienteIdAndEstadoIn(pedidoRequest.getIdCliente())).thenReturn(false);
-        when(platoPersistencePort.findNonExistentPlatoIds(any(Set.class))).thenReturn(new HashSet<>());
+        when(platoPersistencePort.findNonExistentPlatoIds(any(Long.class), any(Set.class))).thenReturn(new HashSet<>());
         when(pedidoPersistencePort.save(any(PedidoModel.class))).thenReturn(pedidoSavedFirst);
         when(platoPersistencePort.getById(pedidoRequest.getItems().stream().findFirst().get().getPlatoId())).thenReturn(platoModel);
 
         PedidoModel result = pedidoUseCase.save(pedidoRequest);
 
         verify(pedidoPersistencePort).existsByClienteIdAndEstadoIn(pedidoRequest.getIdCliente());
-        verify(platoPersistencePort).findNonExistentPlatoIds(any(Set.class));
+        verify(platoPersistencePort).findNonExistentPlatoIds(any(Long.class), any(Set.class));
         verify(platoPersistencePort).getById(1L);
         verify(pedidoPersistencePort, times(2)).save(any(PedidoModel.class));
         verify(traceabilityService).save(any(TraceabilityModel.class));
@@ -106,7 +108,7 @@ class PedidoUseCaseTest {
     @DisplayName("Debe lanzar una excepción si el plato asociado a un ítem no existe")
     void save_shouldThrowException_whenPlatoDoesNotExist() {
         when(pedidoPersistencePort.existsByClienteIdAndEstadoIn(pedidoRequest.getIdCliente())).thenReturn(false);
-        when(platoPersistencePort.findNonExistentPlatoIds(any(Set.class))).thenReturn(new HashSet<>());
+        when(platoPersistencePort.findNonExistentPlatoIds(any(Long.class), any(Set.class))).thenReturn(new HashSet<>());
         when(pedidoPersistencePort.save(any(PedidoModel.class))).thenReturn(pedidoSavedFirst);
         when(platoPersistencePort.getById(anyLong())).thenThrow(new RuntimeException("Plato not found"));
 

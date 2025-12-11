@@ -15,9 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,6 +42,7 @@ class PlatoHandlerTest {
     private PlatoUpdateDto platoUpdateDto;
     private PlatoModel platoModel;
     private PlatoResponseDto platoResponseDto;
+    private PageRequest pageable;
 
     private final Long USER_ID = 1L;
     private final Long PLATO_ID = 1L;
@@ -90,6 +89,8 @@ class PlatoHandlerTest {
                 .idRestaurante(RESTAURANT_ID)
                 .activo(true)
                 .build();
+
+        pageable = PageRequest.of(PAGE, SIZE, Sort.by("nombre"));
     }
 
     @Test
@@ -152,13 +153,13 @@ class PlatoHandlerTest {
         List<PlatoModel> modelList = Arrays.asList(platoModel, platoModel2);
         Page<PlatoModel> mockedPage = new PageImpl<>(modelList, PageRequest.of(PAGE, SIZE), 10);
 
-        when(platoService.getAll(CATEGORIA, RESTAURANT_ID, PAGE, SIZE)).thenReturn(mockedPage);
+        when(platoService.getAll(CATEGORIA, RESTAURANT_ID, pageable)).thenReturn(mockedPage);
         when(platoResponseMapper.toResponse(platoModel)).thenReturn(platoResponseDto);
         when(platoResponseMapper.toResponse(platoModel2)).thenReturn(platoResponseDto2);
 
         Page<PlatoResponseDto> resultPage = platoHandler.getAll(CATEGORIA, RESTAURANT_ID, PAGE, SIZE);
 
-        verify(platoService).getAll(CATEGORIA, RESTAURANT_ID, PAGE, SIZE);
+        verify(platoService).getAll(CATEGORIA, RESTAURANT_ID, pageable);
 
         assertNotNull(resultPage);
         assertEquals(2, resultPage.getContent().size());
@@ -179,11 +180,11 @@ class PlatoHandlerTest {
     void getAll_EmptyPage_ReturnsEmptyPagedResponseDto() {
         Page<PlatoModel> mockedEmptyPage = new PageImpl<>(List.of(), PageRequest.of(PAGE, SIZE), 0);
 
-        when(platoService.getAll(CATEGORIA, RESTAURANT_ID, PAGE, SIZE)).thenReturn(mockedEmptyPage);
+        when(platoService.getAll(CATEGORIA, RESTAURANT_ID, pageable)).thenReturn(mockedEmptyPage);
 
         Page<PlatoResponseDto> resultPage = platoHandler.getAll(CATEGORIA, RESTAURANT_ID, PAGE, SIZE);
 
-        verify(platoService, times(1)).getAll(CATEGORIA, RESTAURANT_ID, PAGE, SIZE);
+        verify(platoService, times(1)).getAll(CATEGORIA, RESTAURANT_ID, pageable);
         verifyNoInteractions(platoRequestMapper);
 
         assertTrue(resultPage.isEmpty());
@@ -197,12 +198,12 @@ class PlatoHandlerTest {
     void getAll_WithNullCategoria_ReturnsPagedResponseDto() {
         Page<PlatoModel> mockedPage = new PageImpl<>(List.of(platoModel), PageRequest.of(PAGE, SIZE), 1);
 
-        when(platoService.getAll(null, RESTAURANT_ID, PAGE, SIZE)).thenReturn(mockedPage);
+        when(platoService.getAll(null, RESTAURANT_ID, pageable)).thenReturn(mockedPage);
         when(platoResponseMapper.toResponse(platoModel)).thenReturn(platoResponseDto);
 
         Page<PlatoResponseDto> resultPage = platoHandler.getAll(null, RESTAURANT_ID, PAGE, SIZE);
 
-        verify(platoService).getAll(null, RESTAURANT_ID, PAGE, SIZE);
+        verify(platoService).getAll(null, RESTAURANT_ID, pageable);
         verify(platoResponseMapper).toResponse(platoModel);
 
         assertNotNull(resultPage);
