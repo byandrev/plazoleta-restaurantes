@@ -15,16 +15,22 @@ public class RestaurantEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String nombre;
 
+    @Column(nullable = false)
     private String direccion;
 
+    @Column(nullable = false)
     private String telefono;
 
+    @Column(nullable = false)
     private String urlLogo;
 
+    @Column(nullable = false, unique = true)
     private String nit;
 
+    @Column(nullable = false)
     private Long idPropietario;
 
 }
