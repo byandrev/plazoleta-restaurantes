@@ -1,10 +1,9 @@
 package com.pragma.powerup.domain.api;
 
+import com.pragma.powerup.domain.model.PaginationResult;
 import com.pragma.powerup.domain.model.PedidoEstado;
 import com.pragma.powerup.domain.model.PedidoModel;
 import com.pragma.powerup.domain.model.UserModel;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 public interface IPedidoServicePort {
 
@@ -14,6 +13,6 @@ public interface IPedidoServicePort {
 
     PedidoModel getById(Long id);
 
-    Page<PedidoModel> getAll(Long userId, Long restaurantId, PedidoEstado estado, PageRequest pageRequest);
+    PaginationResult<PedidoModel> getAll(Long userId, Long restaurantId, PedidoEstado estado, int page, int size, String sortBy);
 
 }

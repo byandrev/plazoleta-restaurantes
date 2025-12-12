@@ -2,15 +2,11 @@ package com.pragma.powerup.domain.usecase;
 
 import com.pragma.powerup.domain.api.IRestaurantServicePort;
 import com.pragma.powerup.domain.exception.DomainException;
-import com.pragma.powerup.domain.model.EmployeeModel;
-import com.pragma.powerup.domain.model.RestaurantModel;
-import com.pragma.powerup.domain.model.RolType;
-import com.pragma.powerup.domain.model.UserModel;
+import com.pragma.powerup.domain.model.*;
 import com.pragma.powerup.domain.spi.IEmployeePersistencePort;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.domain.spi.IUserExternalServicePort;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -42,7 +38,7 @@ public class RestaurantUseCase implements IRestaurantServicePort {
     }
 
     @Override
-    public Page<RestaurantModel> getAll(int page, int size) {
+    public PaginationResult<RestaurantModel> getAll(int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by("nombre").ascending());
         return  restaurantPersistencePort.getAll(pageRequest);
     }

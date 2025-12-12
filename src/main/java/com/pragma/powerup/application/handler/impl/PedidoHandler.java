@@ -1,20 +1,20 @@
 package com.pragma.powerup.application.handler.impl;
 
 import com.pragma.powerup.application.dto.request.PedidoRequestDto;
+import com.pragma.powerup.application.dto.response.PaginationResponseDto;
 import com.pragma.powerup.application.dto.request.PedidoUpdateDto;
 import com.pragma.powerup.application.dto.response.PedidoResponseDto;
 import com.pragma.powerup.application.handler.IPedidoHandler;
+import com.pragma.powerup.application.mapper.IPaginationResponseMapper;
 import com.pragma.powerup.application.mapper.IPedidoRequestMapper;
 import com.pragma.powerup.application.mapper.IPedidoResponseMapper;
 import com.pragma.powerup.application.mapper.IPedidoUpdateMapper;
 import com.pragma.powerup.domain.api.IPedidoServicePort;
+import com.pragma.powerup.domain.model.PaginationResult;
 import com.pragma.powerup.domain.model.PedidoEstado;
 import com.pragma.powerup.domain.model.PedidoModel;
 import com.pragma.powerup.domain.model.UserModel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,6 +28,8 @@ public class PedidoHandler implements IPedidoHandler {
     private final IPedidoUpdateMapper pedidoUpdateMapper;
 
     private final IPedidoResponseMapper pedidoResponseMapper;
+
+    private final IPaginationResponseMapper paginationResponseMapper;
 
     @Override
     public PedidoResponseDto save(UserModel client, PedidoRequestDto pedidoDto) {
@@ -47,10 +49,10 @@ public class PedidoHandler implements IPedidoHandler {
     }
 
     @Override
-    public Page<PedidoResponseDto> getAll(Long userId, Long restaurantId, PedidoEstado estado, int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("fecha").ascending());
-        Page<PedidoModel> pedidosList = pedidoService.getAll(userId, restaurantId, estado, pageRequest);
-        return pedidosList.map(pedidoResponseMapper::toResponse);
+    public PaginationResponseDto<PedidoResponseDto> getAll(Long userId, Long restaurantId, PedidoEstado estado, int page, int size) {
+        PaginationResult<PedidoModel> pedidosList = pedidoService.getAll(userId, restaurantId, estado, page, size, "fecha");
+        PaginationResult<PedidoResponseDto> result = pedidosList.map(pedidoResponseMapper::toResponse);
+        return paginationResponseMapper.toResponse(result);
     }
 
 }
