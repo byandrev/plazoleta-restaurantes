@@ -2,6 +2,7 @@ package com.pragma.powerup.infrastructure.input.rest;
 
 import com.pragma.powerup.application.dto.request.EmployeeRequestDto;
 import com.pragma.powerup.application.dto.request.RestaurantRequestDto;
+import com.pragma.powerup.application.dto.response.PaginationResponseDto;
 import com.pragma.powerup.application.dto.response.RestaurantResponseDto;
 import com.pragma.powerup.application.handler.IRestaurantHandler;
 import com.pragma.powerup.infrastructure.input.rest.response.CustomResponse;
@@ -11,7 +12,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,11 +37,11 @@ public class RestaurantRestController {
             @ApiResponse(responseCode = "404", description = "No data found", content = @Content)
     })
     @GetMapping("/")
-    public ResponseEntity<CustomResponse<Page<RestaurantResponseDto>>> getRestaurants(
+    public ResponseEntity<CustomResponse<PaginationResponseDto<RestaurantResponseDto>>> getRestaurants(
             @RequestParam(defaultValue = "0") @Min(value = 0) int page,
             @RequestParam(defaultValue = "10") @Min(value = 1) int size
     ) {
-        CustomResponse<Page<RestaurantResponseDto>> response = CustomResponse.<Page<RestaurantResponseDto>>builder()
+        CustomResponse<PaginationResponseDto<RestaurantResponseDto>> response = CustomResponse.<PaginationResponseDto<RestaurantResponseDto>>builder()
                 .status(HttpStatus.OK.value())
                 .data(restaurantHandler.getAll(page, size))
                 .build();

@@ -2,15 +2,17 @@ package com.pragma.powerup.application.handler.impl;
 
 import com.pragma.powerup.application.dto.request.EmployeeRequestDto;
 import com.pragma.powerup.application.dto.request.RestaurantRequestDto;
+import com.pragma.powerup.application.dto.response.PaginationResponseDto;
 import com.pragma.powerup.application.dto.response.RestaurantResponseDto;
 import com.pragma.powerup.application.handler.IRestaurantHandler;
 import com.pragma.powerup.application.mapper.IEmployeeRequestDtoMapper;
+import com.pragma.powerup.application.mapper.IPaginationResponseMapper;
 import com.pragma.powerup.application.mapper.IRestaurantRequestMapper;
 import com.pragma.powerup.application.mapper.IRestaurantResponseMapper;
 import com.pragma.powerup.domain.api.IRestaurantServicePort;
+import com.pragma.powerup.domain.model.PaginationResult;
 import com.pragma.powerup.domain.model.RestaurantModel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,6 +23,7 @@ public class RestaurantHandler implements IRestaurantHandler {
     private final IRestaurantRequestMapper restaurantRequestMapper;
     private final IRestaurantResponseMapper restaurantResponseMapper;
     private final IEmployeeRequestDtoMapper  employeeRequestDtoMapper;
+    private final IPaginationResponseMapper paginationResponseMapper;
 
     @Override
     public void save(RestaurantRequestDto restaurantRequestDto) {
@@ -35,9 +38,9 @@ public class RestaurantHandler implements IRestaurantHandler {
     }
 
     @Override
-    public Page<RestaurantResponseDto> getAll(int page, int size) {
-        Page<RestaurantModel> restaurantList = restaurantService.getAll(page, size);
-        return restaurantList.map(restaurantResponseMapper::toResponse);
+    public PaginationResponseDto<RestaurantResponseDto> getAll(int page, int size) {
+        PaginationResult<RestaurantModel> restaurantList = restaurantService.getAll(page, size);
+        return paginationResponseMapper.toResponse(restaurantList.map(restaurantResponseMapper::toResponse));
     }
 
     @Override
