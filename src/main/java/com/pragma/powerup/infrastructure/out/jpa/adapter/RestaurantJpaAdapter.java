@@ -5,7 +5,7 @@ import com.pragma.powerup.infrastructure.exception.ResourceNotFound;
 import com.pragma.powerup.domain.model.RestaurantModel;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.infrastructure.out.jpa.entity.RestaurantEntity;
-import com.pragma.powerup.infrastructure.out.jpa.mapper.IPaginationResultMapper;
+import com.pragma.powerup.infrastructure.out.jpa.mapper.IPaginationMapper;
 import com.pragma.powerup.infrastructure.out.jpa.mapper.IRestaurantEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.repository.IRestaurantRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
 
     private final IRestaurantRepository restaurantRepository;
     private final IRestaurantEntityMapper restaurantEntityMapper;
-    private final IPaginationResultMapper paginationResultMapper;
+    private final IPaginationMapper paginationMapper;
 
     @Override
     public RestaurantModel save(RestaurantModel restaurantModel) {
@@ -37,7 +37,7 @@ public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
     @Override
     public PaginationResult<RestaurantModel> getAll(PageRequest pageRequest) {
         Page<RestaurantEntity> page = restaurantRepository.findAll(pageRequest);
-        return paginationResultMapper.toModel(page.map(restaurantEntityMapper::toModel));
+        return paginationMapper.toModel(page.map(restaurantEntityMapper::toModel));
     }
 
 }
