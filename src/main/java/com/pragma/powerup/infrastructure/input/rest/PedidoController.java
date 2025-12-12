@@ -1,8 +1,9 @@
 package com.pragma.powerup.infrastructure.input.rest;
 
+import com.pragma.powerup.application.dto.request.PaginationRequestDto;
 import com.pragma.powerup.application.dto.request.PedidoRequestDto;
-import com.pragma.powerup.application.dto.response.PaginationResponseDto;
 import com.pragma.powerup.application.dto.request.PedidoUpdateDto;
+import com.pragma.powerup.application.dto.response.PaginationResponseDto;
 import com.pragma.powerup.application.dto.response.PedidoResponseDto;
 import com.pragma.powerup.application.handler.IPedidoHandler;
 import com.pragma.powerup.domain.model.PedidoEstado;
@@ -59,8 +60,7 @@ public class PedidoController {
     @PreAuthorize("hasRole('EMPLEADO')")
     @GetMapping("/{restaurantId}")
     public ResponseEntity<CustomResponse<PaginationResponseDto<PedidoResponseDto>>> getRestaurants(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @Valid PaginationRequestDto paginationRequest,
             @RequestParam(required = false) PedidoEstado estado,
             @PathVariable Long restaurantId,
             @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetail userDetails
@@ -69,7 +69,7 @@ public class PedidoController {
 
         CustomResponse<PaginationResponseDto<PedidoResponseDto>> response = CustomResponse.<PaginationResponseDto<PedidoResponseDto>>builder()
                 .status(HttpStatus.OK.value())
-                .data(pedidoHandler.getAll(userId, restaurantId, estado, page, size))
+                .data(pedidoHandler.getAll(userId, restaurantId, estado, paginationRequest))
                 .build();
 
         return ResponseEntity.ok(response);

@@ -1,5 +1,6 @@
 package com.pragma.powerup.infrastructure.out.jpa.adapter;
 
+import com.pragma.powerup.domain.model.PaginationInfo;
 import com.pragma.powerup.domain.model.PaginationResult;
 import com.pragma.powerup.domain.model.PedidoEstado;
 import com.pragma.powerup.domain.model.PedidoModel;
@@ -11,8 +12,6 @@ import com.pragma.powerup.infrastructure.out.jpa.mapper.IPedidoEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.repository.IPedidoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -52,16 +51,14 @@ public class PedidoJpaAdapter implements IPedidoPersistencePort {
     }
 
     @Override
-    public PaginationResult<PedidoModel> getAll(Long restaurantId, int page, int size, String sortBy) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(sortBy).ascending());
-        Page<PedidoEntity> pageResult = pedidoRepository.findAllByRestaurante_Id(restaurantId, pageRequest);
+    public PaginationResult<PedidoModel> getAll(Long restaurantId, PaginationInfo pagination) {
+        Page<PedidoEntity> pageResult = pedidoRepository.findAllByRestaurante_Id(restaurantId, paginationMapper.toPageable(pagination));
         return paginationMapper.toModel(pageResult.map(pedidoEntityMapper::toModel));
     }
 
     @Override
-    public PaginationResult<PedidoModel> getAllByEstado(Long restaurantId, PedidoEstado estado, int page, int size, String sortBy) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(sortBy).ascending());
-        Page<PedidoEntity> pageResult = pedidoRepository.findByRestaurante_IdAndEstado(restaurantId, estado, pageRequest);
+    public PaginationResult<PedidoModel> getAllByEstado(Long restaurantId, PedidoEstado estado,PaginationInfo pagination) {
+        Page<PedidoEntity> pageResult = pedidoRepository.findByRestaurante_IdAndEstado(restaurantId, estado, paginationMapper.toPageable(pagination));
         return paginationMapper.toModel(pageResult.map(pedidoEntityMapper::toModel));
     }
 

@@ -1,5 +1,6 @@
 package com.pragma.powerup.application.handler;
 
+import com.pragma.powerup.application.dto.request.PaginationRequestDto;
 import com.pragma.powerup.application.dto.request.PedidoRequestDto;
 import com.pragma.powerup.application.dto.response.PaginationResponseDto;
 import com.pragma.powerup.application.dto.request.PedidoUpdateDto;
@@ -15,6 +16,6 @@ public interface IPedidoHandler {
 
     PedidoResponseDto getById(Long id);
 
-    PaginationResponseDto<PedidoResponseDto> getAll(Long userId, Long restaurantId, PedidoEstado estado, int page, int size);
+    PaginationResponseDto<PedidoResponseDto> getAll(Long userId, Long restaurantId, PedidoEstado estado, PaginationRequestDto paginationRequest);
 
 }

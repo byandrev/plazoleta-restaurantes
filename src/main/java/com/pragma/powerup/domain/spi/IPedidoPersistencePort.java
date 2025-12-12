@@ -1,5 +1,6 @@
 package com.pragma.powerup.domain.spi;
 
+import com.pragma.powerup.domain.model.PaginationInfo;
 import com.pragma.powerup.domain.model.PaginationResult;
 import com.pragma.powerup.domain.model.PedidoEstado;
 import com.pragma.powerup.domain.model.PedidoModel;
@@ -12,8 +13,8 @@ public interface IPedidoPersistencePort {
 
     Boolean existsByClienteIdAndEstadoIn(Long clienteId);
 
-    PaginationResult<PedidoModel> getAll(Long restaurantId, int page, int size, String sortBy);
+    PaginationResult<PedidoModel> getAll(Long restaurantId, PaginationInfo pagination);
 
-    PaginationResult<PedidoModel> getAllByEstado(Long restaurantId, PedidoEstado estado, int page, int size, String sortBy);
+    PaginationResult<PedidoModel> getAllByEstado(Long restaurantId, PedidoEstado estado, PaginationInfo pagination);
 
 }
