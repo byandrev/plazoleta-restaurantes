@@ -1,7 +1,9 @@
 package com.pragma.powerup.infrastructure.input.rest;
 
+import com.pragma.powerup.application.dto.request.PaginationRequestDto;
 import com.pragma.powerup.application.dto.request.PlatoRequestDto;
 import com.pragma.powerup.application.dto.request.PlatoUpdateDto;
+import com.pragma.powerup.application.dto.response.PaginationResponseDto;
 import com.pragma.powerup.application.dto.response.PlatoResponseDto;
 import com.pragma.powerup.application.handler.IPlatoHandler;
 import com.pragma.powerup.infrastructure.input.rest.response.CustomResponse;
@@ -12,7 +14,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,15 +38,16 @@ public class PlatoRestController {
             @ApiResponse(responseCode = "404", description = "No data found", content = @Content)
     })
     @GetMapping("/")
-    public ResponseEntity<CustomResponse<Page<PlatoResponseDto>>> getRestaurants(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+    public ResponseEntity<CustomResponse<PaginationResponseDto<PlatoResponseDto>>> getRestaurants(
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "10") int size,
+            @Valid PaginationRequestDto paginationRequest,
             @RequestParam @Min(value = 0) long restaurantId,
             @RequestParam(required = false) String categoria
     ) {
-        CustomResponse<Page<PlatoResponseDto>> response = CustomResponse.<Page<PlatoResponseDto>>builder()
+        CustomResponse<PaginationResponseDto<PlatoResponseDto>> response = CustomResponse.<PaginationResponseDto<PlatoResponseDto>>builder()
                 .status(HttpStatus.OK.value())
-                .data(platoHandler.getAll(categoria, restaurantId, page, size))
+                .data(platoHandler.getAll(categoria, restaurantId, paginationRequest))
                 .build();
 
         return ResponseEntity.ok(response);
