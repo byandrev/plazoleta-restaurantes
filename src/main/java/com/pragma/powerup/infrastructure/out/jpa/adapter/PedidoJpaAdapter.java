@@ -6,7 +6,7 @@ import com.pragma.powerup.domain.model.PedidoModel;
 import com.pragma.powerup.domain.spi.IPedidoPersistencePort;
 import com.pragma.powerup.infrastructure.exception.ResourceNotFound;
 import com.pragma.powerup.infrastructure.out.jpa.entity.PedidoEntity;
-import com.pragma.powerup.infrastructure.out.jpa.mapper.IPaginationResultMapper;
+import com.pragma.powerup.infrastructure.out.jpa.mapper.IPaginationMapper;
 import com.pragma.powerup.infrastructure.out.jpa.mapper.IPedidoEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.repository.IPedidoRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ public class PedidoJpaAdapter implements IPedidoPersistencePort {
 
     private final IPedidoEntityMapper pedidoEntityMapper;
 
-    private final IPaginationResultMapper paginationResultMapper;
+    private final IPaginationMapper paginationMapper;
 
     @Override
     public PedidoModel save(PedidoModel pedidoModel) {
@@ -55,14 +55,14 @@ public class PedidoJpaAdapter implements IPedidoPersistencePort {
     public PaginationResult<PedidoModel> getAll(Long restaurantId, int page, int size, String sortBy) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(sortBy).ascending());
         Page<PedidoEntity> pageResult = pedidoRepository.findAllByRestaurante_Id(restaurantId, pageRequest);
-        return paginationResultMapper.toModel(pageResult.map(pedidoEntityMapper::toModel));
+        return paginationMapper.toModel(pageResult.map(pedidoEntityMapper::toModel));
     }
 
     @Override
     public PaginationResult<PedidoModel> getAllByEstado(Long restaurantId, PedidoEstado estado, int page, int size, String sortBy) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(sortBy).ascending());
         Page<PedidoEntity> pageResult = pedidoRepository.findByRestaurante_IdAndEstado(restaurantId, estado, pageRequest);
-        return paginationResultMapper.toModel(pageResult.map(pedidoEntityMapper::toModel));
+        return paginationMapper.toModel(pageResult.map(pedidoEntityMapper::toModel));
     }
 
 }

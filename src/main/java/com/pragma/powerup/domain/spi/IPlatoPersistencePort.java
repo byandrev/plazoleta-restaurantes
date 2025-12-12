@@ -1,8 +1,8 @@
 package com.pragma.powerup.domain.spi;
 
+import com.pragma.powerup.domain.model.PaginationInfo;
+import com.pragma.powerup.domain.model.PaginationResult;
 import com.pragma.powerup.domain.model.PlatoModel;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 import java.util.Set;
 
@@ -10,9 +10,9 @@ public interface IPlatoPersistencePort {
 
     PlatoModel save(PlatoModel platoModel);
 
-    Page<PlatoModel> getAll(Long restauranteId, PageRequest pageRequest);
+    PaginationResult<PlatoModel> getAll(Long restauranteId, PaginationInfo pagination);
 
-    Page<PlatoModel> getAllByCategoria(String categoria, Long restauranteId, PageRequest pageRequest);
+    PaginationResult<PlatoModel> getAllByCategoria(String categoria, Long restauranteId, PaginationInfo pagination);
 
     PlatoModel getById(Long id);
 
