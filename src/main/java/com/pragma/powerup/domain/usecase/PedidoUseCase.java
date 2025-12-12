@@ -9,8 +9,6 @@ import com.pragma.powerup.domain.spi.IPlatoPersistencePort;
 import com.pragma.powerup.domain.spi.ITraceabilityExternalServicePort;
 import com.pragma.powerup.domain.utils.ConvertDate;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -98,16 +96,16 @@ public class PedidoUseCase implements IPedidoServicePort {
     }
 
     @Override
-    public Page<PedidoModel> getAll(Long userId, Long restaurantId, PedidoEstado estado, PageRequest pageRequest) {
+    public PaginationResult<PedidoModel> getAll(Long userId, Long restaurantId, PedidoEstado estado, int page, int size, String sortBy) {
         if (!employeePersistence.existsById(userId, restaurantId)) {
             throw new DomainException("No eres empleado del restaurante");
         }
 
         if (estado != null) {
-            return pedidoPersistencePort.getAllByEstado(restaurantId, estado, pageRequest);
+            return pedidoPersistencePort.getAllByEstado(restaurantId, estado, page, size, sortBy);
         }
 
-        return pedidoPersistencePort.getAll(restaurantId, pageRequest);
+        return pedidoPersistencePort.getAll(restaurantId, page, size, sortBy);
     }
 
 }
