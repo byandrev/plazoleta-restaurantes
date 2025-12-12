@@ -2,17 +2,12 @@ package com.pragma.powerup.domain.usecase;
 
 import com.pragma.powerup.domain.api.IPlatoServicePort;
 import com.pragma.powerup.domain.exception.DomainException;
-import com.pragma.powerup.domain.model.CategoriaModel;
-import com.pragma.powerup.domain.model.PlatoModel;
-import com.pragma.powerup.domain.model.RestaurantModel;
+import com.pragma.powerup.domain.model.*;
 import com.pragma.powerup.domain.spi.ICategoriaPersistencePort;
 import com.pragma.powerup.domain.spi.IPlatoPersistencePort;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.infrastructure.exception.ResourceNotFound;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -49,12 +44,12 @@ public class PlatoUseCase implements IPlatoServicePort {
     }
 
     @Override
-    public Page<PlatoModel> getAll(String categoria, Long restauranteId, PageRequest pageRequest) {
+    public PaginationResult<PlatoModel> getAll(String categoria, Long restauranteId, PaginationInfo pagination) {
         if (categoria != null && !categoria.trim().isEmpty()) {
-            return platoPersistencePort.getAllByCategoria(categoria.toUpperCase(), restauranteId, pageRequest);
+            return platoPersistencePort.getAllByCategoria(categoria.toUpperCase(), restauranteId, pagination);
         }
 
-        return  platoPersistencePort.getAll(restauranteId, pageRequest);
+        return  platoPersistencePort.getAll(restauranteId, pagination);
     }
 
     @Override
