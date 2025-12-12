@@ -2,10 +2,13 @@ package com.pragma.powerup.application.handler.impl;
 
 import com.pragma.powerup.application.dto.request.PedidoItemRequestDto;
 import com.pragma.powerup.application.dto.request.PedidoRequestDto;
+import com.pragma.powerup.application.dto.request.PedidoUpdateDto;
 import com.pragma.powerup.application.mapper.IPedidoRequestMapper;
-import com.pragma.powerup.application.mapper.IPedidoResponseMapper;
+import com.pragma.powerup.application.mapper.IPedidoUpdateMapper;
 import com.pragma.powerup.domain.api.IPedidoServicePort;
+import com.pragma.powerup.domain.model.PedidoEstado;
 import com.pragma.powerup.domain.model.PedidoModel;
+import com.pragma.powerup.domain.model.UserModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,13 +31,15 @@ class PedidoHandlerTest {
     private IPedidoRequestMapper pedidoRequestMapper;
 
     @Mock
-    private IPedidoResponseMapper pedidoResponseMapper;
+    private IPedidoUpdateMapper pedidoUpdateMapper;
 
     @InjectMocks
     private PedidoHandler pedidoHandler;
 
     private PedidoRequestDto pedidoRequestDto;
+    private PedidoUpdateDto pedidoUpdateDto;
     private PedidoModel pedidoModel;
+    private UserModel client;
 
     @BeforeEach
     void setUp() {
@@ -42,11 +47,22 @@ class PedidoHandlerTest {
                 .builder()
                 .idRestaurante(1L)
                 .idChef(2L)
-                .idCliente(3L)
                 .items(Set.of(PedidoItemRequestDto.builder().platoId(10L).cantidad(2).build()))
                 .build();
 
+        pedidoUpdateDto = PedidoUpdateDto
+                .builder()
+                .idChef(2L)
+                .estado(PedidoEstado.EN_PREPARACION)
+                .build();
+
         pedidoModel = PedidoModel.builder().build();
+
+        client = UserModel
+                .builder()
+                .id(10L)
+                .correo("user@gmail.com")
+                .build();
     }
 
     @Test
@@ -54,10 +70,23 @@ class PedidoHandlerTest {
     void save_SuccessfulFlow_CallsMapperAndService() {
         when(pedidoRequestMapper.toModel(pedidoRequestDto)).thenReturn(pedidoModel);
 
-        pedidoHandler.save(pedidoRequestDto);
+        pedidoHandler.save(client, pedidoRequestDto);
 
         verify(pedidoRequestMapper).toModel(pedidoRequestDto);
-        verify(pedidoServicePort).save(pedidoModel);
+        verify(pedidoServicePort).save(client, pedidoModel);
+
+        verifyNoMoreInteractions(pedidoServicePort, pedidoRequestMapper);
+    }
+
+    @Test
+    @DisplayName("update debe mapear DTO a Model y llamar al servicio para guardar")
+    void update_SuccessfulFlow_CallsMapperAndService() {
+        when(pedidoUpdateMapper.toModel(pedidoUpdateDto)).thenReturn(pedidoModel);
+
+        pedidoHandler.update(client, pedidoUpdateDto);
+
+        verify(pedidoUpdateMapper).toModel(pedidoUpdateDto);
+        verify(pedidoServicePort).update(client, pedidoModel);
 
         verifyNoMoreInteractions(pedidoServicePort, pedidoRequestMapper);
     }

@@ -1,5 +1,6 @@
 package com.pragma.powerup.application.dto.request;
 
+import com.pragma.powerup.domain.model.PedidoEstado;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-class PedidoRequestDtoValidationTest {
+class PedidoUpdateDtoValidationTest {
 
     private Validator validator;
 
@@ -26,17 +27,17 @@ class PedidoRequestDtoValidationTest {
         validator = factory.getValidator();
     }
 
-    private PedidoRequestDto createValidPedidoDto() {
-        return PedidoRequestDto
+    private PedidoUpdateDto createValidPedidoDto() {
+        return PedidoUpdateDto
                 .builder()
-                .idRestaurante(1L)
-                .idChef(2L)
-                .items(Set.of(PedidoItemRequestDto.builder().platoId(10L).cantidad(2).build()))
+                .id(1L)
+                .estado(PedidoEstado.EN_PREPARACION)
+                .idChef(10L)
                 .build();
     }
 
-    private void assertViolation(PedidoRequestDto dto, String expectedMessage) {
-        Set<ConstraintViolation<PedidoRequestDto>> violations = validator.validate(dto);
+    private void assertViolation(PedidoUpdateDto dto, String expectedMessage) {
+        Set<ConstraintViolation<PedidoUpdateDto>> violations = validator.validate(dto);
         assertFalse(violations.isEmpty(), "Debería haber violaciones de validación.");
 
         boolean found = violations.stream()
@@ -48,33 +49,25 @@ class PedidoRequestDtoValidationTest {
     @Test
     @DisplayName("Pedido válido debe pasar la validación")
     void saveValidate_Success() {
-        PedidoRequestDto dto = createValidPedidoDto();
-        Set<ConstraintViolation<PedidoRequestDto>> violations = validator.validate(dto);
+        PedidoUpdateDto dto = createValidPedidoDto();
+        Set<ConstraintViolation<PedidoUpdateDto>> violations = validator.validate(dto);
         assertTrue(violations.isEmpty(), "No deberían existir violaciones con datos válidos.");
     }
 
     @Test
     @DisplayName("idChef vacío debe fallar la validación")
     void saveValidateIdChef_Empty_FailsValidation() {
-        PedidoRequestDto dto = createValidPedidoDto();
+        PedidoUpdateDto dto = createValidPedidoDto();
         dto.setIdChef(null);
         assertViolation(dto, "El idChef no puede estar vacio");
     }
 
     @Test
-    @DisplayName("idRestaurante vacío debe fallar la validación")
-    void saveValidateIdRestaurante_Empty_FailsValidation() {
-        PedidoRequestDto dto = createValidPedidoDto();
-        dto.setIdRestaurante(null);
-        assertViolation(dto, "El idRestaurante no puede estar vacio");
-    }
-
-    @Test
-    @DisplayName("items vacío debe fallar la validación")
-    void saveValidateItems_Empty_FailsValidation() {
-        PedidoRequestDto dto = createValidPedidoDto();
-        dto.setItems(null);
-        assertViolation(dto, "Se necesita minimo un plato para hacer un pedido");
+    @DisplayName("El estado vacío debe fallar la validación")
+    void saveValidateEstado_Empty_FailsValidation() {
+        PedidoUpdateDto dto = createValidPedidoDto();
+        dto.setEstado(null);
+        assertViolation(dto, "El estado no puede estar vacio");
     }
 
 }

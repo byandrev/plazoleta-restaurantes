@@ -9,6 +9,8 @@ public interface IPedidoServicePort {
 
     PedidoModel save(UserModel client, PedidoModel pedido);
 
+    PedidoModel update(UserModel employee, PedidoModel pedido);
+
     PedidoModel getById(Long id);
 
     PaginationResult<PedidoModel> getAll(Long userId, Long restaurantId, PedidoEstado estado, int page, int size, String sortBy);

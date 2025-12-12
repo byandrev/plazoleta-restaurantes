@@ -3,10 +3,7 @@ package com.pragma.powerup.domain.usecase;
 import com.pragma.powerup.domain.api.IPedidoServicePort;
 import com.pragma.powerup.domain.exception.DomainException;
 import com.pragma.powerup.domain.model.*;
-import com.pragma.powerup.domain.spi.IEmployeePersistencePort;
-import com.pragma.powerup.domain.spi.IPedidoPersistencePort;
-import com.pragma.powerup.domain.spi.IPlatoPersistencePort;
-import com.pragma.powerup.domain.spi.ITraceabilityExternalServicePort;
+import com.pragma.powerup.domain.spi.*;
 import com.pragma.powerup.domain.utils.ConvertDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +19,8 @@ public class PedidoUseCase implements IPedidoServicePort {
     private final IPedidoPersistencePort pedidoPersistencePort;
 
     private final IPlatoPersistencePort platoPersistencePort;
+
+    private final IUserExternalServicePort userExternalService;
 
     private final ITraceabilityExternalServicePort traceabilityService;
 
@@ -58,6 +57,19 @@ public class PedidoUseCase implements IPedidoServicePort {
         return pedidoSaved;
     }
 
+    private void updateTraceability(PedidoModel pedido, PedidoEstado backStatus) {
+        traceabilityService.save(TraceabilityModel
+                .builder()
+                .pedidoId(pedido.getId())
+                .clienteId(pedido.getCliente().getId())
+                .correoCliente(pedido.getCliente().getCorreo())
+                .estadoNuevo(pedido.getEstado())
+                .estadoAnterior(backStatus)
+                .correoEmpleado(pedido.getChef().getCorreo())
+                .empleadoId(pedido.getChef().getId())
+                .build());
+    }
+
     @Override
     public PedidoModel save(UserModel client, PedidoModel pedido) {
         if (pedidoPersistencePort.existsByClienteIdAndEstadoIn(client.getId())) {
@@ -75,19 +87,42 @@ public class PedidoUseCase implements IPedidoServicePort {
         pedido.setIdCliente(client.getId());
 
         PedidoModel pedidoSaved = saveAllItems(pedido, items);
+        pedidoSaved.setCliente(client);
+        pedidoSaved.setChef(UserModel.builder().id(0L).correo(null).build());
 
-        traceabilityService.save(TraceabilityModel
-                .builder()
-                        .pedidoId(pedidoSaved.getId())
-                        .clienteId(client.getId())
-                        .correoCliente(client.getCorreo())
-                        .estadoNuevo(pedidoSaved.getEstado())
-                        .estadoAnterior(PedidoEstado.NINGUNO)
-                        .correoEmpleado(null)
-                        .empleadoId(0L)
-                .build());
+        updateTraceability(pedidoSaved, PedidoEstado.PENDIENTE);
 
         return pedidoSaved;
+    }
+
+    @Override
+    public PedidoModel update(UserModel employee, PedidoModel pedido) {
+        if (!employee.getId().equals(pedido.getIdChef())) {
+            throw new DomainException("No puedes asignar a otro empleado a un pedido.");
+        }
+
+        PedidoModel pedidoSaved = pedidoPersistencePort.getById(pedido.getId());
+        RestaurantModel restaurante = pedidoSaved.getRestaurante();
+
+        if (!employeePersistence.existsById(pedido.getIdChef(), restaurante.getId())) {
+            throw new DomainException("No eres empleado del restaurante");
+        }
+
+        if (pedidoSaved.getEstado() == pedido.getEstado()) {
+            throw new DomainException("Estas enviando un estado nuevo el cual es el mismo al anterior");
+        }
+
+        PedidoEstado backStatus = pedidoSaved.getEstado();
+        pedidoSaved.setEstado(pedido.getEstado());
+        pedidoSaved.setIdChef(pedido.getIdChef());
+
+        PedidoModel pedidoUpdated = pedidoPersistencePort.save(pedidoSaved);
+        pedidoUpdated.setCliente(userExternalService.getUserById(pedidoSaved.getIdCliente()));
+        pedidoUpdated.setChef(userExternalService.getUserById(pedidoSaved.getIdChef()));
+
+        updateTraceability(pedidoUpdated, backStatus);
+
+        return pedidoUpdated;
     }
 
     @Override
