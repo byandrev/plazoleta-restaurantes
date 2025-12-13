@@ -113,28 +113,31 @@ public class PedidoUseCase implements IPedidoServicePort {
         } else if (pedidoUpdate.getEstado() == PedidoEstado.LISTO) {
             currentPedido.ready(employeeId);
         } else if (pedidoUpdate.getEstado() == PedidoEstado.ENTREGADO) {
-            String pin = "PIN";
-            currentPedido.deliver(pin);
+            currentPedido.deliver(pedidoUpdate.getPin());
         } else if (pedidoUpdate.getEstado() == PedidoEstado.CANCELADO) {
             currentPedido.cancel();
         } else {
             throw new DomainException("Transición de estado no válida: " + pedidoUpdate.getEstado());
         }
 
-        PedidoModel pedidoUpdated = pedidoPersistencePort.save(currentPedido);
-        pedidoUpdated.setCliente(userExternalService.getUserById(pedidoUpdated.getIdCliente()));
-        pedidoUpdated.setChef(userExternalService.getUserById(pedidoUpdated.getIdChef()));
+        UserModel client = userExternalService.getUserById(currentPedido.getIdCliente());
+        UserModel chef = userExternalService.getUserById(currentPedido.getIdChef());
 
-        updateTraceability(pedidoUpdated, backStatus);
-
-        if (pedidoUpdated.getEstado() == PedidoEstado.LISTO) {
+        if (currentPedido.getEstado() == PedidoEstado.LISTO) {
             String pin = PinGenerator.generatePin(6);
+            currentPedido.setPin(pin);
 
             messageExternalService.send(
-                    pedidoUpdated.getCliente().getCelular(),
-                    "El PIN de tu pedido #" + pedidoUpdated.getId() + " es " + pin
+                    client.getCelular(),
+                    "El PIN de tu pedido #" + currentPedido.getId() + " es " + pin
             );
         }
+
+        PedidoModel pedidoUpdated = pedidoPersistencePort.save(currentPedido);
+        pedidoUpdated.setCliente(client);
+        pedidoUpdated.setChef(chef);
+
+        updateTraceability(pedidoUpdated, backStatus);
 
         return pedidoUpdated;
     }
