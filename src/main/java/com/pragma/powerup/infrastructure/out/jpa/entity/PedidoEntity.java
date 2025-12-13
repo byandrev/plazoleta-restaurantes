@@ -31,6 +31,8 @@ public class PedidoEntity {
     @Column(name = "id_chef", nullable = false)
     private Long idChef;
 
+    private String pin = null;
+
     @ManyToOne
     @JoinColumn(name = "id_restaurante",nullable = false)
     private RestaurantEntity restaurante;
