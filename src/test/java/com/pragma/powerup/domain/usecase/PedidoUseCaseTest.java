@@ -11,9 +11,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -48,9 +45,8 @@ class PedidoUseCaseTest {
     private static final Long RESTAURANT_ID = 1L;
     private static final Long USER_ID = 1L;
     private static final Long CHEF_ID = 2L;
-    private static final PageRequest PAGE_REQUEST = PageRequest.of(0, 10);
-    private PedidoEstado ESTADO = PedidoEstado.PENDIENTE;
-    private Page<PedidoModel> mockPage;
+    private static final PaginationInfo PAGE_REQUEST = new PaginationInfo(0, 10, "id", "ASC");
+    private PaginationResult<PedidoModel> mockPage;
 
     private PedidoModel pedidoRequest;
     private PedidoModel pedidoSavedFirst;
@@ -119,7 +115,12 @@ class PedidoUseCaseTest {
                 .build();
 
         List<PedidoModel> pedidoList = Collections.singletonList(PedidoModel.builder().build());
-        mockPage = new PageImpl<>(pedidoList, PAGE_REQUEST, 1);
+        mockPage = new PaginationResult<PedidoModel>(
+                pedidoList,
+                PAGE_REQUEST.getPage(),
+                PAGE_REQUEST.getSize(),
+                1
+        );
 
         chefModel = UserModel.builder()
                 .id(CHEF_ID)
@@ -202,7 +203,7 @@ class PedidoUseCaseTest {
         when(employeePersistence.existsById(USER_ID, RESTAURANT_ID)).thenReturn(true);
         when(pedidoPersistence.getAllByEstado(RESTAURANT_ID, estado, PAGE_REQUEST)).thenReturn(mockPage);
 
-        Page<PedidoModel> result = pedidoUseCase.getAll(USER_ID, RESTAURANT_ID, estado, PAGE_REQUEST);
+        PaginationResult<PedidoModel> result = pedidoUseCase.getAll(USER_ID, RESTAURANT_ID, estado, PAGE_REQUEST);
 
         assertNotNull(result);
         assertEquals(mockPage, result);

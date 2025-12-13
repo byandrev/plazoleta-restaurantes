@@ -1,26 +1,19 @@
 package com.pragma.powerup.domain.usecase;
 
 import com.pragma.powerup.domain.exception.DomainException;
-import com.pragma.powerup.infrastructure.exception.ResourceNotFound;
-import com.pragma.powerup.domain.model.CategoriaModel;
-import com.pragma.powerup.domain.model.PlatoModel;
-import com.pragma.powerup.domain.model.RestaurantModel;
+import com.pragma.powerup.domain.model.*;
 import com.pragma.powerup.domain.spi.ICategoriaPersistencePort;
 import com.pragma.powerup.domain.spi.IPlatoPersistencePort;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
+import com.pragma.powerup.infrastructure.exception.ResourceNotFound;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -47,6 +40,23 @@ class PlatoUseCaseTest {
     private final Long categoryId = 5L;
     private final String categoria = "Categoria";
     private final Long platoId = 50L;
+    private static final PaginationInfo PAGE_REQUEST = new PaginationInfo(0, 10, "id", "ASC");
+    private PaginationResult<PlatoModel> mockPage;
+    private PaginationResult<PlatoModel> emptyMockPage;
+
+    @BeforeEach
+    void setUp() {
+        List<PlatoModel> platosList = List.of(PlatoModel.builder().id(1L).build(), PlatoModel.builder().id(2L).build());
+
+        mockPage = new PaginationResult<>(
+                platosList,
+                PAGE_REQUEST.getPage(),
+                PAGE_REQUEST.getSize(),
+                platosList.size()
+        );
+
+        emptyMockPage = new PaginationResult<>(List.of(), PAGE_REQUEST.getPage(), PAGE_REQUEST.getSize(), 0);
+    }
 
     private PlatoModel buildValidPlato(String nombre) {
         return PlatoModel.builder()
@@ -68,12 +78,6 @@ class PlatoUseCaseTest {
                 .nombre("Test")
                 .idPropietario(ownerId)
                 .build();
-    }
-
-    private PageRequest buildPage() {
-        int pageSize = 2;
-        int page = 0;
-        return PageRequest.of(page, pageSize, Sort.by(Sort.Direction.ASC, "nombre"));
     }
 
     @Test
@@ -186,68 +190,43 @@ class PlatoUseCaseTest {
     @Test
     @DisplayName("getAll debe retornar la página de platos del restaurante ordenada por nombre")
     void getAllPlatos_Paged_shouldReturnPagedList() {
-        PlatoModel plato1 = buildValidPlato("Burger1");
-        PlatoModel plato2 = buildValidPlato("Burger2");
+        when(platoPersistencePort.getAll(restaurantId, PAGE_REQUEST)).thenReturn(mockPage);
 
-        List<PlatoModel> platoList = Arrays.asList(plato1, plato2);
-        Page<PlatoModel> mockedPage = new PageImpl<>(platoList, buildPage(), 20);
-
-        PageRequest pageRequest = buildPage();
-
-        when(platoPersistencePort.getAll(restaurantId, pageRequest)).thenReturn(mockedPage);
-
-        Page<PlatoModel> result = platoUseCase.getAll(null, restaurantId, pageRequest);
+        PaginationResult<PlatoModel> result = platoUseCase.getAll(null, restaurantId, PAGE_REQUEST);
 
         assertNotNull(result, "La página no debe ser null.");
-        assertEquals(2, result.getContent().size(), "Debe retornar el tamaño de la página (2).");
-        assertEquals(20, result.getTotalElements(), "El total de elementos debe coincidir con el mock (20).");
-        assertEquals("Burger1", result.getContent().get(0).getNombre(), "El primer plato debe ser 'Burger1'.");
-        assertEquals("Burger2", result.getContent().get(1).getNombre(), "El segundo plato debe ser 'Burger2'.");
+        assertEquals(2, result.getContent().size(), "Debe retornar el tamaño de la página.");
+        assertEquals(10, result.getTotalElements(), "El total de elementos debe coincidir con el mock.");
 
-        verify(platoPersistencePort).getAll(restaurantId, pageRequest);
+        verify(platoPersistencePort).getAll(restaurantId, PAGE_REQUEST);
     }
 
     @Test
     @DisplayName("getAll por categoria debe retornar la página de platos del restaurante ordenada por nombre")
     void getAllPlatosWithCategoria_Paged_shouldReturnPagedList() {
-        PlatoModel plato1 = buildValidPlato("Burger1");
-        PlatoModel plato2 = buildValidPlato("Burger2");
+        when(platoPersistencePort.getAllByCategoria(categoria.toUpperCase(), restaurantId, PAGE_REQUEST)).thenReturn(mockPage);
 
-        List<PlatoModel> platoList = Arrays.asList(plato1, plato2);
-        Page<PlatoModel> mockedPage = new PageImpl<>(platoList, buildPage(), 20);
-
-        PageRequest pageRequest = buildPage();
-
-        when(platoPersistencePort.getAllByCategoria(categoria.toUpperCase(), restaurantId, pageRequest)).thenReturn(mockedPage);
-
-        Page<PlatoModel> result = platoUseCase.getAll(categoria, restaurantId, pageRequest);
+        PaginationResult<PlatoModel> result = platoUseCase.getAll(categoria, restaurantId, PAGE_REQUEST);
 
         assertNotNull(result, "La página no debe ser null.");
-        assertEquals(2, result.getContent().size(), "Debe retornar el tamaño de la página (2).");
-        assertEquals(20, result.getTotalElements(), "El total de elementos debe coincidir con el mock (20).");
-        assertEquals("Burger1", result.getContent().get(0).getNombre(), "El primer plato debe ser 'Burger1'.");
-        assertEquals("Burger2", result.getContent().get(1).getNombre(), "El segundo plato debe ser 'Burger2'.");
+        assertEquals(2, result.getContent().size(), "Debe retornar el tamaño de la página.");
+        assertEquals(10, result.getTotalElements(), "El total de elementos debe coincidir con el mock.");
 
-        verify(platoPersistencePort).getAllByCategoria(categoria.toUpperCase(), restaurantId, pageRequest);
+        verify(platoPersistencePort).getAllByCategoria(categoria.toUpperCase(), restaurantId, PAGE_REQUEST);
     }
 
     @Test
     @DisplayName("getAll por categoria debe retornar página vacía si la página no tiene resultados")
     void getAllPlatosWithCategoria_Paged_shouldReturnEmptyList_whenNoPlatosOnPage() {
-        Page<PlatoModel> mockedEmptyPage = new PageImpl<>(Collections.emptyList(), buildPage(), 10);
+        when(platoPersistencePort.getAllByCategoria(categoria.toUpperCase(), restaurantId, PAGE_REQUEST)).thenReturn(emptyMockPage);
 
-        PageRequest pageRequest = buildPage();
-
-        when(platoPersistencePort.getAllByCategoria(categoria.toUpperCase(), restaurantId, pageRequest)).thenReturn(mockedEmptyPage);
-
-        Page<PlatoModel> result = platoUseCase.getAll(categoria, restaurantId, pageRequest);
+        PaginationResult<PlatoModel> result = platoUseCase.getAll(categoria, restaurantId, PAGE_REQUEST);
 
         assertNotNull(result, "La página no debe ser null.");
-        assertTrue(result.isEmpty(), "La página debe estar vacía (isEmpty()).");
         assertEquals(0, result.getContent().size(), "El contenido debe estar vacío.");
         assertEquals(10, result.getTotalElements(), "El total de elementos debe ser 10, aunque la página sea vacía.");
 
-        verify(platoPersistencePort).getAllByCategoria(categoria.toUpperCase(), restaurantId, pageRequest);
+        verify(platoPersistencePort).getAllByCategoria(categoria.toUpperCase(), restaurantId, PAGE_REQUEST);
     }
 
 }

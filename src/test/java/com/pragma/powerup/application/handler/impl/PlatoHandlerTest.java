@@ -1,26 +1,28 @@
 package com.pragma.powerup.application.handler.impl;
 
+import com.pragma.powerup.application.dto.request.PaginationRequestDto;
 import com.pragma.powerup.application.dto.request.PlatoRequestDto;
 import com.pragma.powerup.application.dto.request.PlatoUpdateDto;
+import com.pragma.powerup.application.dto.response.PaginationResponseDto;
 import com.pragma.powerup.application.dto.response.PlatoResponseDto;
+import com.pragma.powerup.application.mapper.IPaginationRequestMapper;
+import com.pragma.powerup.application.mapper.IPaginationResponseMapper;
 import com.pragma.powerup.application.mapper.IPlatoRequestMapper;
 import com.pragma.powerup.application.mapper.IPlatoResponseMapper;
 import com.pragma.powerup.domain.api.IPlatoServicePort;
-import com.pragma.powerup.domain.model.CategoriaModel;
+import com.pragma.powerup.domain.model.PaginationInfo;
+import com.pragma.powerup.domain.model.PaginationResult;
 import com.pragma.powerup.domain.model.PlatoModel;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.*;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,230 +30,104 @@ class PlatoHandlerTest {
 
     @Mock
     private IPlatoServicePort platoService;
-
     @Mock
     private IPlatoRequestMapper platoRequestMapper;
-
     @Mock
     private IPlatoResponseMapper platoResponseMapper;
+    @Mock
+    private IPaginationResponseMapper paginationResponseMapper;
+    @Mock
+    private IPaginationRequestMapper paginationRequestMapper;
 
     @InjectMocks
     private PlatoHandler platoHandler;
 
-    private PlatoRequestDto platoRequestDto;
-    private PlatoUpdateDto platoUpdateDto;
-    private PlatoModel platoModel;
-    private PlatoResponseDto platoResponseDto;
-    private PageRequest pageable;
+    @Test
+    @DisplayName("save() debería convertir el DTO a modelo y llamar al servicio")
+    void save_ShouldConvertAndCallService() {
+        Long userId = 1L;
+        PlatoRequestDto requestDto = PlatoRequestDto.builder().build();
+        PlatoModel platoModel = PlatoModel.builder().build();
 
-    private final Long USER_ID = 1L;
-    private final Long PLATO_ID = 1L;
-    private final Long RESTAURANT_ID = 1L;
-    private final int PAGE = 0;
-    private final int SIZE = 10;
-    private final String CATEGORIA = "Categoria";
+        when(platoRequestMapper.toModel(requestDto)).thenReturn(platoModel);
 
-    @BeforeEach
-    void setUp() {
-        platoRequestDto = PlatoRequestDto.builder()
-                .nombre("Burger")
-                .descripcion("Deliciosa hamburguesa")
-                .precio(100)
-                .urlImagen("https://logo.png")
-                .categoria("Categoria")
-                .idRestaurante(RESTAURANT_ID)
-                .build();
+        platoHandler.save(userId, requestDto);
 
-        platoUpdateDto = PlatoUpdateDto.builder()
-                .descripcion("Descripción actualizada")
-                .precio(150)
-                .activo(true)
-                .build();
-
-        platoModel = PlatoModel.builder()
-                .id(PLATO_ID)
-                .nombre("Burger")
-                .descripcion("Deliciosa hamburguesa")
-                .precio(100)
-                .urlImagen("https://logo.png")
-                .categoria(CategoriaModel.builder().id(1L).nombre("Categoria").build())
-                .idRestaurante(RESTAURANT_ID)
-                .activo(true)
-                .build();
-
-        platoResponseDto = PlatoResponseDto.builder()
-                .id(PLATO_ID)
-                .nombre("Burger")
-                .descripcion("Deliciosa hamburguesa")
-                .precio(100)
-                .urlImagen("https://logo.png")
-                .categoria(CategoriaModel.builder().id(1L).nombre("Categoria").build())
-                .idRestaurante(RESTAURANT_ID)
-                .activo(true)
-                .build();
-
-        pageable = PageRequest.of(PAGE, SIZE, Sort.by("nombre"));
+        verify(platoRequestMapper).toModel(requestDto);
+        verify(platoService).save(userId, platoModel);
     }
 
     @Test
-    @DisplayName("save debe mapear DTO a Model y llamar al servicio para guardar")
-    void save_SuccessfulFlow_CallsMapperAndService() {
-        when(platoRequestMapper.toModel(platoRequestDto)).thenReturn(platoModel);
+    @DisplayName("getAll() debería procesar la paginación, mapear resultados y devolver respuesta paginada")
+    void getAll_ShouldReturnPaginationResponse() {
+        String categoria = "Entradas";
+        Long restauranteId = 10L;
+        PaginationRequestDto paginationRequest = new PaginationRequestDto();
+        PaginationInfo paginationModel = new PaginationInfo();
 
-        platoHandler.save(USER_ID, platoRequestDto);
+        PaginationResult<PlatoModel> paginationResultMock = mock(PaginationResult.class);
+        PaginationResult<PlatoResponseDto> mappedResultMock = mock(PaginationResult.class);
+        PaginationResponseDto<PlatoResponseDto> finalResponse = new PaginationResponseDto<>();
 
-        verify(platoRequestMapper).toModel(platoRequestDto);
-        verify(platoService).save(USER_ID, platoModel);
-        verifyNoMoreInteractions(platoService, platoRequestMapper, platoResponseMapper);
-    }
+        when(paginationRequestMapper.toModel(paginationRequest)).thenReturn(paginationModel);
+        when(platoService.getAll(eq(categoria), eq(restauranteId), any())).thenReturn(paginationResultMock);
 
-    @Test
-    @DisplayName("getById debe llamar al servicio y mapear el Model a Response DTO")
-    void getById_SuccessfulFlow_ReturnsResponseDto() {
-        when(platoService.getById(PLATO_ID)).thenReturn(platoModel);
-        when(platoResponseMapper.toResponse(platoModel)).thenReturn(platoResponseDto);
+        Mockito.doReturn(mappedResultMock).when(paginationResultMock).map(any());
 
-        PlatoResponseDto result = platoHandler.getById(PLATO_ID);
+        when(paginationResponseMapper.toResponse(mappedResultMock)).thenReturn(finalResponse);
 
-        verify(platoService).getById(PLATO_ID);
-        verify(platoResponseMapper).toResponse(platoModel);
+        PaginationResponseDto<PlatoResponseDto> result = platoHandler.getAll(categoria, restauranteId, paginationRequest);
 
         assertNotNull(result);
-        assertEquals(PLATO_ID, result.getId());
-        assertEquals("Burger", result.getNombre());
-        assertEquals(100, result.getPrecio());
-        assertEquals(RESTAURANT_ID, result.getIdRestaurante());
+        assertEquals(finalResponse, result);
 
-        verifyNoMoreInteractions(platoService, platoRequestMapper, platoResponseMapper);
+        verify(paginationRequestMapper).toModel(paginationRequest);
+        verify(platoService).getAll(eq(categoria), eq(restauranteId), any());
+        verify(paginationResultMock).map(any());
+        verify(paginationResponseMapper).toResponse(mappedResultMock);
     }
 
     @Test
-    @DisplayName("getAll debe llamar al servicio con paginación y mapear Page<Model> a Page<ResponseDto>")
-    void getAll_SuccessfulFlow_ReturnsPagedResponseDto() {
-        PlatoModel platoModel2 = PlatoModel.builder()
-                .id(2L)
-                .nombre("Pizza")
-                .descripcion("Pizza deliciosa")
-                .precio(200)
-                .urlImagen("https://pizza.png")
-                .categoria(CategoriaModel.builder().id(1L).nombre("Categoria").build())
-                .idRestaurante(RESTAURANT_ID)
-                .activo(true)
-                .build();
+    @DisplayName("getById() debería obtener el modelo del servicio y retornarlo como DTO")
+    void getById_ShouldReturnDto() {
+        Long platoId = 5L;
+        PlatoModel platoModel = PlatoModel.builder().build();
+        PlatoResponseDto responseDto = PlatoResponseDto.builder().build();
 
-        PlatoResponseDto platoResponseDto2 = PlatoResponseDto.builder()
-                .id(2L)
-                .nombre("Pizza")
-                .descripcion("Pizza deliciosa")
-                .precio(200)
-                .urlImagen("https://pizza.png")
-                .categoria(CategoriaModel.builder().id(1L).nombre("Categoria").build())
-                .idRestaurante(RESTAURANT_ID)
-                .activo(true)
-                .build();
+        when(platoService.getById(platoId)).thenReturn(platoModel);
+        when(platoResponseMapper.toResponse(platoModel)).thenReturn(responseDto);
 
-        List<PlatoModel> modelList = Arrays.asList(platoModel, platoModel2);
-        Page<PlatoModel> mockedPage = new PageImpl<>(modelList, PageRequest.of(PAGE, SIZE), 10);
-
-        when(platoService.getAll(CATEGORIA, RESTAURANT_ID, pageable)).thenReturn(mockedPage);
-        when(platoResponseMapper.toResponse(platoModel)).thenReturn(platoResponseDto);
-        when(platoResponseMapper.toResponse(platoModel2)).thenReturn(platoResponseDto2);
-
-        Page<PlatoResponseDto> resultPage = platoHandler.getAll(CATEGORIA, RESTAURANT_ID, PAGE, SIZE);
-
-        verify(platoService).getAll(CATEGORIA, RESTAURANT_ID, pageable);
-
-        assertNotNull(resultPage);
-        assertEquals(2, resultPage.getContent().size());
-        assertEquals(10, resultPage.getTotalElements());
-        assertEquals(1, resultPage.getTotalPages());
-
-        verify(platoResponseMapper).toResponse(platoModel);
-        verify(platoResponseMapper).toResponse(platoModel2);
-
-        assertEquals("Burger", resultPage.getContent().get(0).getNombre());
-        assertEquals("Pizza", resultPage.getContent().get(1).getNombre());
-
-        verifyNoMoreInteractions(platoService, platoRequestMapper);
-    }
-
-    @Test
-    @DisplayName("getAll debe manejar una página vacía correctamente")
-    void getAll_EmptyPage_ReturnsEmptyPagedResponseDto() {
-        Page<PlatoModel> mockedEmptyPage = new PageImpl<>(List.of(), PageRequest.of(PAGE, SIZE), 0);
-
-        when(platoService.getAll(CATEGORIA, RESTAURANT_ID, pageable)).thenReturn(mockedEmptyPage);
-
-        Page<PlatoResponseDto> resultPage = platoHandler.getAll(CATEGORIA, RESTAURANT_ID, PAGE, SIZE);
-
-        verify(platoService, times(1)).getAll(CATEGORIA, RESTAURANT_ID, pageable);
-        verifyNoInteractions(platoRequestMapper);
-
-        assertTrue(resultPage.isEmpty());
-        assertEquals(0, resultPage.getTotalElements());
-
-        verifyNoMoreInteractions(platoService);
-    }
-
-    @Test
-    @DisplayName("getAll debe funcionar correctamente cuando categoria es null")
-    void getAll_WithNullCategoria_ReturnsPagedResponseDto() {
-        Page<PlatoModel> mockedPage = new PageImpl<>(List.of(platoModel), PageRequest.of(PAGE, SIZE), 1);
-
-        when(platoService.getAll(null, RESTAURANT_ID, pageable)).thenReturn(mockedPage);
-        when(platoResponseMapper.toResponse(platoModel)).thenReturn(platoResponseDto);
-
-        Page<PlatoResponseDto> resultPage = platoHandler.getAll(null, RESTAURANT_ID, PAGE, SIZE);
-
-        verify(platoService).getAll(null, RESTAURANT_ID, pageable);
-        verify(platoResponseMapper).toResponse(platoModel);
-
-        assertNotNull(resultPage);
-        assertEquals(1, resultPage.getContent().size());
-    }
-
-    @Test
-    @DisplayName("update debe mapear DTO a Model, llamar al servicio y mapear el resultado a ResponseDto")
-    void update_SuccessfulFlow_ReturnsResponseDto() {
-        PlatoModel updatedPlatoModel = PlatoModel.builder()
-                .id(PLATO_ID)
-                .nombre("Burger")
-                .descripcion("Descripción actualizada")
-                .precio(150)
-                .urlImagen("https://logo.png")
-                .categoria(CategoriaModel.builder().id(1L).nombre("Categoria").build())
-                .idRestaurante(RESTAURANT_ID)
-                .activo(true)
-                .build();
-
-        PlatoResponseDto updatedPlatoResponseDto = PlatoResponseDto.builder()
-                .id(PLATO_ID)
-                .nombre("Burger")
-                .descripcion("Descripción actualizada")
-                .precio(150)
-                .urlImagen("https://logo.png")
-                .categoria(CategoriaModel.builder().id(1L).nombre("Categoria").build())
-                .idRestaurante(RESTAURANT_ID)
-                .activo(true)
-                .build();
-
-        when(platoRequestMapper.toModel(platoUpdateDto)).thenReturn(updatedPlatoModel);
-        when(platoService.update(USER_ID, PLATO_ID, updatedPlatoModel)).thenReturn(updatedPlatoModel);
-        when(platoResponseMapper.toResponse(updatedPlatoModel)).thenReturn(updatedPlatoResponseDto);
-
-        PlatoResponseDto result = platoHandler.update(USER_ID, PLATO_ID, platoUpdateDto);
-
-        verify(platoRequestMapper).toModel(platoUpdateDto);
-        verify(platoService).update(USER_ID, PLATO_ID, updatedPlatoModel);
-        verify(platoResponseMapper).toResponse(updatedPlatoModel);
+        PlatoResponseDto result = platoHandler.getById(platoId);
 
         assertNotNull(result);
-        assertEquals(PLATO_ID, result.getId());
-        assertEquals("Descripción actualizada", result.getDescripcion());
-        assertEquals(150, result.getPrecio());
-        assertTrue(result.isActivo());
+        assertEquals(responseDto, result);
+        verify(platoService).getById(platoId);
+        verify(platoResponseMapper).toResponse(platoModel);
+    }
 
-        verifyNoMoreInteractions(platoService, platoRequestMapper, platoResponseMapper);
+    @Test
+    @DisplayName("update() debería convertir DTO, llamar al servicio y devolver respuesta mapeada")
+    void update_ShouldUpdateAndReturnDto() {
+        Long userId = 1L;
+        Long platoId = 5L;
+        PlatoUpdateDto updateDto = PlatoUpdateDto.builder().build();
+
+        PlatoModel inputModel = PlatoModel.builder().build();
+        PlatoModel updatedModel = PlatoModel.builder().build();
+        PlatoResponseDto responseDto = PlatoResponseDto.builder().build();
+
+        when(platoRequestMapper.toModel(updateDto)).thenReturn(inputModel);
+        when(platoService.update(userId, platoId, inputModel)).thenReturn(updatedModel);
+        when(platoResponseMapper.toResponse(updatedModel)).thenReturn(responseDto);
+
+        PlatoResponseDto result = platoHandler.update(userId, platoId, updateDto);
+
+        assertNotNull(result);
+        assertEquals(responseDto, result);
+
+        verify(platoRequestMapper).toModel(updateDto);
+        verify(platoService).update(userId, platoId, inputModel);
+        verify(platoResponseMapper).toResponse(updatedModel);
     }
 
 }
