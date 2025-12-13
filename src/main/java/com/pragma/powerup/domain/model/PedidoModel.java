@@ -73,7 +73,7 @@ public class PedidoModel {
 
     public void cancel() {
         if (this.estado != PedidoEstado.PENDIENTE) {
-            throw new DomainException("Solo puedes cancelar el pedido si aún está en estado PENDIENTE. Estado actual: " + this.estado);
+            throw new DomainException("Lo sentimos, tu pedido ya está en preparación y no puede cancelarse");
         }
 
         this.estado = PedidoEstado.CANCELADO;
