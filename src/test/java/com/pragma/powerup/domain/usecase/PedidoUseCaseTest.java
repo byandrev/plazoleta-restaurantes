@@ -25,18 +25,16 @@ class PedidoUseCaseTest {
 
     @Mock
     private IPedidoPersistencePort pedidoPersistence;
-
     @Mock
     private IPlatoPersistencePort platoPersistence;
-
     @Mock
     private ITraceabilityExternalServicePort traceabilityService;
-
     @Mock
     private IEmployeePersistencePort  employeePersistence;
-
     @Mock
     private IUserExternalServicePort userExternalService;
+    @Mock
+    private IMessageExternalServicePort messageExternalService;
 
     @InjectMocks
     private PedidoUseCase pedidoUseCase;
@@ -92,7 +90,8 @@ class PedidoUseCaseTest {
 
         existingPedido = PedidoModel.builder()
                 .id(PEDIDO_ID)
-                .idCliente(10L)
+                .idCliente(client.getId())
+                .cliente(client)
                 .idRestaurante(RESTAURANT_ID)
                 .restaurante(restaurantModel)
                 .estado(PedidoEstado.PENDIENTE)
@@ -129,7 +128,7 @@ class PedidoUseCaseTest {
     }
 
     @Test
-    @DisplayName("Debe crear un pedido exitosamente si el cliente no tiene pedidos en proceso")
+    @DisplayName("save() debe crear un pedido exitosamente si el cliente no tiene pedidos en proceso")
     void save_shouldCreatePedidoSuccessfully_whenClientHasNoPendingOrders() {
         when(pedidoPersistence.existsByClienteIdAndEstadoIn(pedidoRequest.getCliente().getId())).thenReturn(false);
         when(platoPersistence.findNonExistentPlatoIds(any(Long.class), any(Set.class))).thenReturn(new HashSet<>());
@@ -150,7 +149,7 @@ class PedidoUseCaseTest {
     }
 
     @Test
-    @DisplayName("Debe lanzar DomainException si el cliente ya tiene un pedido en proceso")
+    @DisplayName("save() debe lanzar DomainException si el cliente ya tiene un pedido en proceso")
     void save_shouldThrowDomainException_whenClientHasPendingOrders() {
         when(pedidoPersistence.existsByClienteIdAndEstadoIn(pedidoRequest.getCliente().getId())).thenReturn(true);
 
@@ -166,7 +165,7 @@ class PedidoUseCaseTest {
     }
 
     @Test
-    @DisplayName("Debe lanzar una excepción si el plato asociado a un ítem no existe")
+    @DisplayName("save() debe lanzar una excepción si el plato asociado a un ítem no existe")
     void save_shouldThrowException_whenPlatoDoesNotExist() {
         when(pedidoPersistence.existsByClienteIdAndEstadoIn(pedidoRequest.getCliente().getId())).thenReturn(false);
         when(platoPersistence.findNonExistentPlatoIds(any(Long.class), any(Set.class))).thenReturn(new HashSet<>());
@@ -183,7 +182,7 @@ class PedidoUseCaseTest {
     }
 
     @Test
-    @DisplayName("Debe lanzar DomainException si el usuario no es empleado del restaurante")
+    @DisplayName("getAll() debe lanzar DomainException si el usuario no es empleado del restaurante")
     void getAll_UserIsNotEmployee_ThrowsDomainException() {
         when(employeePersistence.existsById(USER_ID, RESTAURANT_ID)).thenReturn(false);
 
@@ -197,7 +196,7 @@ class PedidoUseCaseTest {
     }
 
     @Test
-    @DisplayName("Debe llamar a getAllByEstado cuando 'estado' es diferente a null")
+    @DisplayName("getAll() debe llamar a getAllByEstado cuando 'estado' es diferente a null")
     void getAll_EstadoIsNotNull_CallsGetAllByEstado() {
         PedidoEstado estado = PedidoEstado.PENDIENTE;
         when(employeePersistence.existsById(USER_ID, RESTAURANT_ID)).thenReturn(true);
@@ -214,7 +213,7 @@ class PedidoUseCaseTest {
     }
 
     @Test
-    @DisplayName("Debe actualizar el pedido exitosamente")
+    @DisplayName("update() debe actualizar el pedido exitosamente")
     void update_ShouldUpdatePedidoSuccessfully() {
         when(pedidoPersistence.getById(PEDIDO_ID)).thenReturn(existingPedido);
         when(employeePersistence.existsById(CHEF_ID, RESTAURANT_ID)).thenReturn(true);
@@ -238,24 +237,27 @@ class PedidoUseCaseTest {
     }
 
     @Test
-    @DisplayName("Debe lanzar DomainException si el empleado intenta asignar a otro chef")
+    @DisplayName("update() debe lanzar DomainException si el empleado intenta asignar a otro chef")
     void update_ShouldThrowDomainException_WhenEmployeeTriesToAssignOtherChef() {
         UserModel empleadoDiferente = UserModel.builder().id(USER_ID).correo("diferente@gmail.com").build();
+
+        when(pedidoPersistence.getById(anyLong())).thenReturn(existingPedido);
+        when(employeePersistence.existsById(anyLong(), anyLong())).thenReturn(false);
 
         DomainException exception = assertThrows(DomainException.class, () ->
                 pedidoUseCase.update(empleadoDiferente, pedidoUpdatedRequest)
         );
 
-        assertEquals("No puedes asignar a otro empleado a un pedido.", exception.getMessage());
+        assertEquals("No eres empleado del restaurante", exception.getMessage());
 
-        verify(pedidoPersistence, never()).getById(anyLong());
-        verify(employeePersistence, never()).existsById(anyLong(), anyLong());
+        verify(pedidoPersistence).getById(anyLong());
+        verify(employeePersistence).existsById(anyLong(), anyLong());
         verify(pedidoPersistence, never()).save(any(PedidoModel.class));
         verify(traceabilityService, never()).save(any(TraceabilityModel.class));
     }
 
     @Test
-    @DisplayName("Debe lanzar DomainException si el chef asignado no es empleado del restaurante")
+    @DisplayName("update() debe lanzar DomainException si el chef asignado no es empleado del restaurante")
     void update_ShouldThrowDomainException_WhenChefIsNotRestaurantEmployee() {
         when(pedidoPersistence.getById(PEDIDO_ID)).thenReturn(existingPedido);
         when(employeePersistence.existsById(CHEF_ID, RESTAURANT_ID)).thenReturn(false);
@@ -273,7 +275,7 @@ class PedidoUseCaseTest {
     }
 
     @Test
-    @DisplayName("Debe lanzar DomainException si el nuevo estado es igual al estado anterior")
+    @DisplayName("update() debe lanzar DomainException si el nuevo estado es igual al estado anterior")
     void update_ShouldThrowDomainException_WhenNewStateIsSameAsOldState() {
         when(pedidoPersistence.getById(PEDIDO_ID)).thenReturn(existingPedido);
         PedidoModel requestSameState = PedidoModel.builder()
@@ -288,12 +290,112 @@ class PedidoUseCaseTest {
                 pedidoUseCase.update(chefModel, requestSameState)
         );
 
-        assertEquals("Estas enviando un estado nuevo el cual es el mismo al anterior", exception.getMessage());
+        assertEquals("El nuevo estado es el mismo que el actual", exception.getMessage());
 
         verify(pedidoPersistence).getById(PEDIDO_ID);
         verify(employeePersistence).existsById(CHEF_ID, RESTAURANT_ID);
         verify(pedidoPersistence, never()).save(any(PedidoModel.class));
         verify(traceabilityService, never()).save(any(TraceabilityModel.class));
+    }
+
+    @Test
+    @DisplayName("update() debe cambiar exitosamente el estado de PENDIENTE a EN_PREPARACION")
+    void update_ShouldChangeStateTo_EN_PREPARACION_Successfully() {
+        PedidoModel request = PedidoModel.builder()
+                .id(PEDIDO_ID)
+                .estado(PedidoEstado.EN_PREPARACION)
+                .cliente(client)
+                .build();
+
+        PedidoModel expectedUpdated = PedidoModel.builder()
+                .id(PEDIDO_ID)
+                .estado(PedidoEstado.EN_PREPARACION)
+                .cliente(client)
+                .idCliente(client.getId())
+                .chef(chefModel)
+                .idChef(CHEF_ID)
+                .build();
+
+        when(pedidoPersistence.getById(PEDIDO_ID)).thenReturn(existingPedido);
+        when(employeePersistence.existsById(CHEF_ID, RESTAURANT_ID)).thenReturn(true);
+        when(pedidoPersistence.save(any(PedidoModel.class))).thenReturn(expectedUpdated);
+        when(userExternalService.getUserById(expectedUpdated.getIdCliente())).thenReturn(client);
+        when(userExternalService.getUserById(expectedUpdated.getIdChef())).thenReturn(chefModel);
+
+        PedidoModel result = pedidoUseCase.update(chefModel, request);
+
+        assertEquals(PedidoEstado.EN_PREPARACION, result.getEstado());
+        assertEquals(CHEF_ID, result.getIdChef());
+
+        verify(pedidoPersistence).getById(PEDIDO_ID);
+        verify(pedidoPersistence).save(argThat(p -> p.getEstado() == PedidoEstado.EN_PREPARACION && p.getIdChef().equals(CHEF_ID)));
+        verify(traceabilityService).save(any(TraceabilityModel.class));
+        verify(messageExternalService, never()).send(anyString(), anyString());
+    }
+
+    @Test
+    @DisplayName("update() debe cambiar exitosamente el estado de EN_PREPARACION a LISTO y enviar PIN")
+    void update_ShouldChangeStateTo_LISTO_SuccessfullyAndSendPin() {
+        existingPedido.setEstado(PedidoEstado.EN_PREPARACION);
+
+        PedidoModel request = PedidoModel.builder().id(PEDIDO_ID).estado(PedidoEstado.LISTO).build();
+
+        PedidoModel expectedUpdated = PedidoModel.builder()
+                .id(PEDIDO_ID)
+                .estado(PedidoEstado.LISTO)
+                .cliente(client)
+                .idCliente(client.getId())
+                .chef(chefModel)
+                .idChef(CHEF_ID)
+                .build();
+
+        when(pedidoPersistence.getById(PEDIDO_ID)).thenReturn(existingPedido);
+        when(employeePersistence.existsById(CHEF_ID, RESTAURANT_ID)).thenReturn(true);
+        when(pedidoPersistence.save(any(PedidoModel.class))).thenReturn(expectedUpdated);
+        when(userExternalService.getUserById(expectedUpdated.getIdCliente())).thenReturn(client);
+        when(userExternalService.getUserById(expectedUpdated.getIdChef())).thenReturn(chefModel);
+
+        PedidoModel result = pedidoUseCase.update(chefModel, request);
+
+        assertEquals(PedidoEstado.LISTO, result.getEstado());
+
+        verify(pedidoPersistence).save(argThat(p -> p.getEstado() == PedidoEstado.LISTO));
+        verify(traceabilityService).save(any(TraceabilityModel.class));
+        verify(messageExternalService).send(
+                eq(client.getCelular()),
+                contains("El PIN de tu pedido #" + PEDIDO_ID + " es ")
+        );
+    }
+
+    @Test
+    @DisplayName("update() debe cambiar exitosamente el estado de PENDIENTE a CANCELADO")
+    void update_ShouldChangeStateTo_CANCELADO_Successfully() {
+        PedidoModel request = PedidoModel.builder()
+                .id(PEDIDO_ID)
+                .estado(PedidoEstado.CANCELADO)
+                .build();
+
+        PedidoModel expectedUpdated = PedidoModel.builder()
+                .id(PEDIDO_ID)
+                .estado(PedidoEstado.CANCELADO)
+                .cliente(client)
+                .idCliente(client.getId())
+                .chef(chefModel)
+                .idChef(CHEF_ID)
+                .build();
+
+        when(pedidoPersistence.getById(PEDIDO_ID)).thenReturn(existingPedido);
+        when(employeePersistence.existsById(CHEF_ID, RESTAURANT_ID)).thenReturn(true);
+        when(pedidoPersistence.save(any(PedidoModel.class))).thenReturn(expectedUpdated);
+        when(userExternalService.getUserById(expectedUpdated.getIdCliente())).thenReturn(client);
+        when(userExternalService.getUserById(expectedUpdated.getIdChef())).thenReturn(chefModel);
+
+        PedidoModel result = pedidoUseCase.update(chefModel, request);
+
+        assertEquals(PedidoEstado.CANCELADO, result.getEstado());
+
+        verify(pedidoPersistence).save(argThat(p -> p.getEstado() == PedidoEstado.CANCELADO));
+        verify(traceabilityService).save(any(TraceabilityModel.class));
     }
 
 }

@@ -5,6 +5,7 @@ import com.pragma.powerup.domain.exception.DomainException;
 import com.pragma.powerup.domain.model.*;
 import com.pragma.powerup.domain.spi.*;
 import com.pragma.powerup.domain.utils.ConvertDate;
+import com.pragma.powerup.domain.utils.PinGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,14 +18,11 @@ import java.util.stream.Collectors;
 public class PedidoUseCase implements IPedidoServicePort {
 
     private final IPedidoPersistencePort pedidoPersistencePort;
-
     private final IPlatoPersistencePort platoPersistencePort;
-
     private final IUserExternalServicePort userExternalService;
-
     private final ITraceabilityExternalServicePort traceabilityService;
-
     private final IEmployeePersistencePort employeePersistence;
+    private final IMessageExternalServicePort messageExternalService;
 
     private void checkPlatos(PedidoModel pedido) {
         Set<Long> platosIds = pedido.getItems().stream().map(PedidoItemModel::getPlatoId).collect(Collectors.toSet());
@@ -72,9 +70,8 @@ public class PedidoUseCase implements IPedidoServicePort {
 
     @Override
     public PedidoModel save(UserModel client, PedidoModel pedido) {
-        if (pedidoPersistencePort.existsByClienteIdAndEstadoIn(client.getId())) {
-            throw new DomainException("No puedes crear un pedido porque tienes uno pendiente.");
-        }
+        boolean hasPendingOrder = pedidoPersistencePort.existsByClienteIdAndEstadoIn(client.getId());
+        pedido.canBeCreated(hasPendingOrder);
 
         checkPlatos(pedido);
 
@@ -96,31 +93,48 @@ public class PedidoUseCase implements IPedidoServicePort {
     }
 
     @Override
-    public PedidoModel update(UserModel employee, PedidoModel pedido) {
-        if (!employee.getId().equals(pedido.getIdChef())) {
-            throw new DomainException("No puedes asignar a otro empleado a un pedido.");
-        }
+    public PedidoModel update(UserModel employee, PedidoModel pedidoUpdate) {
+        PedidoModel currentPedido = pedidoPersistencePort.getById(pedidoUpdate.getId());
+        RestaurantModel restaurant = currentPedido.getRestaurante();
 
-        PedidoModel pedidoSaved = pedidoPersistencePort.getById(pedido.getId());
-        RestaurantModel restaurante = pedidoSaved.getRestaurante();
-
-        if (!employeePersistence.existsById(pedido.getIdChef(), restaurante.getId())) {
+        if (!employeePersistence.existsById(employee.getId(), restaurant.getId())) {
             throw new DomainException("No eres empleado del restaurante");
         }
 
-        if (pedidoSaved.getEstado() == pedido.getEstado()) {
-            throw new DomainException("Estas enviando un estado nuevo el cual es el mismo al anterior");
+        if (currentPedido.getEstado() == pedidoUpdate.getEstado()) {
+            throw new DomainException("El nuevo estado es el mismo que el actual");
         }
 
-        PedidoEstado backStatus = pedidoSaved.getEstado();
-        pedidoSaved.setEstado(pedido.getEstado());
-        pedidoSaved.setIdChef(pedido.getIdChef());
+        PedidoEstado backStatus = currentPedido.getEstado();
+        Long employeeId = employee.getId();
 
-        PedidoModel pedidoUpdated = pedidoPersistencePort.save(pedidoSaved);
-        pedidoUpdated.setCliente(userExternalService.getUserById(pedidoSaved.getIdCliente()));
-        pedidoUpdated.setChef(userExternalService.getUserById(pedidoSaved.getIdChef()));
+        if (pedidoUpdate.getEstado() == PedidoEstado.EN_PREPARACION) {
+            currentPedido.prepare(employeeId);
+        } else if (pedidoUpdate.getEstado() == PedidoEstado.LISTO) {
+            currentPedido.ready(employeeId);
+        } else if (pedidoUpdate.getEstado() == PedidoEstado.ENTREGADO) {
+            String pin = "PIN";
+            currentPedido.deliver(pin);
+        } else if (pedidoUpdate.getEstado() == PedidoEstado.CANCELADO) {
+            currentPedido.cancel();
+        } else {
+            throw new DomainException("Transición de estado no válida: " + pedidoUpdate.getEstado());
+        }
+
+        PedidoModel pedidoUpdated = pedidoPersistencePort.save(currentPedido);
+        pedidoUpdated.setCliente(userExternalService.getUserById(pedidoUpdated.getIdCliente()));
+        pedidoUpdated.setChef(userExternalService.getUserById(pedidoUpdated.getIdChef()));
 
         updateTraceability(pedidoUpdated, backStatus);
+
+        if (pedidoUpdated.getEstado() == PedidoEstado.LISTO) {
+            String pin = PinGenerator.generatePin(6);
+
+            messageExternalService.send(
+                    pedidoUpdated.getCliente().getCelular(),
+                    "El PIN de tu pedido #" + pedidoUpdated.getId() + " es " + pin
+            );
+        }
 
         return pedidoUpdated;
     }
