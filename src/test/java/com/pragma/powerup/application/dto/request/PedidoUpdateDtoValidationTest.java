@@ -61,4 +61,20 @@ class PedidoUpdateDtoValidationTest {
         assertViolation(dto, "El estado no puede estar vacio");
     }
 
+    @Test
+    @DisplayName("El tamaño del PIN menor que 6 debe fallar la validación")
+    void saveValidatePin_MinSize_FailsValidation() {
+        PedidoUpdateDto dto = createValidPedidoDto();
+        dto.setPin("123");
+        assertViolation(dto, "El tamaño del PIN debe ser 6 digitos");
+    }
+
+    @Test
+    @DisplayName("El tamaño del PIN mayor que 6 debe fallar la validación")
+    void saveValidatePin_MaxSize_FailsValidation() {
+        PedidoUpdateDto dto = createValidPedidoDto();
+        dto.setPin("1234567");
+        assertViolation(dto, "El tamaño del PIN debe ser 6 digitos");
+    }
+
 }
