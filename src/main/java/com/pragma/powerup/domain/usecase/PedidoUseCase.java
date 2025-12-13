@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -91,6 +92,28 @@ public class PedidoUseCase implements IPedidoServicePort {
 
         return pedidoSaved;
     }
+
+    @Override
+    public PedidoModel cancel(UserModel client, PedidoModel pedidoUpdate) {
+        PedidoModel currentPedido = pedidoPersistencePort.getById(pedidoUpdate.getId());
+        PedidoEstado backStatus = currentPedido.getEstado();
+
+        if (!Objects.equals(currentPedido.getIdCliente(), client.getId())) {
+            throw new DomainException("No tienes permiso para cancelar el pedido: " + pedidoUpdate.getId());
+        }
+
+        currentPedido.cancel();
+
+        PedidoModel pedidoUpdated = pedidoPersistencePort.save(currentPedido);
+        UserModel chef = userExternalService.getUserById(currentPedido.getIdChef());
+        pedidoUpdated.setCliente(client);
+        pedidoUpdated.setChef(chef);
+
+        updateTraceability(pedidoUpdated, backStatus);
+
+        return pedidoUpdated;
+    }
+
 
     @Override
     public PedidoModel update(UserModel employee, PedidoModel pedidoUpdate) {

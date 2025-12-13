@@ -6,6 +6,8 @@ public interface IPedidoServicePort {
 
     PedidoModel save(UserModel client, PedidoModel pedido);
 
+    PedidoModel cancel(UserModel client, PedidoModel pedido);
+
     PedidoModel update(UserModel employee, PedidoModel pedido);
 
     PedidoModel getById(Long id);
