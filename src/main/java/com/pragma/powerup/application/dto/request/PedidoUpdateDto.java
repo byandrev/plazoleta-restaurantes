@@ -14,8 +14,6 @@ public class PedidoUpdateDto {
     @Schema(hidden = true)
     private Long id;
 
-    private Long idChef;
-
     @NotNull(message = "El estado no puede estar vacio")
     private PedidoEstado estado;
 
