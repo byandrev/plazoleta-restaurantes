@@ -1,11 +1,11 @@
 server:
-  port: 8082
+  port: ${PORT}
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5433/plazoleta-restaurantes
-    username: root
-    password: 123456
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:
@@ -13,8 +13,8 @@ spring:
     show-sql: true
 
 jwt:
-  secret: 123456
-  expiration: 1
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION_TIME}
 
 appDescription: "Plazoleta Restaurantes"
 appVersion: "1.0.0"
