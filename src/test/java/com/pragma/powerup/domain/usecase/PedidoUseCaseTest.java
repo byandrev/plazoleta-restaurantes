@@ -386,9 +386,9 @@ class PedidoUseCaseTest {
 
         when(pedidoPersistence.getById(PEDIDO_ID)).thenReturn(existingPedido);
         when(employeePersistence.existsById(CHEF_ID, RESTAURANT_ID)).thenReturn(true);
+        when(userExternalService.getUserById(existingPedido.getIdCliente())).thenReturn(client);
+        when(userExternalService.getUserById(existingPedido.getIdChef())).thenReturn(chefModel);
         when(pedidoPersistence.save(any(PedidoModel.class))).thenReturn(expectedUpdated);
-        when(userExternalService.getUserById(expectedUpdated.getIdCliente())).thenReturn(client);
-        when(userExternalService.getUserById(expectedUpdated.getIdChef())).thenReturn(chefModel);
 
         PedidoModel result = pedidoUseCase.update(chefModel, request);
 
