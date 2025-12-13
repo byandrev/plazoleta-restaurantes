@@ -30,7 +30,7 @@ public interface IPaginationMapper {
 
         Sort sort = Sort.by(pagination.getSortBy());
 
-        if (pagination.getSortDirection().equals(Sort.Direction.ASC)) {
+        if (pagination.getSortDirection().equals("ASC")) {
             sort = sort.ascending();
         } else {
             sort = sort.descending();

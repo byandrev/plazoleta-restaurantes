@@ -1,16 +1,16 @@
 package com.pragma.powerup.infrastructure.out.jpa.adapter;
 
+import com.pragma.powerup.domain.model.PaginationInfo;
 import com.pragma.powerup.domain.model.PaginationResult;
-import com.pragma.powerup.infrastructure.exception.ResourceNotFound;
 import com.pragma.powerup.domain.model.RestaurantModel;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
+import com.pragma.powerup.infrastructure.exception.ResourceNotFound;
 import com.pragma.powerup.infrastructure.out.jpa.entity.RestaurantEntity;
 import com.pragma.powerup.infrastructure.out.jpa.mapper.IPaginationMapper;
 import com.pragma.powerup.infrastructure.out.jpa.mapper.IRestaurantEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.repository.IRestaurantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -35,8 +35,8 @@ public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
     }
 
     @Override
-    public PaginationResult<RestaurantModel> getAll(PageRequest pageRequest) {
-        Page<RestaurantEntity> page = restaurantRepository.findAll(pageRequest);
+    public PaginationResult<RestaurantModel> getAll(PaginationInfo pagination) {
+        Page<RestaurantEntity> page = restaurantRepository.findAll(paginationMapper.toPageable(pagination));
         return paginationMapper.toModel(page.map(restaurantEntityMapper::toModel));
     }
 

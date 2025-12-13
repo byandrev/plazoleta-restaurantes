@@ -1,6 +1,7 @@
 package com.pragma.powerup.domain.api;
 
 import com.pragma.powerup.domain.model.EmployeeModel;
+import com.pragma.powerup.domain.model.PaginationInfo;
 import com.pragma.powerup.domain.model.PaginationResult;
 import com.pragma.powerup.domain.model.RestaurantModel;
 
@@ -10,7 +11,7 @@ public interface IRestaurantServicePort {
 
     RestaurantModel getById(Long id);
 
-    PaginationResult<RestaurantModel> getAll(int page, int size);
+    PaginationResult<RestaurantModel> getAll(PaginationInfo pagination);
 
     void assignEmployee(Long ownerId, EmployeeModel employee);
 

@@ -1,8 +1,8 @@
 package com.pragma.powerup.domain.spi;
 
+import com.pragma.powerup.domain.model.PaginationInfo;
 import com.pragma.powerup.domain.model.PaginationResult;
 import com.pragma.powerup.domain.model.RestaurantModel;
-import org.springframework.data.domain.PageRequest;
 
 public interface IRestaurantPersistencePort {
 
@@ -10,6 +10,6 @@ public interface IRestaurantPersistencePort {
 
     RestaurantModel getById(Long id);
 
-    PaginationResult<RestaurantModel> getAll(PageRequest pageRequest);
+    PaginationResult<RestaurantModel> getAll(PaginationInfo pagination);
 
 }

@@ -1,9 +1,6 @@
 package com.pragma.powerup.domain.api;
 
-import com.pragma.powerup.domain.model.PaginationResult;
-import com.pragma.powerup.domain.model.PedidoEstado;
-import com.pragma.powerup.domain.model.PedidoModel;
-import com.pragma.powerup.domain.model.UserModel;
+import com.pragma.powerup.domain.model.*;
 
 public interface IPedidoServicePort {
 
@@ -13,6 +10,6 @@ public interface IPedidoServicePort {
 
     PedidoModel getById(Long id);
 
-    PaginationResult<PedidoModel> getAll(Long userId, Long restaurantId, PedidoEstado estado, int page, int size, String sortBy);
+    PaginationResult<PedidoModel> getAll(Long userId, Long restaurantId, PedidoEstado estado, PaginationInfo pagination);
 
 }

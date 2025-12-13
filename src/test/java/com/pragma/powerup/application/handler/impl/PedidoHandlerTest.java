@@ -1,15 +1,13 @@
 package com.pragma.powerup.application.handler.impl;
 
-import com.pragma.powerup.application.dto.request.PedidoItemRequestDto;
+import com.pragma.powerup.application.dto.request.PaginationRequestDto;
 import com.pragma.powerup.application.dto.request.PedidoRequestDto;
 import com.pragma.powerup.application.dto.request.PedidoUpdateDto;
-import com.pragma.powerup.application.mapper.IPedidoRequestMapper;
-import com.pragma.powerup.application.mapper.IPedidoUpdateMapper;
+import com.pragma.powerup.application.dto.response.PaginationResponseDto;
+import com.pragma.powerup.application.dto.response.PedidoResponseDto;
+import com.pragma.powerup.application.mapper.*;
 import com.pragma.powerup.domain.api.IPedidoServicePort;
-import com.pragma.powerup.domain.model.PedidoEstado;
-import com.pragma.powerup.domain.model.PedidoModel;
-import com.pragma.powerup.domain.model.UserModel;
-import org.junit.jupiter.api.BeforeEach;
+import com.pragma.powerup.domain.model.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,78 +15,122 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Set;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PedidoHandlerTest {
 
     @Mock
-    private IPedidoServicePort pedidoServicePort;
-
+    private IPedidoServicePort pedidoService;
     @Mock
     private IPedidoRequestMapper pedidoRequestMapper;
-
     @Mock
     private IPedidoUpdateMapper pedidoUpdateMapper;
+    @Mock
+    private IPedidoResponseMapper pedidoResponseMapper;
+    @Mock
+    private IPaginationResponseMapper paginationResponseMapper;
+    @Mock
+    private IPaginationRequestMapper paginationRequestMapper;
 
     @InjectMocks
     private PedidoHandler pedidoHandler;
 
-    private PedidoRequestDto pedidoRequestDto;
-    private PedidoUpdateDto pedidoUpdateDto;
-    private PedidoModel pedidoModel;
-    private UserModel client;
+    @Test
+    @DisplayName("Save: Debería mapear DTO, llamar al servicio con el cliente y retornar la respuesta")
+    void save_ShouldConvertAndCallService() {
+        UserModel clientMock = mock(UserModel.class);
+        PedidoRequestDto requestDto = PedidoRequestDto.builder().build();
+        PedidoModel inputModel = PedidoModel.builder().id(1L).build();
+        PedidoModel savedModel = PedidoModel.builder().id(1L).build();
+        PedidoResponseDto responseDto = PedidoResponseDto.builder().id(1L).build();
 
-    @BeforeEach
-    void setUp() {
-        pedidoRequestDto = PedidoRequestDto
-                .builder()
-                .idRestaurante(1L)
-                .idChef(2L)
-                .items(Set.of(PedidoItemRequestDto.builder().platoId(10L).cantidad(2).build()))
-                .build();
+        when(pedidoRequestMapper.toModel(requestDto)).thenReturn(inputModel);
+        when(pedidoService.save(clientMock, inputModel)).thenReturn(savedModel);
+        when(pedidoResponseMapper.toResponse(savedModel)).thenReturn(responseDto);
 
-        pedidoUpdateDto = PedidoUpdateDto
-                .builder()
-                .idChef(2L)
-                .estado(PedidoEstado.EN_PREPARACION)
-                .build();
+        PedidoResponseDto result = pedidoHandler.save(clientMock, requestDto);
 
-        pedidoModel = PedidoModel.builder().build();
+        assertNotNull(result);
+        assertEquals(responseDto, result);
 
-        client = UserModel
-                .builder()
-                .id(10L)
-                .correo("user@gmail.com")
-                .build();
+        verify(pedidoRequestMapper).toModel(requestDto);
+        verify(pedidoService).save(clientMock, inputModel);
+        verify(pedidoResponseMapper).toResponse(savedModel);
     }
 
     @Test
-    @DisplayName("save debe mapear DTO a Model y llamar al servicio para guardar")
-    void save_SuccessfulFlow_CallsMapperAndService() {
-        when(pedidoRequestMapper.toModel(pedidoRequestDto)).thenReturn(pedidoModel);
+    @DisplayName("update() debería mapear DTO de actualización, llamar al servicio con el empleado y retornar la respuesta")
+    void update_ShouldConvertAndCallService() {
+        UserModel employeeMock = mock(UserModel.class);
+        PedidoUpdateDto updateDto = PedidoUpdateDto.builder().build();
+        PedidoModel inputModel = PedidoModel.builder().build();
+        PedidoModel updatedModel = PedidoModel.builder().build();
+        PedidoResponseDto responseDto = PedidoResponseDto.builder().build();
 
-        pedidoHandler.save(client, pedidoRequestDto);
+        when(pedidoUpdateMapper.toModel(updateDto)).thenReturn(inputModel);
+        when(pedidoService.update(employeeMock, inputModel)).thenReturn(updatedModel);
+        when(pedidoResponseMapper.toResponse(updatedModel)).thenReturn(responseDto);
 
-        verify(pedidoRequestMapper).toModel(pedidoRequestDto);
-        verify(pedidoServicePort).save(client, pedidoModel);
+        PedidoResponseDto result = pedidoHandler.update(employeeMock, updateDto);
 
-        verifyNoMoreInteractions(pedidoServicePort, pedidoRequestMapper);
+        assertNotNull(result);
+        assertEquals(responseDto, result);
+
+        verify(pedidoUpdateMapper).toModel(updateDto);
+        verify(pedidoService).update(employeeMock, inputModel);
+        verify(pedidoResponseMapper).toResponse(updatedModel);
     }
 
     @Test
-    @DisplayName("update debe mapear DTO a Model y llamar al servicio para guardar")
-    void update_SuccessfulFlow_CallsMapperAndService() {
-        when(pedidoUpdateMapper.toModel(pedidoUpdateDto)).thenReturn(pedidoModel);
+    @DisplayName("getById() debería obtener el modelo del servicio y retornarlo como DTO")
+    void getById_ShouldReturnDto() {
+        Long pedidoId = 1L;
+        PedidoModel pedidoModel = PedidoModel.builder().id(pedidoId).build();
+        PedidoResponseDto responseDto = PedidoResponseDto.builder().id(pedidoId).build();
 
-        pedidoHandler.update(client, pedidoUpdateDto);
+        when(pedidoService.getById(pedidoId)).thenReturn(pedidoModel);
+        when(pedidoResponseMapper.toResponse(pedidoModel)).thenReturn(responseDto);
 
-        verify(pedidoUpdateMapper).toModel(pedidoUpdateDto);
-        verify(pedidoServicePort).update(client, pedidoModel);
+        PedidoResponseDto result = pedidoHandler.getById(pedidoId);
 
-        verifyNoMoreInteractions(pedidoServicePort, pedidoRequestMapper);
+        assertNotNull(result);
+        assertEquals(responseDto, result);
+
+        verify(pedidoService).getById(pedidoId);
+        verify(pedidoResponseMapper).toResponse(pedidoModel);
+    }
+
+    @Test
+    @DisplayName("getAll() debería manejar la paginación, mapear el resultado y devolver respuesta paginada")
+    void getAll_ShouldReturnPaginationResponse() {
+        // Arrange
+        Long userId = 10L;
+        Long restaurantId = 5L;
+        PedidoEstado estado = PedidoEstado.PENDIENTE;
+        PaginationRequestDto paginationRequest = new PaginationRequestDto();
+
+        PaginationInfo paginationModel = mock(PaginationInfo.class);
+        PaginationResult<PedidoModel> pedidosListMock = mock(PaginationResult.class);
+        PaginationResult<PedidoResponseDto> mappedResultMock = mock(PaginationResult.class);
+        PaginationResponseDto<PedidoResponseDto> finalResponse = new PaginationResponseDto<>();
+
+        when(paginationRequestMapper.toModel(paginationRequest)).thenReturn(paginationModel);
+        when(pedidoService.getAll(eq(userId), eq(restaurantId), eq(estado), eq(paginationModel))).thenReturn(pedidosListMock);
+        doReturn(mappedResultMock).when(pedidosListMock).map(any());
+        when(paginationResponseMapper.toResponse(mappedResultMock)).thenReturn(finalResponse);
+
+        PaginationResponseDto<PedidoResponseDto> result = pedidoHandler.getAll(userId, restaurantId, estado, paginationRequest);
+
+        assertNotNull(result);
+        assertEquals(finalResponse, result);
+
+        verify(paginationRequestMapper).toModel(paginationRequest);
+        verify(pedidoService).getAll(eq(userId), eq(restaurantId), eq(estado), eq(paginationModel));
+        verify(paginationResponseMapper).toResponse(mappedResultMock);
+        verify(pedidosListMock).map(any());
     }
 
 }

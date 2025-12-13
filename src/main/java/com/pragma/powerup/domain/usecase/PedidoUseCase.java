@@ -131,16 +131,16 @@ public class PedidoUseCase implements IPedidoServicePort {
     }
 
     @Override
-    public PaginationResult<PedidoModel> getAll(Long userId, Long restaurantId, PedidoEstado estado, int page, int size, String sortBy) {
+    public PaginationResult<PedidoModel> getAll(Long userId, Long restaurantId, PedidoEstado estado, PaginationInfo pagination) {
         if (!employeePersistence.existsById(userId, restaurantId)) {
             throw new DomainException("No eres empleado del restaurante");
         }
 
         if (estado != null) {
-            return pedidoPersistencePort.getAllByEstado(restaurantId, estado, page, size, sortBy);
+            return pedidoPersistencePort.getAllByEstado(restaurantId, estado, pagination);
         }
 
-        return pedidoPersistencePort.getAll(restaurantId, page, size, sortBy);
+        return pedidoPersistencePort.getAll(restaurantId, pagination);
     }
 
 }

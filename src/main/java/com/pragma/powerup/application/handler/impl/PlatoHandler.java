@@ -16,11 +16,8 @@ import com.pragma.powerup.domain.model.PlatoModel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
-
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class PlatoHandler implements IPlatoHandler {
 
     private final IPlatoServicePort platoService;

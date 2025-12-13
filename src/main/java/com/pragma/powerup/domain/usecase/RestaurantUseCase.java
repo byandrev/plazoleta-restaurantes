@@ -7,8 +7,6 @@ import com.pragma.powerup.domain.spi.IEmployeePersistencePort;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.domain.spi.IUserExternalServicePort;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -38,9 +36,8 @@ public class RestaurantUseCase implements IRestaurantServicePort {
     }
 
     @Override
-    public PaginationResult<RestaurantModel> getAll(int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("nombre").ascending());
-        return  restaurantPersistencePort.getAll(pageRequest);
+    public PaginationResult<RestaurantModel> getAll(PaginationInfo pagination) {
+        return  restaurantPersistencePort.getAll(pagination);
     }
 
     @Override

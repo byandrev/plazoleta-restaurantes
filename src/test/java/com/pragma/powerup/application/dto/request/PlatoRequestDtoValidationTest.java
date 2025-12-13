@@ -30,6 +30,7 @@ class PlatoRequestDtoValidationTest {
         return PlatoRequestDto
                 .builder()
                 .nombre("Burger")
+                .descripcion("Tests")
                 .categoria("Categoria")
                 .urlImagen("https://logo.png")
                 .precio(100)
@@ -92,7 +93,7 @@ class PlatoRequestDtoValidationTest {
     void saveValidateUrlImage_InvalidFormat_FailsValidation() {
         PlatoRequestDto dto = createValidPlatoDto();
         dto.setUrlImagen("");
-        assertViolation(dto, "La url_imagen no puede estar vacio");
+        assertViolation(dto, "La url_imagen no puede estar vacia");
     }
 
 }

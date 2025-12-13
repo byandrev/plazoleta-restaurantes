@@ -3,6 +3,7 @@ package com.pragma.powerup.application.dto.request;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Sort;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -21,6 +22,6 @@ public class PaginationRequestDto {
 
     private String sortBy = "id";
 
-    private String sortDirection = "ASC";
+    private Sort.Direction sortDirection = Sort.Direction.ASC;
 
 }

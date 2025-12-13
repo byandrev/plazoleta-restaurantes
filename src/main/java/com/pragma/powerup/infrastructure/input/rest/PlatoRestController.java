@@ -39,8 +39,6 @@ public class PlatoRestController {
     })
     @GetMapping("/")
     public ResponseEntity<CustomResponse<PaginationResponseDto<PlatoResponseDto>>> getRestaurants(
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "10") int size,
             @Valid PaginationRequestDto paginationRequest,
             @RequestParam @Min(value = 0) long restaurantId,
             @RequestParam(required = false) String categoria

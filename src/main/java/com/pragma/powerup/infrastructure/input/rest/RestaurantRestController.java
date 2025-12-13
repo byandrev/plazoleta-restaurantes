@@ -1,6 +1,7 @@
 package com.pragma.powerup.infrastructure.input.rest;
 
 import com.pragma.powerup.application.dto.request.EmployeeRequestDto;
+import com.pragma.powerup.application.dto.request.PaginationRequestDto;
 import com.pragma.powerup.application.dto.request.RestaurantRequestDto;
 import com.pragma.powerup.application.dto.response.PaginationResponseDto;
 import com.pragma.powerup.application.dto.response.RestaurantResponseDto;
@@ -21,7 +22,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
 
 
 @RestController
@@ -39,12 +39,11 @@ public class RestaurantRestController {
     })
     @GetMapping("/")
     public ResponseEntity<CustomResponse<PaginationResponseDto<RestaurantResponseDto>>> getRestaurants(
-            @RequestParam(defaultValue = "0") @Min(value = 0) int page,
-            @RequestParam(defaultValue = "10") @Min(value = 1) int size
+            @Valid PaginationRequestDto paginationRequest
     ) {
         CustomResponse<PaginationResponseDto<RestaurantResponseDto>> response = CustomResponse.<PaginationResponseDto<RestaurantResponseDto>>builder()
                 .status(HttpStatus.OK.value())
-                .data(restaurantHandler.getAll(page, size))
+                .data(restaurantHandler.getAll(paginationRequest))
                 .build();
 
         return ResponseEntity.ok(response);
