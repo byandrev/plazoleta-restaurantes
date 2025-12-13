@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Set;
 
 @Data
@@ -21,6 +22,8 @@ public class PedidoModel {
     private Long idRestaurante;
     private RestaurantModel restaurante;
     private Set<PedidoItemModel> items;
+    private String pin;
+
     public void addItem(PedidoItemModel item){
         this.items.add(item);
     }
@@ -55,6 +58,14 @@ public class PedidoModel {
     public void deliver(String pin) {
         if (this.estado != PedidoEstado.LISTO) {
             throw new DomainException("Solo se puede entregar un pedido en estado LISTO. Estado actual: " + this.estado);
+        }
+
+        if (pin == null) {
+            throw new DomainException("El PIN del pedido no puede estar vacio");
+        }
+
+        if (!pin.equals(this.pin)) {
+            throw new DomainException("El PIN no es el correcto");
         }
 
         this.estado = PedidoEstado.ENTREGADO;

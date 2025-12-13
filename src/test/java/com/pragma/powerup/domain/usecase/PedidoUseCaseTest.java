@@ -368,6 +368,68 @@ class PedidoUseCaseTest {
     }
 
     @Test
+    @DisplayName("update() debe cambiar exitosamente el estado de LISTO a ENTREGADO")
+    void update_ShouldChangeStateTo_ENTREGADO_Successfully() {
+        existingPedido.setEstado(PedidoEstado.LISTO);
+        existingPedido.setPin("123456");
+
+        PedidoModel request = PedidoModel.builder()
+                .id(PEDIDO_ID)
+                .estado(PedidoEstado.ENTREGADO)
+                .pin("123456")
+                .build();
+
+        PedidoModel expectedUpdated = PedidoModel.builder()
+                .id(PEDIDO_ID)
+                .estado(PedidoEstado.ENTREGADO)
+                .cliente(client)
+                .idCliente(client.getId())
+                .chef(chefModel)
+                .idChef(CHEF_ID)
+                .build();
+
+        when(pedidoPersistence.getById(PEDIDO_ID)).thenReturn(existingPedido);
+        when(employeePersistence.existsById(CHEF_ID, RESTAURANT_ID)).thenReturn(true);
+        when(pedidoPersistence.save(any(PedidoModel.class))).thenReturn(expectedUpdated);
+        when(userExternalService.getUserById(existingPedido.getIdCliente())).thenReturn(client);
+        when(userExternalService.getUserById(existingPedido.getIdChef())).thenReturn(chefModel);
+
+        PedidoModel result = pedidoUseCase.update(chefModel, request);
+
+        assertEquals(PedidoEstado.ENTREGADO, result.getEstado());
+
+        verify(pedidoPersistence).save(argThat(p -> p.getEstado() == PedidoEstado.ENTREGADO));
+        verify(traceabilityService).save(any(TraceabilityModel.class));
+        verify(messageExternalService, never()).send(anyString(), anyString());
+    }
+
+    @Test
+    @DisplayName("update() debe lanzar un DomainException cuando el PIN no es el mismo")
+    void update_ShouldChangeStateTo_ENTREGADO_InvalidPIN_Successfully() {
+        existingPedido.setEstado(PedidoEstado.LISTO);
+        existingPedido.setPin("654321");
+
+        PedidoModel request = PedidoModel.builder()
+                .id(PEDIDO_ID)
+                .estado(PedidoEstado.ENTREGADO)
+                .pin("123456")
+                .build();
+
+        when(pedidoPersistence.getById(PEDIDO_ID)).thenReturn(existingPedido);
+        when(employeePersistence.existsById(CHEF_ID, RESTAURANT_ID)).thenReturn(true);
+
+        DomainException exception = assertThrows(DomainException.class, () ->
+            pedidoUseCase.update(chefModel, request)
+        );
+
+        assertEquals("El PIN no es el correcto", exception.getMessage());
+
+        verify(pedidoPersistence, never()).save(argThat(p -> p.getEstado() == PedidoEstado.ENTREGADO));
+        verify(traceabilityService, never()).save(any(TraceabilityModel.class));
+        verify(messageExternalService, never()).send(anyString(), anyString());
+    }
+
+    @Test
     @DisplayName("update() debe cambiar exitosamente el estado de PENDIENTE a CANCELADO")
     void update_ShouldChangeStateTo_CANCELADO_Successfully() {
         PedidoModel request = PedidoModel.builder()
@@ -386,9 +448,9 @@ class PedidoUseCaseTest {
 
         when(pedidoPersistence.getById(PEDIDO_ID)).thenReturn(existingPedido);
         when(employeePersistence.existsById(CHEF_ID, RESTAURANT_ID)).thenReturn(true);
+        when(userExternalService.getUserById(existingPedido.getIdCliente())).thenReturn(client);
+        when(userExternalService.getUserById(existingPedido.getIdChef())).thenReturn(chefModel);
         when(pedidoPersistence.save(any(PedidoModel.class))).thenReturn(expectedUpdated);
-        when(userExternalService.getUserById(expectedUpdated.getIdCliente())).thenReturn(client);
-        when(userExternalService.getUserById(expectedUpdated.getIdChef())).thenReturn(chefModel);
 
         PedidoModel result = pedidoUseCase.update(chefModel, request);
 
