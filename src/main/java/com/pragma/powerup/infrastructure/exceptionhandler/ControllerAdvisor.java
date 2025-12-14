@@ -7,13 +7,14 @@ import com.pragma.powerup.infrastructure.exception.ValidationError;
 import com.pragma.powerup.infrastructure.input.rest.response.CustomResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -50,8 +51,8 @@ public class ControllerAdvisor {
         return ResponseEntity.status(ex.getCode()).body(response);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<CustomResponse<Void>> handleValidationException(MethodArgumentNotValidException ex) {
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<CustomResponse<Void>> handleValidationException(BindException ex) {
         List<ValidationError> errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -133,6 +134,17 @@ public class ControllerAdvisor {
                 .error(ExceptionResponse.BAD_REQUEST.getMessage())
                 .message(ExceptionResponse.JSON_ERROR.getMessage())
                 .errors(errors)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ResponseEntity<CustomResponse<Void>> handleGlobalException(PropertyReferenceException ex) {
+        CustomResponse<Void> response = CustomResponse.<Void>builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Campo de ordenamiento inválido: " + ex.getPropertyName())
+                .message(ExceptionResponse.BAD_REQUEST.getMessage())
                 .build();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
