@@ -39,6 +39,13 @@ public class PedidoHandler implements IPedidoHandler {
     }
 
     @Override
+    public PedidoResponseDto cancel(UserModel client, Long pedidoId) {
+        PedidoUpdateDto pedidoDto = PedidoUpdateDto.builder().id(pedidoId).build();
+        PedidoModel pedidoModel = pedidoUpdateMapper.toModel(pedidoDto);
+        return pedidoResponseMapper.toResponse(pedidoService.cancel(client, pedidoModel));
+    }
+
+    @Override
     public PedidoResponseDto getById(Long id) {
         return pedidoResponseMapper.toResponse(pedidoService.getById(id));
     }

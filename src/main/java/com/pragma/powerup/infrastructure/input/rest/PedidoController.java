@@ -97,7 +97,29 @@ public class PedidoController {
 
         pedidoHandler.update(client, pedidoUpdateDto);
 
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Operation(summary = "Cancel pedido")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Pedido canceled", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Conflict to cancel pedido", content = @Content)
+    })
+    @PatchMapping("/cancelar/{pedidoId}")
+    @PreAuthorize("hasRole('CLIENTE')")
+    public ResponseEntity<Void> cancelPedido(
+            @PathVariable Long pedidoId,
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetail userDetails
+    ) {
+        UserModel client = UserModel
+                .builder()
+                .id(userDetails.getId())
+                .correo(userDetails.getEmail())
+                .build();
+
+        pedidoHandler.cancel(client, pedidoId);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }

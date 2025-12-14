@@ -14,6 +14,8 @@ public interface IPedidoHandler {
 
     PedidoResponseDto update(UserModel employee, PedidoUpdateDto pedidoDto);
 
+    PedidoResponseDto cancel(UserModel client, Long pedidoId);
+
     PedidoResponseDto getById(Long id);
 
     PaginationResponseDto<PedidoResponseDto> getAll(Long userId, Long restaurantId, PedidoEstado estado, PaginationRequestDto paginationRequest);
