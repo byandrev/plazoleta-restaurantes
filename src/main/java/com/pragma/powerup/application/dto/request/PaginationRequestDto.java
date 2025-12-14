@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.Pattern;
 
 @Data
 @AllArgsConstructor
@@ -22,6 +23,11 @@ public class PaginationRequestDto {
 
     private String sortBy = "id";
 
-    private Sort.Direction sortDirection = Sort.Direction.ASC;
+    @Pattern(regexp = "(?i)^(ASC|DESC)$", message = "La dirección debe ser 'ASC' o 'DESC'")
+    private String sortDirection = "ASC";
+
+    public Sort.Direction getSortDirectionEnum() {
+        return Sort.Direction.fromString(sortDirection.toUpperCase());
+    }
 
 }
