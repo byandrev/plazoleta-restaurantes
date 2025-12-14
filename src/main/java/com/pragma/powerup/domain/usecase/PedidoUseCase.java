@@ -114,7 +114,6 @@ public class PedidoUseCase implements IPedidoServicePort {
         return pedidoUpdated;
     }
 
-
     @Override
     public PedidoModel update(UserModel employee, PedidoModel pedidoUpdate) {
         PedidoModel currentPedido = pedidoPersistencePort.getById(pedidoUpdate.getId());
