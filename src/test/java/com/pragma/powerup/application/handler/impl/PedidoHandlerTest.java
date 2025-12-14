@@ -8,6 +8,7 @@ import com.pragma.powerup.application.dto.response.PedidoResponseDto;
 import com.pragma.powerup.application.mapper.*;
 import com.pragma.powerup.domain.api.IPedidoServicePort;
 import com.pragma.powerup.domain.model.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +22,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PedidoHandlerTest {
+
+    private static final Long PEDIDO_ID = 1L;
+    private static final Long CLIENTE_ID = 10L;
 
     @Mock
     private IPedidoServicePort pedidoService;
@@ -38,14 +42,22 @@ class PedidoHandlerTest {
     @InjectMocks
     private PedidoHandler pedidoHandler;
 
+    private UserModel clientModel;
+    private PedidoResponseDto responseDto;
+
+    @BeforeEach
+    void setUp() {
+        clientModel = UserModel.builder().id(CLIENTE_ID).correo("cliente@mail.com").build();
+        responseDto = PedidoResponseDto.builder().id(PEDIDO_ID).estado(PedidoEstado.CANCELADO).build();
+    }
+
     @Test
-    @DisplayName("Save: Debería mapear DTO, llamar al servicio con el cliente y retornar la respuesta")
+    @DisplayName("save() debería mapear DTO, llamar al servicio con el cliente y retornar la respuesta")
     void save_ShouldConvertAndCallService() {
         UserModel clientMock = mock(UserModel.class);
         PedidoRequestDto requestDto = PedidoRequestDto.builder().build();
         PedidoModel inputModel = PedidoModel.builder().id(1L).build();
         PedidoModel savedModel = PedidoModel.builder().id(1L).build();
-        PedidoResponseDto responseDto = PedidoResponseDto.builder().id(1L).build();
 
         when(pedidoRequestMapper.toModel(requestDto)).thenReturn(inputModel);
         when(pedidoService.save(clientMock, inputModel)).thenReturn(savedModel);
@@ -68,7 +80,6 @@ class PedidoHandlerTest {
         PedidoUpdateDto updateDto = PedidoUpdateDto.builder().build();
         PedidoModel inputModel = PedidoModel.builder().build();
         PedidoModel updatedModel = PedidoModel.builder().build();
-        PedidoResponseDto responseDto = PedidoResponseDto.builder().build();
 
         when(pedidoUpdateMapper.toModel(updateDto)).thenReturn(inputModel);
         when(pedidoService.update(employeeMock, inputModel)).thenReturn(updatedModel);
@@ -81,6 +92,28 @@ class PedidoHandlerTest {
 
         verify(pedidoUpdateMapper).toModel(updateDto);
         verify(pedidoService).update(employeeMock, inputModel);
+        verify(pedidoResponseMapper).toResponse(updatedModel);
+    }
+
+    @Test
+    @DisplayName("cancel() debe construir DTO, mapear, llamar al servicio y retornar la respuesta")
+    void cancel_ShouldBuildDtoMapAndCallService() {
+        UserModel employeeMock = mock(UserModel.class);
+        PedidoUpdateDto updateDto = PedidoUpdateDto.builder().id(PEDIDO_ID).build();
+        PedidoModel inputModel = PedidoModel.builder().id(PEDIDO_ID).build();
+        PedidoModel updatedModel = PedidoModel.builder().id(PEDIDO_ID).build();
+
+        when(pedidoUpdateMapper.toModel(updateDto)).thenReturn(inputModel);
+        when(pedidoService.cancel(employeeMock, inputModel)).thenReturn(updatedModel);
+        when(pedidoResponseMapper.toResponse(updatedModel)).thenReturn(responseDto);
+
+        PedidoResponseDto result = pedidoHandler.cancel(employeeMock, updatedModel.getId());
+
+        assertNotNull(result);
+        assertEquals(responseDto, result);
+
+        verify(pedidoUpdateMapper).toModel(updateDto);
+        verify(pedidoService).cancel(employeeMock, inputModel);
         verify(pedidoResponseMapper).toResponse(updatedModel);
     }
 
