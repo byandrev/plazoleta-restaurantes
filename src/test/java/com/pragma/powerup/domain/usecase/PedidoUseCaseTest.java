@@ -12,10 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -101,6 +98,9 @@ class PedidoUseCaseTest {
         pedidoUpdatedRequest = PedidoModel.builder()
                 .id(PEDIDO_ID)
                 .estado(PedidoEstado.EN_PREPARACION)
+                .cliente(client)
+                .idCliente(client.getId())
+                .chef(chefModel)
                 .idChef(CHEF_ID)
                 .build();
 
@@ -307,20 +307,13 @@ class PedidoUseCaseTest {
                 .cliente(client)
                 .build();
 
-        PedidoModel expectedUpdated = PedidoModel.builder()
-                .id(PEDIDO_ID)
-                .estado(PedidoEstado.EN_PREPARACION)
-                .cliente(client)
-                .idCliente(client.getId())
-                .chef(chefModel)
-                .idChef(CHEF_ID)
-                .build();
+        pedidoUpdatedRequest.setEstado(PedidoEstado.EN_PREPARACION);
 
         when(pedidoPersistence.getById(PEDIDO_ID)).thenReturn(existingPedido);
         when(employeePersistence.existsById(CHEF_ID, RESTAURANT_ID)).thenReturn(true);
-        when(pedidoPersistence.save(any(PedidoModel.class))).thenReturn(expectedUpdated);
-        when(userExternalService.getUserById(expectedUpdated.getIdCliente())).thenReturn(client);
-        when(userExternalService.getUserById(expectedUpdated.getIdChef())).thenReturn(chefModel);
+        when(pedidoPersistence.save(any(PedidoModel.class))).thenReturn(pedidoUpdatedRequest);
+        when(userExternalService.getUserById(pedidoUpdatedRequest.getIdCliente())).thenReturn(client);
+        when(userExternalService.getUserById(pedidoUpdatedRequest.getIdChef())).thenReturn(chefModel);
 
         PedidoModel result = pedidoUseCase.update(chefModel, request);
 
@@ -340,20 +333,13 @@ class PedidoUseCaseTest {
 
         PedidoModel request = PedidoModel.builder().id(PEDIDO_ID).estado(PedidoEstado.LISTO).build();
 
-        PedidoModel expectedUpdated = PedidoModel.builder()
-                .id(PEDIDO_ID)
-                .estado(PedidoEstado.LISTO)
-                .cliente(client)
-                .idCliente(client.getId())
-                .chef(chefModel)
-                .idChef(CHEF_ID)
-                .build();
+        pedidoUpdatedRequest.setEstado(PedidoEstado.LISTO);
 
         when(pedidoPersistence.getById(PEDIDO_ID)).thenReturn(existingPedido);
         when(employeePersistence.existsById(CHEF_ID, RESTAURANT_ID)).thenReturn(true);
-        when(pedidoPersistence.save(any(PedidoModel.class))).thenReturn(expectedUpdated);
-        when(userExternalService.getUserById(expectedUpdated.getIdCliente())).thenReturn(client);
-        when(userExternalService.getUserById(expectedUpdated.getIdChef())).thenReturn(chefModel);
+        when(pedidoPersistence.save(any(PedidoModel.class))).thenReturn(pedidoUpdatedRequest);
+        when(userExternalService.getUserById(pedidoUpdatedRequest.getIdCliente())).thenReturn(client);
+        when(userExternalService.getUserById(pedidoUpdatedRequest.getIdChef())).thenReturn(chefModel);
 
         PedidoModel result = pedidoUseCase.update(chefModel, request);
 
@@ -379,18 +365,11 @@ class PedidoUseCaseTest {
                 .pin("123456")
                 .build();
 
-        PedidoModel expectedUpdated = PedidoModel.builder()
-                .id(PEDIDO_ID)
-                .estado(PedidoEstado.ENTREGADO)
-                .cliente(client)
-                .idCliente(client.getId())
-                .chef(chefModel)
-                .idChef(CHEF_ID)
-                .build();
+        pedidoUpdatedRequest.setEstado(PedidoEstado.ENTREGADO);
 
         when(pedidoPersistence.getById(PEDIDO_ID)).thenReturn(existingPedido);
         when(employeePersistence.existsById(CHEF_ID, RESTAURANT_ID)).thenReturn(true);
-        when(pedidoPersistence.save(any(PedidoModel.class))).thenReturn(expectedUpdated);
+        when(pedidoPersistence.save(any(PedidoModel.class))).thenReturn(pedidoUpdatedRequest);
         when(userExternalService.getUserById(existingPedido.getIdCliente())).thenReturn(client);
         when(userExternalService.getUserById(existingPedido.getIdChef())).thenReturn(chefModel);
 
@@ -437,20 +416,13 @@ class PedidoUseCaseTest {
                 .estado(PedidoEstado.CANCELADO)
                 .build();
 
-        PedidoModel expectedUpdated = PedidoModel.builder()
-                .id(PEDIDO_ID)
-                .estado(PedidoEstado.CANCELADO)
-                .cliente(client)
-                .idCliente(client.getId())
-                .chef(chefModel)
-                .idChef(CHEF_ID)
-                .build();
+        pedidoUpdatedRequest.setEstado(PedidoEstado.CANCELADO);
 
         when(pedidoPersistence.getById(PEDIDO_ID)).thenReturn(existingPedido);
         when(employeePersistence.existsById(CHEF_ID, RESTAURANT_ID)).thenReturn(true);
         when(userExternalService.getUserById(existingPedido.getIdCliente())).thenReturn(client);
         when(userExternalService.getUserById(existingPedido.getIdChef())).thenReturn(chefModel);
-        when(pedidoPersistence.save(any(PedidoModel.class))).thenReturn(expectedUpdated);
+        when(pedidoPersistence.save(any(PedidoModel.class))).thenReturn(pedidoUpdatedRequest);
 
         PedidoModel result = pedidoUseCase.update(chefModel, request);
 
@@ -458,6 +430,25 @@ class PedidoUseCaseTest {
 
         verify(pedidoPersistence).save(argThat(p -> p.getEstado() == PedidoEstado.CANCELADO));
         verify(traceabilityService).save(any(TraceabilityModel.class));
+    }
+
+    @Test
+    @DisplayName("cancel() debe cambiar exitosamente el estado de PENDIENTE a CANCELADO por el cliente")
+    void cancel_ShouldChangeStateTo_CANCELADO_WhenInPENDIENTE() {
+        PedidoModel request = PedidoModel.builder().id(PEDIDO_ID).build();
+        pedidoUpdatedRequest.setEstado(PedidoEstado.CANCELADO);
+
+        when(pedidoPersistence.getById(PEDIDO_ID)).thenReturn(existingPedido);
+        when(pedidoPersistence.save(any(PedidoModel.class))).thenReturn(pedidoUpdatedRequest);
+        when(userExternalService.getUserById(existingPedido.getIdChef())).thenReturn(chefModel);
+
+        PedidoModel result = pedidoUseCase.cancel(client, request);
+
+        assertEquals(PedidoEstado.CANCELADO, result.getEstado());
+
+        verify(pedidoPersistence).getById(PEDIDO_ID);
+        verify(pedidoPersistence).save(argThat(p -> p.getEstado() == PedidoEstado.CANCELADO && Objects.equals(p.getId(), PEDIDO_ID)));
+        verify(traceabilityService).save(argThat(t -> t.getEstadoNuevo() == PedidoEstado.CANCELADO && t.getEstadoAnterior() == PedidoEstado.PENDIENTE));
     }
 
 }
