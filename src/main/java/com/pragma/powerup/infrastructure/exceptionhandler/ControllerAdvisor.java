@@ -58,7 +58,10 @@ public class ControllerAdvisor {
                 .stream()
                 .map(error -> new ValidationError(
                         error.getField(),
-                        error.getDefaultMessage(),
+                        String.format(
+                                "El valor proporcionado para el campo '%s' no es un formato válido.",
+                                error.getField()
+                        ),
                         error.getRejectedValue()
                 ))
                 .collect(Collectors.toList());
