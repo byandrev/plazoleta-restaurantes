@@ -5,15 +5,16 @@ import com.pragma.powerup.application.dto.request.PedidoRequestDto;
 import com.pragma.powerup.application.dto.response.PaginationResponseDto;
 import com.pragma.powerup.application.dto.request.PedidoUpdateDto;
 import com.pragma.powerup.application.dto.response.PedidoResponseDto;
+import com.pragma.powerup.application.dto.response.TraceabilityResponseDto;
 import com.pragma.powerup.application.handler.IPedidoHandler;
 import com.pragma.powerup.application.mapper.*;
 import com.pragma.powerup.domain.api.IPedidoServicePort;
-import com.pragma.powerup.domain.model.PaginationResult;
-import com.pragma.powerup.domain.model.PedidoEstado;
-import com.pragma.powerup.domain.model.PedidoModel;
-import com.pragma.powerup.domain.model.UserModel;
+import com.pragma.powerup.domain.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +26,7 @@ public class PedidoHandler implements IPedidoHandler {
     private final IPedidoResponseMapper pedidoResponseMapper;
     private final IPaginationResponseMapper paginationResponseMapper;
     private final IPaginationRequestMapper paginationRequestMapper;
+    private final ITraceabilityResponseMapper traceabilityResponseMapper;
 
     @Override
     public PedidoResponseDto save(UserModel client, PedidoRequestDto pedidoDto) {
@@ -55,6 +57,12 @@ public class PedidoHandler implements IPedidoHandler {
         PaginationResult<PedidoModel> pedidosList = pedidoService.getAll(userId, restaurantId, estado, paginationRequestMapper.toModel(paginationRequest));
         PaginationResult<PedidoResponseDto> result = pedidosList.map(pedidoResponseMapper::toResponse);
         return paginationResponseMapper.toResponse(result);
+    }
+
+    @Override
+    public List<TraceabilityResponseDto> getHistory(Long pedidoId) {
+        List<TraceabilityModel> list = pedidoService.getHistory(pedidoId);
+        return list.stream().map(traceabilityResponseMapper::toResponse).collect(Collectors.toList());
     }
 
 }

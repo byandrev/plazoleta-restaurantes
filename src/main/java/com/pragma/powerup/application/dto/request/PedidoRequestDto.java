@@ -12,9 +12,6 @@ import java.util.Set;
 @Builder
 public class PedidoRequestDto {
 
-    @NotNull(message = "El idChef no puede estar vacio")
-    private Long idChef;
-
     @NotNull(message = "El idRestaurante no puede estar vacio")
     private Long idRestaurante;
 

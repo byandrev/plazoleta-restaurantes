@@ -451,4 +451,37 @@ class PedidoUseCaseTest {
         verify(traceabilityService).save(argThat(t -> t.getEstadoNuevo() == PedidoEstado.CANCELADO && t.getEstadoAnterior() == PedidoEstado.PENDIENTE));
     }
 
+    @Test
+    @DisplayName("getHistory() debe retornar el historial de trazabilidad del pedido")
+    void getHistory_ShouldReturnTraceabilityHistory() {
+        List<TraceabilityModel> traceabilityHistory = List.of(
+            TraceabilityModel.builder().pedidoId(PEDIDO_ID).estadoAnterior(PedidoEstado.PENDIENTE).estadoNuevo(PedidoEstado.EN_PREPARACION).build(),
+            TraceabilityModel.builder().pedidoId(PEDIDO_ID).estadoAnterior(PedidoEstado.EN_PREPARACION).estadoNuevo(PedidoEstado.LISTO).build()
+        );
+
+        when(traceabilityService.getHistory(PEDIDO_ID)).thenReturn(traceabilityHistory);
+
+        List<TraceabilityModel> result = pedidoUseCase.getHistory(PEDIDO_ID);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals(PedidoEstado.PENDIENTE, result.get(0).getEstadoAnterior());
+        assertEquals(PedidoEstado.EN_PREPARACION, result.get(0).getEstadoNuevo());
+
+        verify(traceabilityService).getHistory(PEDIDO_ID);
+    }
+
+    @Test
+    @DisplayName("getHistory() debe retornar una lista vacía si no hay historial")
+    void getHistory_ShouldReturnEmptyList_WhenNoHistory() {
+        when(traceabilityService.getHistory(PEDIDO_ID)).thenReturn(Collections.emptyList());
+
+        List<TraceabilityModel> result = pedidoUseCase.getHistory(PEDIDO_ID);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        verify(traceabilityService).getHistory(PEDIDO_ID);
+    }
+
 }

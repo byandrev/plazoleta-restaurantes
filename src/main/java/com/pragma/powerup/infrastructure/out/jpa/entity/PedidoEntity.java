@@ -28,7 +28,7 @@ public class PedidoEntity {
     @Column(nullable = false)
     private PedidoEstado estado;
 
-    @Column(name = "id_chef", nullable = false)
+    @Column(name = "id_chef")
     private Long idChef;
 
     private String pin = null;
