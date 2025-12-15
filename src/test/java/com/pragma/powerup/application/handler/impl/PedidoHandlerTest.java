@@ -5,6 +5,7 @@ import com.pragma.powerup.application.dto.request.PedidoRequestDto;
 import com.pragma.powerup.application.dto.request.PedidoUpdateDto;
 import com.pragma.powerup.application.dto.response.PaginationResponseDto;
 import com.pragma.powerup.application.dto.response.PedidoResponseDto;
+import com.pragma.powerup.application.dto.response.TraceabilityResponseDto;
 import com.pragma.powerup.application.mapper.*;
 import com.pragma.powerup.domain.api.IPedidoServicePort;
 import com.pragma.powerup.domain.model.*;
@@ -15,6 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -38,6 +41,8 @@ class PedidoHandlerTest {
     private IPaginationResponseMapper paginationResponseMapper;
     @Mock
     private IPaginationRequestMapper paginationRequestMapper;
+    @Mock
+    private ITraceabilityResponseMapper traceabilityResponseMapper;
 
     @InjectMocks
     private PedidoHandler pedidoHandler;
@@ -164,6 +169,33 @@ class PedidoHandlerTest {
         verify(pedidoService).getAll(eq(userId), eq(restaurantId), eq(estado), eq(paginationModel));
         verify(paginationResponseMapper).toResponse(mappedResultMock);
         verify(pedidosListMock).map(any());
+    }
+
+    @Test
+    @DisplayName("getHistory() debería obtener el historial del servicio y mapear cada elemento a DTO")
+    void getHistory_ShouldReturnTraceabilityList() {
+        Long pedidoId = 1L;
+        TraceabilityModel traceability1 = TraceabilityModel.builder().id("1L").build();
+        TraceabilityModel traceability2 = TraceabilityModel.builder().id("2L").build();
+        List<TraceabilityModel> traceabilityList = List.of(traceability1, traceability2);
+
+        TraceabilityResponseDto responseDto1 = TraceabilityResponseDto.builder().id("1L").build();
+        TraceabilityResponseDto responseDto2 = TraceabilityResponseDto.builder().id("2L").build();
+
+        when(pedidoService.getHistory(pedidoId)).thenReturn(traceabilityList);
+        when(traceabilityResponseMapper.toResponse(traceability1)).thenReturn(responseDto1);
+        when(traceabilityResponseMapper.toResponse(traceability2)).thenReturn(responseDto2);
+
+        List<TraceabilityResponseDto> result = pedidoHandler.getHistory(pedidoId);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals(responseDto1, result.get(0));
+        assertEquals(responseDto2, result.get(1));
+
+        verify(pedidoService).getHistory(pedidoId);
+        verify(traceabilityResponseMapper).toResponse(traceability1);
+        verify(traceabilityResponseMapper).toResponse(traceability2);
     }
 
 }
