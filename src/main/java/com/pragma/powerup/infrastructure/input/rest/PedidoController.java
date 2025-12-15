@@ -5,6 +5,7 @@ import com.pragma.powerup.application.dto.request.PedidoRequestDto;
 import com.pragma.powerup.application.dto.request.PedidoUpdateDto;
 import com.pragma.powerup.application.dto.response.PaginationResponseDto;
 import com.pragma.powerup.application.dto.response.PedidoResponseDto;
+import com.pragma.powerup.application.dto.response.TraceabilityResponseDto;
 import com.pragma.powerup.application.handler.IPedidoHandler;
 import com.pragma.powerup.domain.model.PedidoEstado;
 import com.pragma.powerup.domain.model.UserModel;
@@ -23,6 +24,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/pedidos")
@@ -59,7 +61,7 @@ public class PedidoController {
     })
     @PreAuthorize("hasRole('EMPLEADO')")
     @GetMapping("/{restaurantId}")
-    public ResponseEntity<CustomResponse<PaginationResponseDto<PedidoResponseDto>>> getRestaurants(
+    public ResponseEntity<CustomResponse<PaginationResponseDto<PedidoResponseDto>>> getPedidos(
             @Valid PaginationRequestDto paginationRequest,
             @RequestParam(required = false) PedidoEstado estado,
             @PathVariable Long restaurantId,
@@ -120,6 +122,23 @@ public class PedidoController {
         pedidoHandler.cancel(client, pedidoId);
 
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Operation(summary = "Get historial del pedido")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Historial returned")
+    })
+    @PreAuthorize("hasRole('CLIENTE')")
+    @GetMapping("/trazabilidad/{pedidoId}")
+    public ResponseEntity<CustomResponse<List<TraceabilityResponseDto>>> getHistorial(
+            @PathVariable Long pedidoId
+    ) {
+        CustomResponse<List<TraceabilityResponseDto>> response = CustomResponse.<List<TraceabilityResponseDto>>builder()
+                .status(HttpStatus.OK.value())
+                .data(pedidoHandler.getHistory(pedidoId))
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
 }
