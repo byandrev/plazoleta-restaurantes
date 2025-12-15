@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -180,6 +181,11 @@ public class PedidoUseCase implements IPedidoServicePort {
         }
 
         return pedidoPersistencePort.getAll(restaurantId, pagination);
+    }
+
+    @Override
+    public List<TraceabilityModel> getHistory(Long pedidoId) {
+        return traceabilityService.getHistory(pedidoId);
     }
 
 }
