@@ -30,7 +30,6 @@ class PedidoRequestDtoValidationTest {
         return PedidoRequestDto
                 .builder()
                 .idRestaurante(1L)
-                .idChef(2L)
                 .items(Set.of(PedidoItemRequestDto.builder().platoId(10L).cantidad(2).build()))
                 .build();
     }
@@ -51,14 +50,6 @@ class PedidoRequestDtoValidationTest {
         PedidoRequestDto dto = createValidPedidoDto();
         Set<ConstraintViolation<PedidoRequestDto>> violations = validator.validate(dto);
         assertTrue(violations.isEmpty(), "No deberían existir violaciones con datos válidos.");
-    }
-
-    @Test
-    @DisplayName("idChef vacío debe fallar la validación")
-    void saveValidateIdChef_Empty_FailsValidation() {
-        PedidoRequestDto dto = createValidPedidoDto();
-        dto.setIdChef(null);
-        assertViolation(dto, "El idChef no puede estar vacio");
     }
 
     @Test
