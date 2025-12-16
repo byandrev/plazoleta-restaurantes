@@ -21,6 +21,7 @@ public class PedidoUseCase implements IPedidoServicePort {
 
     private final IPedidoPersistencePort pedidoPersistencePort;
     private final IPlatoPersistencePort platoPersistencePort;
+    private final IRestaurantPersistencePort restaurantPersistence;
     private final IUserExternalServicePort userExternalService;
     private final ITraceabilityExternalServicePort traceabilityService;
     private final IEmployeePersistencePort employeePersistence;
@@ -190,7 +191,13 @@ public class PedidoUseCase implements IPedidoServicePort {
     }
 
     @Override
-    public PaginationResult<PedidoTimeModel> getTimePedidos(Long restaurantId, PaginationInfo pagination) {
+    public PaginationResult<PedidoTimeModel> getTimePedidos(Long userId, Long restaurantId, PaginationInfo pagination) {
+        RestaurantModel restaurant = restaurantPersistence.getById(restaurantId);
+
+        if (!Objects.equals(restaurant.getIdPropietario(), userId)) {
+            throw new DomainException("No eres propietario del restaurante");
+        }
+
         return traceabilityService.getTimePedidos(restaurantId, pagination);
     }
 

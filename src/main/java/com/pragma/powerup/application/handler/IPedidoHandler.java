@@ -27,6 +27,6 @@ public interface IPedidoHandler {
 
     List<TraceabilityResponseDto> getHistory(Long pedidoId);
 
-    PaginationResponseDto<PedidoTimeResponseDto> getTimePedidos(Long restaurantId, PaginationRequestDto pagination);
+    PaginationResponseDto<PedidoTimeResponseDto> getTimePedidos(Long userId, Long restaurantId, PaginationRequestDto pagination);
 
 }

@@ -68,8 +68,8 @@ public class PedidoHandler implements IPedidoHandler {
     }
 
     @Override
-    public PaginationResponseDto<PedidoTimeResponseDto> getTimePedidos(Long restaurantId, PaginationRequestDto pagination) {
-        PaginationResult<PedidoTimeModel> timeList = pedidoService.getTimePedidos(restaurantId, paginationRequestMapper.toModel(pagination));
+    public PaginationResponseDto<PedidoTimeResponseDto> getTimePedidos(Long userId, Long restaurantId, PaginationRequestDto pagination) {
+        PaginationResult<PedidoTimeModel> timeList = pedidoService.getTimePedidos(userId, restaurantId, paginationRequestMapper.toModel(pagination));
         PaginationResult<PedidoTimeResponseDto> result = timeList.map(timeResponseMapper::toResponse);
         return paginationResponseMapper.toResponse(result);
     }

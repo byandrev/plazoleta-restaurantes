@@ -150,11 +150,16 @@ public class PedidoController {
     @GetMapping("/trazabilidad")
     public ResponseEntity<CustomResponse<PaginationResponseDto<PedidoTimeResponseDto>>> getTimePedidos(
             @Valid PaginationRequestDto paginationRequest,
-            @RequestParam Long restauranteId
+            @RequestParam Long restauranteId,
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetail userDetails
     ) {
         CustomResponse<PaginationResponseDto<PedidoTimeResponseDto>> response = CustomResponse.<PaginationResponseDto<PedidoTimeResponseDto>>builder()
                 .status(HttpStatus.OK.value())
-                .data(pedidoHandler.getTimePedidos(restauranteId, paginationRequest))
+                .data(pedidoHandler.getTimePedidos(
+                        userDetails.getId(),
+                        restauranteId,
+                        paginationRequest
+                ))
                 .build();
 
         return ResponseEntity.ok(response);

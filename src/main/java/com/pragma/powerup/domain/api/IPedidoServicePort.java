@@ -18,6 +18,6 @@ public interface IPedidoServicePort {
 
     List<TraceabilityModel> getHistory(Long pedidoId);
 
-    PaginationResult<PedidoTimeModel> getTimePedidos(Long restaurantId, PaginationInfo pagination);
+    PaginationResult<PedidoTimeModel> getTimePedidos(Long userId, Long restaurantId, PaginationInfo pagination);
 
 }
