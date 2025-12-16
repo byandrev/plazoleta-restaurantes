@@ -91,7 +91,7 @@ public class PedidoUseCase implements IPedidoServicePort {
 
         updateTraceability(pedidoSaved, PedidoEstado.PENDIENTE);
 
-        return pedidoSaved;
+        return pedidoPersistencePort.save(pedidoSaved);
     }
 
     @Override
