@@ -1,6 +1,7 @@
 package com.pragma.powerup.infrastructure.out.feign;
 
 import com.pragma.powerup.application.dto.request.MessageRequestDto;
+import com.pragma.powerup.infrastructure.input.rest.response.CustomResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -9,6 +10,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface IMessageFeignClient {
 
     @PostMapping("/api/v1/messages/")
-    void send(@RequestBody MessageRequestDto message);
+    CustomResponse<Void> send(@RequestBody MessageRequestDto message);
 
 }
