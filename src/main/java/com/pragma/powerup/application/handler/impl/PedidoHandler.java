@@ -5,6 +5,7 @@ import com.pragma.powerup.application.dto.request.PedidoRequestDto;
 import com.pragma.powerup.application.dto.response.PaginationResponseDto;
 import com.pragma.powerup.application.dto.request.PedidoUpdateDto;
 import com.pragma.powerup.application.dto.response.PedidoResponseDto;
+import com.pragma.powerup.application.dto.response.PedidoTimeResponseDto;
 import com.pragma.powerup.application.dto.response.TraceabilityResponseDto;
 import com.pragma.powerup.application.handler.IPedidoHandler;
 import com.pragma.powerup.application.mapper.*;
@@ -24,6 +25,7 @@ public class PedidoHandler implements IPedidoHandler {
     private final IPedidoRequestMapper pedidoRequestMapper;
     private final IPedidoUpdateMapper pedidoUpdateMapper;
     private final IPedidoResponseMapper pedidoResponseMapper;
+    private final IPedidoTimeResponseMapper timeResponseMapper;
     private final IPaginationResponseMapper paginationResponseMapper;
     private final IPaginationRequestMapper paginationRequestMapper;
     private final ITraceabilityResponseMapper traceabilityResponseMapper;
@@ -63,6 +65,13 @@ public class PedidoHandler implements IPedidoHandler {
     public List<TraceabilityResponseDto> getHistory(Long pedidoId) {
         List<TraceabilityModel> list = pedidoService.getHistory(pedidoId);
         return list.stream().map(traceabilityResponseMapper::toResponse).collect(Collectors.toList());
+    }
+
+    @Override
+    public PaginationResponseDto<PedidoTimeResponseDto> getTimePedidos(Long restaurantId, PaginationRequestDto pagination) {
+        PaginationResult<PedidoTimeModel> timeList = pedidoService.getTimePedidos(restaurantId, paginationRequestMapper.toModel(pagination));
+        PaginationResult<PedidoTimeResponseDto> result = timeList.map(timeResponseMapper::toResponse);
+        return paginationResponseMapper.toResponse(result);
     }
 
 }

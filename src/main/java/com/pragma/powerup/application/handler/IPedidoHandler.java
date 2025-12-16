@@ -5,8 +5,10 @@ import com.pragma.powerup.application.dto.request.PedidoRequestDto;
 import com.pragma.powerup.application.dto.response.PaginationResponseDto;
 import com.pragma.powerup.application.dto.request.PedidoUpdateDto;
 import com.pragma.powerup.application.dto.response.PedidoResponseDto;
+import com.pragma.powerup.application.dto.response.PedidoTimeResponseDto;
 import com.pragma.powerup.application.dto.response.TraceabilityResponseDto;
 import com.pragma.powerup.domain.model.PedidoEstado;
+import com.pragma.powerup.domain.model.PedidoTimeModel;
 import com.pragma.powerup.domain.model.UserModel;
 
 import java.util.List;
@@ -24,5 +26,7 @@ public interface IPedidoHandler {
     PaginationResponseDto<PedidoResponseDto> getAll(Long userId, Long restaurantId, PedidoEstado estado, PaginationRequestDto paginationRequest);
 
     List<TraceabilityResponseDto> getHistory(Long pedidoId);
+
+    PaginationResponseDto<PedidoTimeResponseDto> getTimePedidos(Long restaurantId, PaginationRequestDto pagination);
 
 }
