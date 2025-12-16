@@ -189,4 +189,9 @@ public class PedidoUseCase implements IPedidoServicePort {
         return traceabilityService.getHistory(pedidoId);
     }
 
+    @Override
+    public PaginationResult<PedidoTimeModel> getTimePedidos(Long restaurantId, PaginationInfo pagination) {
+        return traceabilityService.getTimePedidos(restaurantId, pagination);
+    }
+
 }
