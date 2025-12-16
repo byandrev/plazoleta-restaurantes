@@ -1,11 +1,15 @@
 package com.pragma.powerup.infrastructure.out.feign.adapter;
 
+import com.pragma.powerup.domain.model.PaginationInfo;
+import com.pragma.powerup.domain.model.PaginationResult;
+import com.pragma.powerup.domain.model.PedidoTimeModel;
 import com.pragma.powerup.domain.model.TraceabilityModel;
 import com.pragma.powerup.domain.spi.ITraceabilityExternalServicePort;
 import com.pragma.powerup.infrastructure.exception.ResourceNotFound;
 import com.pragma.powerup.infrastructure.input.rest.response.CustomResponse;
 import com.pragma.powerup.infrastructure.out.feign.ITraceabilityFeignClient;
 import com.pragma.powerup.infrastructure.out.feign.mapper.ITraceabilityFeignMapper;
+import com.pragma.powerup.infrastructure.out.jpa.mapper.IPaginationMapper;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,8 +21,8 @@ import java.util.List;
 public class TraceabilityExternalAdapter implements ITraceabilityExternalServicePort {
 
     private final ITraceabilityFeignClient client;
-
     private final ITraceabilityFeignMapper mapper;
+    private final IPaginationMapper paginationMapper;
 
     @Override
     public void save(TraceabilityModel traceabilityModel) {
@@ -33,6 +37,15 @@ public class TraceabilityExternalAdapter implements ITraceabilityExternalService
         } catch (FeignException ex) {
             throw new ResourceNotFound("El pedido " + pedidoId + " no existe");
         }
+    }
+
+    @Override
+    public PaginationResult<PedidoTimeModel> getTimePedidos(Long restaurantId, PaginationInfo pagination) {
+        CustomResponse<PaginationResult<PedidoTimeModel>> response = client.getTimePedidos(
+                restaurantId,
+                paginationMapper.toPageable(pagination)
+        );
+        return response.getData();
     }
 
 }
