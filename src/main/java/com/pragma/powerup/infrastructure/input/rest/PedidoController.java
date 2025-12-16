@@ -5,6 +5,7 @@ import com.pragma.powerup.application.dto.request.PedidoRequestDto;
 import com.pragma.powerup.application.dto.request.PedidoUpdateDto;
 import com.pragma.powerup.application.dto.response.PaginationResponseDto;
 import com.pragma.powerup.application.dto.response.PedidoResponseDto;
+import com.pragma.powerup.application.dto.response.PedidoTimeResponseDto;
 import com.pragma.powerup.application.dto.response.TraceabilityResponseDto;
 import com.pragma.powerup.application.handler.IPedidoHandler;
 import com.pragma.powerup.domain.model.PedidoEstado;
@@ -136,6 +137,24 @@ public class PedidoController {
         CustomResponse<List<TraceabilityResponseDto>> response = CustomResponse.<List<TraceabilityResponseDto>>builder()
                 .status(HttpStatus.OK.value())
                 .data(pedidoHandler.getHistory(pedidoId))
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Get tiempo de los pedidos")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de tiempo de los pedidos")
+    })
+    @PreAuthorize("hasRole('PROPIETARIO')")
+    @GetMapping("/trazabilidad")
+    public ResponseEntity<CustomResponse<PaginationResponseDto<PedidoTimeResponseDto>>> getTimePedidos(
+            @Valid PaginationRequestDto paginationRequest,
+            @RequestParam Long restauranteId
+    ) {
+        CustomResponse<PaginationResponseDto<PedidoTimeResponseDto>> response = CustomResponse.<PaginationResponseDto<PedidoTimeResponseDto>>builder()
+                .status(HttpStatus.OK.value())
+                .data(pedidoHandler.getTimePedidos(restauranteId, paginationRequest))
                 .build();
 
         return ResponseEntity.ok(response);
