@@ -61,6 +61,7 @@ public class PedidoUseCase implements IPedidoServicePort {
         traceabilityService.save(TraceabilityModel
                 .builder()
                 .pedidoId(pedido.getId())
+                .restaurantId(pedido.getIdRestaurante())
                 .clienteId(pedido.getCliente().getId())
                 .correoCliente(pedido.getCliente().getCorreo())
                 .estadoNuevo(pedido.getEstado())
