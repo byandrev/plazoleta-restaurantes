@@ -3,7 +3,6 @@ package com.pragma.powerup.application.dto.request;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.domain.Sort;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -25,9 +24,5 @@ public class PaginationRequestDto {
 
     @Pattern(regexp = "(?i)^(ASC|DESC)$", message = "La dirección debe ser 'ASC' o 'DESC'")
     private String sortDirection = "ASC";
-
-    public Sort.Direction getSortDirectionEnum() {
-        return Sort.Direction.fromString(sortDirection.toUpperCase());
-    }
 
 }
