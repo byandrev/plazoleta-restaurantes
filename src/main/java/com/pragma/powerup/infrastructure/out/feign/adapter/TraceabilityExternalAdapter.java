@@ -1,9 +1,6 @@
 package com.pragma.powerup.infrastructure.out.feign.adapter;
 
-import com.pragma.powerup.domain.model.PaginationInfo;
-import com.pragma.powerup.domain.model.PaginationResult;
-import com.pragma.powerup.domain.model.PedidoTimeModel;
-import com.pragma.powerup.domain.model.TraceabilityModel;
+import com.pragma.powerup.domain.model.*;
 import com.pragma.powerup.domain.spi.ITraceabilityExternalServicePort;
 import com.pragma.powerup.infrastructure.exception.ResourceNotFound;
 import com.pragma.powerup.infrastructure.input.rest.response.CustomResponse;
@@ -46,6 +43,19 @@ public class TraceabilityExternalAdapter implements ITraceabilityExternalService
                 paginationMapper.toPageable(pagination)
         );
         return response.getData();
+    }
+
+    @Override
+    public PaginationResult<EmpleadoTiempoModel> getTimeEmpleados(Long restaurantId, PaginationInfo pagination) {
+        try {
+            CustomResponse<PaginationResult<EmpleadoTiempoModel>> response = client.getTimeEmpleados(
+                    restaurantId,
+                    paginationMapper.toPageable(pagination)
+            );
+            return response.getData();
+        } catch (FeignException ex) {
+            throw new ResourceNotFound("Error al obtener el ranking de empleados del restaurante " + restaurantId);
+        }
     }
 
 }
