@@ -20,4 +20,6 @@ public interface IPedidoServicePort {
 
     PaginationResult<PedidoTimeModel> getTimePedidos(Long userId, Long restaurantId, PaginationInfo pagination);
 
+    PaginationResult<EmpleadoTiempoModel> getTimeEmpleados(Long userId, Long restaurantId, PaginationInfo pagination);
+
 }

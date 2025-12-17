@@ -201,4 +201,15 @@ public class PedidoUseCase implements IPedidoServicePort {
         return traceabilityService.getTimePedidos(restaurantId, pagination);
     }
 
+    @Override
+    public PaginationResult<EmpleadoTiempoModel> getTimeEmpleados(Long userId, Long restaurantId, PaginationInfo pagination) {
+        RestaurantModel restaurant = restaurantPersistence.getById(restaurantId);
+
+        if (!Objects.equals(restaurant.getIdPropietario(), userId)) {
+            throw new DomainException("No eres propietario del restaurante");
+        }
+
+        return traceabilityService.getTimeEmpleados(restaurantId, pagination);
+    }
+
 }
