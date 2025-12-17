@@ -1,6 +1,7 @@
 package com.pragma.powerup.infrastructure.out.feign;
 
 import com.pragma.powerup.application.dto.request.TraceabilityRequestDto;
+import com.pragma.powerup.domain.model.EmpleadoTiempoModel;
 import com.pragma.powerup.domain.model.PaginationResult;
 import com.pragma.powerup.domain.model.PedidoTimeModel;
 import com.pragma.powerup.domain.model.TraceabilityModel;
@@ -23,6 +24,12 @@ public interface ITraceabilityFeignClient {
 
     @GetMapping("/api/v1/trazabilidad/pedidos/")
     CustomResponse<PaginationResult<PedidoTimeModel>> getTimePedidos(
+            @RequestParam Long restauranteId,
+            @QueryMap Pageable pagination
+    );
+
+    @GetMapping("/api/v1/trazabilidad/empleados/")
+    CustomResponse<PaginationResult<EmpleadoTiempoModel>> getTimeEmpleados(
             @RequestParam Long restauranteId,
             @QueryMap Pageable pagination
     );
