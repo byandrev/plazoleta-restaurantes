@@ -536,4 +536,42 @@ class PedidoUseCaseTest {
         verify(traceabilityService, never()).getTimePedidos(anyLong(), any(PaginationInfo.class));
     }
 
+    @Test
+    @DisplayName("getTimeEmpleados() debe retornar la información de tiempo si el usuario es el propietario del restaurante")
+    void getTimeEmpleados_ShouldReturnTimeInfo_WhenUserIsOwner() {
+        PaginationResult<EmpleadoTiempoModel> expectedPaginationResult = new PaginationResult<>(
+                Collections.singletonList(EmpleadoTiempoModel.builder().empleado(1L).tiempoMedioSegundos(5000D).build()), 1, 1L, 1
+        );
+
+        when(restaurantPersistence.getById(RESTAURANT_ID)).thenReturn(restaurantModel);
+        when(traceabilityService.getTimeEmpleados(RESTAURANT_ID, paginationInfo)).thenReturn(expectedPaginationResult);
+
+        PaginationResult<EmpleadoTiempoModel> result = pedidoUseCase.getTimeEmpleados(OWNER_ID, RESTAURANT_ID, paginationInfo);
+
+        assertNotNull(result, "El resultado no debe ser nulo.");
+        assertEquals(
+                expectedPaginationResult.getTotalElements(),
+                result.getTotalElements(),
+                "El total de elementos debe coincidir."
+        );
+
+        verify(restaurantPersistence).getById(RESTAURANT_ID);
+        verify(traceabilityService).getTimeEmpleados(RESTAURANT_ID, paginationInfo);
+    }
+
+    @Test
+    @DisplayName("getTimeEmpleados() debe lanzar DomainException si el usuario no es el propietario del restaurante")
+    void getTimeEmpleados_ShouldThrowDomainException_WhenUserIsNotOwner() {
+        when(restaurantPersistence.getById(RESTAURANT_ID)).thenReturn(restaurantModel);
+
+        DomainException exception = assertThrows(DomainException.class, () ->
+                pedidoUseCase.getTimeEmpleados(USER_ID, RESTAURANT_ID, paginationInfo)
+        );
+
+        assertEquals("No eres propietario del restaurante", exception.getMessage());
+
+        verify(restaurantPersistence).getById(RESTAURANT_ID);
+        verify(traceabilityService, never()).getTimeEmpleados(anyLong(), any(PaginationInfo.class));
+    }
+
 }
