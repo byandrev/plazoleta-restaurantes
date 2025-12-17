@@ -2,11 +2,8 @@ package com.pragma.powerup.application.handler.impl;
 
 import com.pragma.powerup.application.dto.request.PaginationRequestDto;
 import com.pragma.powerup.application.dto.request.PedidoRequestDto;
-import com.pragma.powerup.application.dto.response.PaginationResponseDto;
+import com.pragma.powerup.application.dto.response.*;
 import com.pragma.powerup.application.dto.request.PedidoUpdateDto;
-import com.pragma.powerup.application.dto.response.PedidoResponseDto;
-import com.pragma.powerup.application.dto.response.PedidoTimeResponseDto;
-import com.pragma.powerup.application.dto.response.TraceabilityResponseDto;
 import com.pragma.powerup.application.handler.IPedidoHandler;
 import com.pragma.powerup.application.mapper.*;
 import com.pragma.powerup.domain.api.IPedidoServicePort;
@@ -26,6 +23,7 @@ public class PedidoHandler implements IPedidoHandler {
     private final IPedidoUpdateMapper pedidoUpdateMapper;
     private final IPedidoResponseMapper pedidoResponseMapper;
     private final IPedidoTimeResponseMapper timeResponseMapper;
+    private final IEmpleadoTiempoResponseMapper empleadoTiempoResponseMapper;
     private final IPaginationResponseMapper paginationResponseMapper;
     private final IPaginationRequestMapper paginationRequestMapper;
     private final ITraceabilityResponseMapper traceabilityResponseMapper;
@@ -71,6 +69,13 @@ public class PedidoHandler implements IPedidoHandler {
     public PaginationResponseDto<PedidoTimeResponseDto> getTimePedidos(Long userId, Long restaurantId, PaginationRequestDto pagination) {
         PaginationResult<PedidoTimeModel> timeList = pedidoService.getTimePedidos(userId, restaurantId, paginationRequestMapper.toModel(pagination));
         PaginationResult<PedidoTimeResponseDto> result = timeList.map(timeResponseMapper::toResponse);
+        return paginationResponseMapper.toResponse(result);
+    }
+
+    @Override
+    public PaginationResponseDto<EmpleadoTiempoResponseDto> getTimeEmpleados(Long userId, Long restaurantId, PaginationRequestDto pagination) {
+        PaginationResult<EmpleadoTiempoModel> timeList = pedidoService.getTimeEmpleados(userId, restaurantId, paginationRequestMapper.toModel(pagination));
+        PaginationResult<EmpleadoTiempoResponseDto> result = timeList.map(empleadoTiempoResponseMapper::toResponse);
         return paginationResponseMapper.toResponse(result);
     }
 
