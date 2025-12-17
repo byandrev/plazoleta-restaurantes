@@ -3,11 +3,9 @@ package com.pragma.powerup.infrastructure.input.rest;
 import com.pragma.powerup.application.dto.request.PaginationRequestDto;
 import com.pragma.powerup.application.dto.request.PedidoRequestDto;
 import com.pragma.powerup.application.dto.request.PedidoUpdateDto;
-import com.pragma.powerup.application.dto.response.PaginationResponseDto;
-import com.pragma.powerup.application.dto.response.PedidoResponseDto;
-import com.pragma.powerup.application.dto.response.PedidoTimeResponseDto;
-import com.pragma.powerup.application.dto.response.TraceabilityResponseDto;
+import com.pragma.powerup.application.dto.response.*;
 import com.pragma.powerup.application.handler.IPedidoHandler;
+import com.pragma.powerup.domain.model.EmpleadoTiempoModel;
 import com.pragma.powerup.domain.model.PedidoEstado;
 import com.pragma.powerup.domain.model.UserModel;
 import com.pragma.powerup.infrastructure.input.rest.response.CustomResponse;
@@ -156,6 +154,29 @@ public class PedidoController {
         CustomResponse<PaginationResponseDto<PedidoTimeResponseDto>> response = CustomResponse.<PaginationResponseDto<PedidoTimeResponseDto>>builder()
                 .status(HttpStatus.OK.value())
                 .data(pedidoHandler.getTimePedidos(
+                        userDetails.getId(),
+                        restauranteId,
+                        paginationRequest
+                ))
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Get tiempo medio de los empleados")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de empleados con sus tiempos")
+    })
+    @PreAuthorize("hasRole('PROPIETARIO')")
+    @GetMapping("/trazabilidad/empleados")
+    public ResponseEntity<CustomResponse<PaginationResponseDto<EmpleadoTiempoResponseDto>>> getTimeEmpleados(
+            @Valid PaginationRequestDto paginationRequest,
+            @RequestParam Long restauranteId,
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetail userDetails
+    ) {
+        CustomResponse<PaginationResponseDto<EmpleadoTiempoResponseDto>> response = CustomResponse.<PaginationResponseDto<EmpleadoTiempoResponseDto>>builder()
+                .status(HttpStatus.OK.value())
+                .data(pedidoHandler.getTimeEmpleados(
                         userDetails.getId(),
                         restauranteId,
                         paginationRequest
