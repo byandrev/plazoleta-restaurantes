@@ -21,6 +21,7 @@ public class PedidoUseCase implements IPedidoServicePort {
 
     private final IPedidoPersistencePort pedidoPersistencePort;
     private final IPlatoPersistencePort platoPersistencePort;
+    private final IRestaurantPersistencePort restaurantPersistence;
     private final IUserExternalServicePort userExternalService;
     private final ITraceabilityExternalServicePort traceabilityService;
     private final IEmployeePersistencePort employeePersistence;
@@ -61,6 +62,7 @@ public class PedidoUseCase implements IPedidoServicePort {
         traceabilityService.save(TraceabilityModel
                 .builder()
                 .pedidoId(pedido.getId())
+                .restaurantId(pedido.getIdRestaurante())
                 .clienteId(pedido.getCliente().getId())
                 .correoCliente(pedido.getCliente().getCorreo())
                 .estadoNuevo(pedido.getEstado())
@@ -186,6 +188,28 @@ public class PedidoUseCase implements IPedidoServicePort {
     @Override
     public List<TraceabilityModel> getHistory(Long pedidoId) {
         return traceabilityService.getHistory(pedidoId);
+    }
+
+    @Override
+    public PaginationResult<PedidoTimeModel> getTimePedidos(Long userId, Long restaurantId, PaginationInfo pagination) {
+        RestaurantModel restaurant = restaurantPersistence.getById(restaurantId);
+
+        if (!Objects.equals(restaurant.getIdPropietario(), userId)) {
+            throw new DomainException("No eres propietario del restaurante");
+        }
+
+        return traceabilityService.getTimePedidos(restaurantId, pagination);
+    }
+
+    @Override
+    public PaginationResult<EmpleadoTiempoModel> getTimeEmpleados(Long userId, Long restaurantId, PaginationInfo pagination) {
+        RestaurantModel restaurant = restaurantPersistence.getById(restaurantId);
+
+        if (!Objects.equals(restaurant.getIdPropietario(), userId)) {
+            throw new DomainException("No eres propietario del restaurante");
+        }
+
+        return traceabilityService.getTimeEmpleados(restaurantId, pagination);
     }
 
 }

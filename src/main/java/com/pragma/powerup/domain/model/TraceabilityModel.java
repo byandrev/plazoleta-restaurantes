@@ -13,6 +13,8 @@ public class TraceabilityModel {
 
     private Long pedidoId;
 
+    private Long restaurantId;
+
     private Long clienteId;
 
     private String correoCliente;

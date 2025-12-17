@@ -16,5 +16,9 @@ jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION_TIME}
 
+service:
+  secret:
+    plazoleta: ${MS_PLAZOLETA_SECRET_KEY}
+
 appDescription: "Plazoleta Restaurantes"
 appVersion: "1.0.0"

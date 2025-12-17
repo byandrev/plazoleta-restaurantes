@@ -3,9 +3,7 @@ package com.pragma.powerup.application.handler.impl;
 import com.pragma.powerup.application.dto.request.PaginationRequestDto;
 import com.pragma.powerup.application.dto.request.PedidoRequestDto;
 import com.pragma.powerup.application.dto.request.PedidoUpdateDto;
-import com.pragma.powerup.application.dto.response.PaginationResponseDto;
-import com.pragma.powerup.application.dto.response.PedidoResponseDto;
-import com.pragma.powerup.application.dto.response.TraceabilityResponseDto;
+import com.pragma.powerup.application.dto.response.*;
 import com.pragma.powerup.application.mapper.*;
 import com.pragma.powerup.domain.api.IPedidoServicePort;
 import com.pragma.powerup.domain.model.*;
@@ -43,6 +41,10 @@ class PedidoHandlerTest {
     private IPaginationRequestMapper paginationRequestMapper;
     @Mock
     private ITraceabilityResponseMapper traceabilityResponseMapper;
+    @Mock
+    private IPedidoTimeResponseMapper pedidoTimeResponseMapper;
+    @Mock
+    private IEmpleadoTiempoResponseMapper empleadoTiempoResponseMapper;
 
     @InjectMocks
     private PedidoHandler pedidoHandler;
@@ -144,7 +146,6 @@ class PedidoHandlerTest {
     @Test
     @DisplayName("getAll() debería manejar la paginación, mapear el resultado y devolver respuesta paginada")
     void getAll_ShouldReturnPaginationResponse() {
-        // Arrange
         Long userId = 10L;
         Long restaurantId = 5L;
         PedidoEstado estado = PedidoEstado.PENDIENTE;
@@ -196,6 +197,60 @@ class PedidoHandlerTest {
         verify(pedidoService).getHistory(pedidoId);
         verify(traceabilityResponseMapper).toResponse(traceability1);
         verify(traceabilityResponseMapper).toResponse(traceability2);
+    }
+
+    @Test
+    @DisplayName("getTimePedidos() debería obtener tiempos, mapear resultados y devolver respuesta paginada")
+    void getTimePedidos_ShouldReturnPaginationResponse() {
+        Long userId = 10L;
+        Long restaurantId = 5L;
+        PaginationRequestDto paginationRequest = new PaginationRequestDto(0, 0, "id", "ASC");
+        PaginationInfo paginationModel = mock(PaginationInfo.class);
+        PaginationResult<PedidoTimeModel> serviceResultMock = mock(PaginationResult.class);
+        PaginationResult<PedidoTimeResponseDto> mappedResultMock = mock(PaginationResult.class);
+        PaginationResponseDto<PedidoTimeResponseDto> finalResponse = new PaginationResponseDto<>();
+
+        when(paginationRequestMapper.toModel(paginationRequest)).thenReturn(paginationModel);
+        when(pedidoService.getTimePedidos(userId, restaurantId, paginationModel)).thenReturn(serviceResultMock);
+        doReturn(mappedResultMock).when(serviceResultMock).map(any());
+        when(paginationResponseMapper.toResponse(mappedResultMock)).thenReturn(finalResponse);
+
+        PaginationResponseDto<PedidoTimeResponseDto> result = pedidoHandler.getTimePedidos(userId, restaurantId, paginationRequest);
+
+        assertNotNull(result);
+        assertEquals(finalResponse, result);
+
+        verify(paginationRequestMapper).toModel(paginationRequest);
+        verify(pedidoService).getTimePedidos(userId, restaurantId, paginationModel);
+        verify(serviceResultMock).map(any());
+        verify(paginationResponseMapper).toResponse(mappedResultMock);
+    }
+
+    @Test
+    @DisplayName("getTimeEmpleados() debería obtener tiempos de empleados, mapear resultados y devolver respuesta paginada")
+    void getTimeEmpleados_ShouldReturnPaginationResponse() {
+        Long userId = 10L;
+        Long restaurantId = 5L;
+        PaginationRequestDto paginationRequest = new PaginationRequestDto();
+        PaginationInfo paginationModel = mock(PaginationInfo.class);
+        PaginationResult<EmpleadoTiempoModel> serviceResultMock = mock(PaginationResult.class);
+        PaginationResult<EmpleadoTiempoResponseDto> mappedResultMock = mock(PaginationResult.class);
+        PaginationResponseDto<EmpleadoTiempoResponseDto> finalResponse = new PaginationResponseDto<>();
+
+        when(paginationRequestMapper.toModel(paginationRequest)).thenReturn(paginationModel);
+        when(pedidoService.getTimeEmpleados(userId, restaurantId, paginationModel)).thenReturn(serviceResultMock);
+        doReturn(mappedResultMock).when(serviceResultMock).map(any());
+        when(paginationResponseMapper.toResponse(mappedResultMock)).thenReturn(finalResponse);
+
+        PaginationResponseDto<EmpleadoTiempoResponseDto> result = pedidoHandler.getTimeEmpleados(userId, restaurantId, paginationRequest);
+
+        assertNotNull(result);
+        assertEquals(finalResponse, result);
+
+        verify(paginationRequestMapper).toModel(paginationRequest);
+        verify(pedidoService).getTimeEmpleados(userId, restaurantId, paginationModel);
+        verify(serviceResultMock).map(any());
+        verify(paginationResponseMapper).toResponse(mappedResultMock);
     }
 
 }

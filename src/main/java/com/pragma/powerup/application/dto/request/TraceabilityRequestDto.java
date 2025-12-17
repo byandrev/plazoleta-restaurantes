@@ -10,6 +10,8 @@ public class TraceabilityRequestDto {
 
     private Long pedidoId;
 
+    private Long restaurantId;
+
     private Long clienteId;
 
     private String correoCliente;

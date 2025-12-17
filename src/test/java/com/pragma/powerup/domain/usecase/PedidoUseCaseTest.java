@@ -32,6 +32,8 @@ class PedidoUseCaseTest {
     private IUserExternalServicePort userExternalService;
     @Mock
     private IMessageExternalServicePort messageExternalService;
+    @Mock
+    private IRestaurantPersistencePort restaurantPersistence;
 
     @InjectMocks
     private PedidoUseCase pedidoUseCase;
@@ -40,6 +42,7 @@ class PedidoUseCaseTest {
     private static final Long RESTAURANT_ID = 1L;
     private static final Long USER_ID = 1L;
     private static final Long CHEF_ID = 2L;
+    private static final Long OWNER_ID = 3L;
     private static final PaginationInfo PAGE_REQUEST = new PaginationInfo(0, 10, "id", "ASC");
     private PaginationResult<PedidoModel> mockPage;
 
@@ -53,6 +56,7 @@ class PedidoUseCaseTest {
     private PedidoModel pedidoUpdatedRequest;
     private PedidoModel pedidoUpdatedSaved;
     private RestaurantModel restaurantModel;
+    private PaginationInfo paginationInfo;
 
     @BeforeEach
     void setUp() {
@@ -62,7 +66,7 @@ class PedidoUseCaseTest {
                 .correo("user@gmail.com")
                 .build();
 
-        restaurantModel = RestaurantModel.builder().id(RESTAURANT_ID).build();
+        restaurantModel = RestaurantModel.builder().id(RESTAURANT_ID).idPropietario(OWNER_ID).build();
 
         platoModel = PlatoModel.builder().id(1L).nombre("Pizza").precio(10).build();
 
@@ -125,6 +129,11 @@ class PedidoUseCaseTest {
                 .id(CHEF_ID)
                 .correo("chef@gmail.com")
                 .build();
+
+        paginationInfo = PaginationInfo.builder()
+                .page(0)
+                .size(10)
+                .build();
     }
 
     @Test
@@ -140,7 +149,7 @@ class PedidoUseCaseTest {
         verify(pedidoPersistence).existsByClienteIdAndEstadoIn(pedidoRequest.getCliente().getId());
         verify(platoPersistence).findNonExistentPlatoIds(any(Long.class), any(Set.class));
         verify(platoPersistence).getById(1L);
-        verify(pedidoPersistence).save(any(PedidoModel.class));
+        verify(pedidoPersistence, times(2)).save(any(PedidoModel.class));
         verify(traceabilityService).save(any(TraceabilityModel.class));
 
         assertNotNull(result);
@@ -482,6 +491,87 @@ class PedidoUseCaseTest {
         assertTrue(result.isEmpty());
 
         verify(traceabilityService).getHistory(PEDIDO_ID);
+    }
+
+    @Test
+    @DisplayName("getTimePedidos() debe retornar la información de tiempo si el usuario es el propietario del restaurante")
+    void getTimePedidos_ShouldReturnTimeInfo_WhenUserIsOwner() {
+        PaginationResult<PedidoTimeModel> expectedPaginationResult = new PaginationResult<PedidoTimeModel>(
+                Collections.singletonList(
+                        PedidoTimeModel.builder()
+                                .pedido(1L)
+                                .tiempo(5000F)
+                                .build()
+                ), 1, 1L, 1
+        );
+
+        when(restaurantPersistence.getById(RESTAURANT_ID)).thenReturn(restaurantModel);
+        when(traceabilityService.getTimePedidos(RESTAURANT_ID, paginationInfo)).thenReturn(expectedPaginationResult);
+
+        PaginationResult<PedidoTimeModel> result = pedidoUseCase.getTimePedidos(OWNER_ID, RESTAURANT_ID, paginationInfo);
+
+        assertNotNull(result, "El resultado no debe ser nulo.");
+        assertEquals(
+                expectedPaginationResult.getTotalElements(),
+                result.getTotalElements(),
+                "El total de elementos debe coincidir."
+        );
+
+        verify(restaurantPersistence).getById(RESTAURANT_ID);
+        verify(traceabilityService).getTimePedidos(RESTAURANT_ID, paginationInfo);
+    }
+
+    @Test
+    @DisplayName("getTimePedidos() debe lanzar DomainException si el usuario no es el propietario del restaurante")
+    void getTimePedidos_ShouldThrowDomainException_WhenUserIsNotOwner() {
+        when(restaurantPersistence.getById(RESTAURANT_ID)).thenReturn(restaurantModel);
+
+        DomainException exception = assertThrows(DomainException.class, () ->
+                pedidoUseCase.getTimePedidos(USER_ID, RESTAURANT_ID, paginationInfo)
+        );
+
+        assertEquals("No eres propietario del restaurante", exception.getMessage());
+
+        verify(restaurantPersistence).getById(RESTAURANT_ID);
+        verify(traceabilityService, never()).getTimePedidos(anyLong(), any(PaginationInfo.class));
+    }
+
+    @Test
+    @DisplayName("getTimeEmpleados() debe retornar la información de tiempo si el usuario es el propietario del restaurante")
+    void getTimeEmpleados_ShouldReturnTimeInfo_WhenUserIsOwner() {
+        PaginationResult<EmpleadoTiempoModel> expectedPaginationResult = new PaginationResult<>(
+                Collections.singletonList(EmpleadoTiempoModel.builder().empleado(1L).tiempoMedioSegundos(5000D).build()), 1, 1L, 1
+        );
+
+        when(restaurantPersistence.getById(RESTAURANT_ID)).thenReturn(restaurantModel);
+        when(traceabilityService.getTimeEmpleados(RESTAURANT_ID, paginationInfo)).thenReturn(expectedPaginationResult);
+
+        PaginationResult<EmpleadoTiempoModel> result = pedidoUseCase.getTimeEmpleados(OWNER_ID, RESTAURANT_ID, paginationInfo);
+
+        assertNotNull(result, "El resultado no debe ser nulo.");
+        assertEquals(
+                expectedPaginationResult.getTotalElements(),
+                result.getTotalElements(),
+                "El total de elementos debe coincidir."
+        );
+
+        verify(restaurantPersistence).getById(RESTAURANT_ID);
+        verify(traceabilityService).getTimeEmpleados(RESTAURANT_ID, paginationInfo);
+    }
+
+    @Test
+    @DisplayName("getTimeEmpleados() debe lanzar DomainException si el usuario no es el propietario del restaurante")
+    void getTimeEmpleados_ShouldThrowDomainException_WhenUserIsNotOwner() {
+        when(restaurantPersistence.getById(RESTAURANT_ID)).thenReturn(restaurantModel);
+
+        DomainException exception = assertThrows(DomainException.class, () ->
+                pedidoUseCase.getTimeEmpleados(USER_ID, RESTAURANT_ID, paginationInfo)
+        );
+
+        assertEquals("No eres propietario del restaurante", exception.getMessage());
+
+        verify(restaurantPersistence).getById(RESTAURANT_ID);
+        verify(traceabilityService, never()).getTimeEmpleados(anyLong(), any(PaginationInfo.class));
     }
 
 }

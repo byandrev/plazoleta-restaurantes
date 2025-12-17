@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,19 +29,26 @@ import javax.validation.constraints.Min;
 @Validated
 @RequestMapping("/api/v1/platos")
 @RequiredArgsConstructor
+@Tag(name = "Platos", description = "Endpoints para la gestión del menú (creación, actualización y consulta de platos)")
 public class PlatoRestController {
 
     private final IPlatoHandler platoHandler;
 
-    @Operation(summary = "Get platos")
+    @Operation(
+            summary = "Listar platos por restaurante",
+            description = "Obtiene una lista paginada de platos filtrados por restaurante y, opcionalmente, por categoría."
+    )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Platos returned"),
-            @ApiResponse(responseCode = "404", description = "No data found", content = @Content)
+            @ApiResponse(responseCode = "200", description = "Lista de platos obtenida exitosamente"),
+            @ApiResponse(responseCode = "400", description = "Parámetros de consulta inválidos", content = @Content),
+            @ApiResponse(responseCode = "404", description = "No se encontraron platos para los criterios proporcionados", content = @Content)
     })
     @GetMapping("/")
     public ResponseEntity<CustomResponse<PaginationResponseDto<PlatoResponseDto>>> getRestaurants(
             @Valid PaginationRequestDto paginationRequest,
+            @Parameter(description = "ID del restaurante propietario del menú", example = "1")
             @RequestParam @Min(value = 0) long restaurantId,
+            @Parameter(description = "Nombre de la categoría para filtrar (opcional)", example = "Entradas")
             @RequestParam(required = false) String categoria
     ) {
         CustomResponse<PaginationResponseDto<PlatoResponseDto>> response = CustomResponse.<PaginationResponseDto<PlatoResponseDto>>builder()
@@ -51,10 +59,14 @@ public class PlatoRestController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Add new plato")
+    @Operation(
+            summary = "Crear un nuevo plato",
+            description = "Permite al propietario registrar un nuevo plato en su restaurante. **Solo accesible por PROPIETARIO.**"
+    )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Plato created", content = @Content),
-            @ApiResponse(responseCode = "409", description = "Plato already exists", content = @Content)
+            @ApiResponse(responseCode = "201", description = "Plato creado exitosamente", content = @Content),
+            @ApiResponse(responseCode = "403", description = "No tiene permisos para crear platos", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Conflicto: El plato ya existe o datos duplicados", content = @Content)
     })
     @PreAuthorize("hasRole('PROPIETARIO')")
     @PostMapping("/")
@@ -66,16 +78,19 @@ public class PlatoRestController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Get plato by id")
+    @Operation(
+            summary = "Obtener detalle de un plato",
+            description = "Retorna la información completa de un plato a partir de su ID único."
+    )
     @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Plato returned"
-            ),
-            @ApiResponse(responseCode = "404", description = "No data found", content = @Content)
+            @ApiResponse(responseCode = "200", description = "Datos del plato obtenidos"),
+            @ApiResponse(responseCode = "404", description = "Plato no encontrado", content = @Content)
     })
     @GetMapping("/{id}")
-    public ResponseEntity<CustomResponse<PlatoResponseDto>> getPlatoById(@PathVariable Long id) {
+    public ResponseEntity<CustomResponse<PlatoResponseDto>> getPlatoById(
+            @Parameter(description = "ID del plato a consultar", example = "10")
+            @PathVariable Long id
+    ) {
         CustomResponse<PlatoResponseDto> response = CustomResponse.<PlatoResponseDto>builder()
                 .status(HttpStatus.OK.value())
                 .data(platoHandler.getById(id))
@@ -84,14 +99,19 @@ public class PlatoRestController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Update plato")
+    @Operation(
+            summary = "Actualizar información de un plato",
+            description = "Permite modificar el precio o la descripción de un plato existente. **Solo accesible por el PROPIETARIO dueño del plato.**"
+    )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Plato updated"),
-            @ApiResponse(responseCode = "404", description = "Plato not found", content = @Content)
+            @ApiResponse(responseCode = "200", description = "Plato actualizado correctamente"),
+            @ApiResponse(responseCode = "403", description = "No tiene permisos para modificar este plato", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Plato no encontrado", content = @Content)
     })
     @PreAuthorize("hasRole('PROPIETARIO')")
     @PutMapping("/{id}")
     public ResponseEntity<CustomResponse<PlatoResponseDto>> updatePlato(
+            @Parameter(description = "ID del plato a modificar")
             @Valid @PathVariable Long id,
             @RequestBody PlatoUpdateDto platoUpdateDto,
             @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetail userDetails
