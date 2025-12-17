@@ -5,7 +5,6 @@ import com.pragma.powerup.application.dto.request.PedidoRequestDto;
 import com.pragma.powerup.application.dto.request.PedidoUpdateDto;
 import com.pragma.powerup.application.dto.response.*;
 import com.pragma.powerup.application.handler.IPedidoHandler;
-import com.pragma.powerup.domain.model.EmpleadoTiempoModel;
 import com.pragma.powerup.domain.model.PedidoEstado;
 import com.pragma.powerup.domain.model.UserModel;
 import com.pragma.powerup.infrastructure.input.rest.response.CustomResponse;
@@ -28,7 +27,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/pedidos")
 @RequiredArgsConstructor
-public class PedidoController {
+public class PedidoRestController {
 
     private final IPedidoHandler pedidoHandler;
 
