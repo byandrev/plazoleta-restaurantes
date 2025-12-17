@@ -149,7 +149,7 @@ class PedidoUseCaseTest {
         verify(pedidoPersistence).existsByClienteIdAndEstadoIn(pedidoRequest.getCliente().getId());
         verify(platoPersistence).findNonExistentPlatoIds(any(Long.class), any(Set.class));
         verify(platoPersistence).getById(1L);
-        verify(pedidoPersistence).save(any(PedidoModel.class));
+        verify(pedidoPersistence, times(2)).save(any(PedidoModel.class));
         verify(traceabilityService).save(any(TraceabilityModel.class));
 
         assertNotNull(result);
