@@ -14,9 +14,7 @@ import com.pragma.powerup.domain.api.IPlatoServicePort;
 import com.pragma.powerup.domain.model.PaginationResult;
 import com.pragma.powerup.domain.model.PlatoModel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
-@Service
 @RequiredArgsConstructor
 public class PlatoHandler implements IPlatoHandler {
 

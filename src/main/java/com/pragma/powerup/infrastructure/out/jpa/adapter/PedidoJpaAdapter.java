@@ -12,11 +12,9 @@ import com.pragma.powerup.infrastructure.out.jpa.mapper.IPedidoEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.repository.IPedidoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
 @RequiredArgsConstructor
 public class PedidoJpaAdapter implements IPedidoPersistencePort {
 

@@ -5,9 +5,7 @@ import com.pragma.powerup.domain.spi.IPedidoItemPersistencePort;
 import com.pragma.powerup.infrastructure.out.jpa.mapper.IPedidoItemMapper;
 import com.pragma.powerup.infrastructure.out.jpa.repository.IPedidoItemRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 
-@Repository
 @RequiredArgsConstructor
 public class PedidoItemJpaAdapter implements IPedidoItemPersistencePort {
 

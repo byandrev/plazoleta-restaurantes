@@ -9,9 +9,7 @@ import com.pragma.powerup.infrastructure.out.feign.IUserFeignClient;
 import com.pragma.powerup.infrastructure.out.feign.mapper.IUserFeignMapper;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
-@Component
 @RequiredArgsConstructor
 public class UserExternalAdapter implements IUserExternalServicePort {
 

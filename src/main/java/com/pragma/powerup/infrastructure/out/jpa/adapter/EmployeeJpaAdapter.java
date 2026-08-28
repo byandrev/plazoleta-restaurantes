@@ -7,9 +7,7 @@ import com.pragma.powerup.infrastructure.out.jpa.entity.EmployeeRestaurantId;
 import com.pragma.powerup.infrastructure.out.jpa.mapper.IEmployeeRestaurantEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.repository.IEmployeeRestaurantRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 
-@Repository
 @RequiredArgsConstructor
 public class EmployeeJpaAdapter implements IEmployeePersistencePort {
 

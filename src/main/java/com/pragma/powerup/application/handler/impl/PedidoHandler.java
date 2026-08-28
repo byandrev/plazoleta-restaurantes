@@ -9,12 +9,10 @@ import com.pragma.powerup.application.mapper.*;
 import com.pragma.powerup.domain.api.IPedidoServicePort;
 import com.pragma.powerup.domain.model.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
 @RequiredArgsConstructor
 public class PedidoHandler implements IPedidoHandler {
 

@@ -8,12 +8,10 @@ import com.pragma.powerup.domain.spi.IPlatoPersistencePort;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.infrastructure.exception.ResourceNotFound;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 import java.util.Optional;
 
-@Service
 @RequiredArgsConstructor
 public class PlatoUseCase implements IPlatoServicePort {
 

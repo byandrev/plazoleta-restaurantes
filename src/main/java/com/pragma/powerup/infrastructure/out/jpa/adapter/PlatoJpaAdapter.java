@@ -11,14 +11,12 @@ import com.pragma.powerup.infrastructure.out.jpa.mapper.IPlatoEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.repository.IPlatoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Repository;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Repository
 @RequiredArgsConstructor
 public class PlatoJpaAdapter implements IPlatoPersistencePort {
 

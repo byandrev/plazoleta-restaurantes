@@ -7,7 +7,6 @@ import com.pragma.powerup.domain.spi.*;
 import com.pragma.powerup.domain.utils.ConvertDate;
 import com.pragma.powerup.domain.utils.PinGenerator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
@@ -15,7 +14,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Service
 @RequiredArgsConstructor
 public class PedidoUseCase implements IPedidoServicePort {
 

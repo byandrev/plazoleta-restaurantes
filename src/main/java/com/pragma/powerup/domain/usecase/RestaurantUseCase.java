@@ -7,11 +7,9 @@ import com.pragma.powerup.domain.spi.IEmployeePersistencePort;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.domain.spi.IUserExternalServicePort;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
-@Service
 @RequiredArgsConstructor
 public class RestaurantUseCase implements IRestaurantServicePort {
 

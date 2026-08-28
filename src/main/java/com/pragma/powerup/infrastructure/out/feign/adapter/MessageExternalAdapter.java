@@ -6,9 +6,7 @@ import com.pragma.powerup.infrastructure.exception.InfraException;
 import com.pragma.powerup.infrastructure.out.feign.IMessageFeignClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
 
-@Component
 @RequiredArgsConstructor
 public class MessageExternalAdapter implements IMessageExternalServicePort {
 

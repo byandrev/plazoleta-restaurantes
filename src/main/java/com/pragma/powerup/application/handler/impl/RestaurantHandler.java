@@ -11,9 +11,7 @@ import com.pragma.powerup.domain.api.IRestaurantServicePort;
 import com.pragma.powerup.domain.model.PaginationResult;
 import com.pragma.powerup.domain.model.RestaurantModel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
-@Service
 @RequiredArgsConstructor
 public class RestaurantHandler implements IRestaurantHandler {
 

@@ -7,9 +7,7 @@ import com.pragma.powerup.infrastructure.out.jpa.entity.CategoriaEntity;
 import com.pragma.powerup.infrastructure.out.jpa.mapper.ICategoriaEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.repository.ICategoriaRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 
-@Repository
 @RequiredArgsConstructor
 public class CategoriaJpaAdapter implements ICategoriaPersistencePort {
 

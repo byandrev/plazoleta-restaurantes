@@ -9,11 +9,9 @@ import com.pragma.powerup.infrastructure.out.feign.mapper.ITraceabilityFeignMapp
 import com.pragma.powerup.infrastructure.out.jpa.mapper.IPaginationMapper;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
 @RequiredArgsConstructor
 public class TraceabilityExternalAdapter implements ITraceabilityExternalServicePort {
 
